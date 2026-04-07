@@ -72,11 +72,16 @@ AI Summary → Empathy Rewrite (Llama 3.2) → Script Generator → Google TTS �
 - Preferred language selection (English / Hindi / Marathi / Telugu)
 - Change password (with current password verification)
 
-### 👥 Role-Based Dashboards
+### 👥 Role-Based Command Centers
 - **Patient** — Upload reports, view AI summaries, listen to voice, ask AI, view analytics
 - **Doctor** — Access high-fidelity intelligence dashboards with longitudinal trends and clinical comparison tables
-- **Pathology Lab** — Upload verified reports for specific patients via LV-ID
-- **SuperAdmin** — Secure lifecycle management for healthcare provider verification (Approve/Reject flow)
+- **Pathology Lab** — **Command Center** with real-time Recharts analytics (volume trends, diagnostic mix) and private practitioner management
+- **SuperAdmin** — Secure lifecycle management for healthcare provider verification (Approve/Reject flow) with real-time session invalidation
+
+### 🛡️ Secure Lab Infrastructure
+- **Private Provider Directory** — Labs manage their own "Affiliated Doctors," ensuring data isolation and privacy.
+- **Dynamic Analytics (Recharts)** — Real-time MongoDB aggregation pipelines for daily volume and test distribution mapping.
+- **Provider Status Control** — Doctors and Labs are restricted to a `PENDING` state until verified by a SuperAdmin.
 
 ### 🔒 Security & Privacy
 - All AI runs **100% locally** (Ollama + Tesseract + Google TTS)
