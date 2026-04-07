@@ -28,6 +28,7 @@ export default function DoctorPatientsPage() {
     setPatientReports([]);
     setReportsLoading(true);
     try {
+      // ✅ Standardized URL: /api/doctor/patient/:id/reports
       const res = await api.get(`/doctor/patient/${p._id}/reports`);
       setPatientReports(res.data || []);
     } catch {
@@ -41,6 +42,7 @@ export default function DoctorPatientsPage() {
     if (!noteText.trim()) return;
     setSavingNote(reportId);
     try {
+      // ✅ Standardized URL: /api/doctor/reports/:id/note
       await api.post(`/doctor/reports/${reportId}/note`, { note: noteText });
       setNoteText('');
       if (selected) openPatient(selected);
@@ -134,6 +136,15 @@ export default function DoctorPatientsPage() {
                 <div>
                   <h2 className="text-xl font-black text-[#1F2933]">{selected.name}</h2>
                   <p className="text-sm text-[#6B7280] font-medium">{selected.email}</p>
+                </div>
+                <div className="ml-auto">
+                  <Link 
+                    href={`/dashboard/doctor/patient/${selected._id}/dashboard`}
+                    className="bg-[#4F6F6F] text-white px-5 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#1F2933] transition-all shadow-md flex items-center gap-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c4.5 0 9 3.5 9 9Z"/><path d="M12 7v5l3 3"/></svg>
+                    View Intelligence Dashboard
+                  </Link>
                 </div>
               </div>
 

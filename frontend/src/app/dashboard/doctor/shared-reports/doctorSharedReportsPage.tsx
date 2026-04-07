@@ -30,6 +30,7 @@ export default function DoctorSharedReportsPage() {
     if (!noteText.trim()) return;
     setSavingNote(reportId);
     try {
+      // ✅ Standardized URL: /api/doctor/reports/:id/note
       await api.post(`/doctor/reports/${reportId}/note`, { note: noteText });
       setNoteText('');
       const res = await api.get('/doctor/shared-reports');

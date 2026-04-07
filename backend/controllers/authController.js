@@ -8,12 +8,23 @@ const DoctorProfile = require('../models/DoctorProfile');
 
 exports.signup = async (req, res) => {
     try {
-        const { name, email, password, role } = req.body;
+        const { 
+            name, email, password, role, 
+            medicalLicenseNumber, hospitalName, specialization, 
+            labName, registrationNumber, address 
+        } = req.body;
 
         // Check if user exists
         let user = await User.findOne({ email });
         if (user) {
             return res.status(400).json({ message: 'User already exists' });
+        }
+
+        // Set status based on role
+        const { affiliatedLabId } = req.body;
+        let status = 'APPROVED';
+        if ((role === 'doctor' || role === 'pathology') && !affiliatedLabId) {
+            status = 'PENDING';
         }
 
         // Hash password
@@ -28,7 +39,9 @@ exports.signup = async (req, res) => {
             email,
             password: hashedPassword,
             role,
-            lvId
+            lvId,
+            status,
+            affiliatedLabs: affiliatedLabId ? [affiliatedLabId] : []
         });
 
         await user.save();
@@ -39,19 +52,31 @@ exports.signup = async (req, res) => {
         } else if (role === 'pathology') {
             await PathologyProfile.create({ 
                 userId: user._id, 
-                labName: name, 
-                licenseNumber: `PENDING-${Date.now()}` 
+                labName: labName || name, 
+                licenseNumber: registrationNumber || `PENDING-${Date.now()}` 
             });
         } else if (role === 'doctor') {
+            const licenseCertificateUrl = req.file ? `/uploads/certificates/${req.file.filename}` : '';
             await DoctorProfile.create({ 
                 userId: user._id, 
-                registrationNumber: `PENDING-${Date.now()}` 
+                specialty: specialization,
+                registrationNumber: medicalLicenseNumber || `PENDING-${Date.now()}`,
+                hospitalName: hospitalName,
+                licenseCertificateUrl: licenseCertificateUrl
             });
         }
 
-        const token = jwt.sign({ id: user._id, role: user.role, lvId: user.lvId }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
-
-        res.status(201).json({ token, user: { _id: user._id, name, email, role, lvId } });
+        // Return token only if status is APPROVED
+        if (status === 'APPROVED') {
+            const token = jwt.sign({ id: user._id, role: user.role, lvId: user.lvId }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
+            return res.status(201).json({ token, user: { _id: user._id, name, email, role, lvId, status } });
+        } else {
+            // For PENDING status, return success without token
+            return res.status(201).json({ 
+                message: 'Registration successful! Your account is pending admin approval.',
+                user: { _id: user._id, name, email, role, lvId, status } 
+            });
+        }
     } catch (error) {
         console.error('Signup Error:', error);
         res.status(500).json({ message: 'Server Error' });
@@ -72,9 +97,18 @@ exports.login = async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
+        // ROLE-BASED STATUS CHECK: Block PENDING users for Doctors and Pathology
+        if ((user.role === 'doctor' || user.role === 'pathology') && user.status !== 'APPROVED') {
+            return res.status(403).json({ 
+                success: false,
+                message: 'Your account is pending admin approval. You will be notified once verified.',
+                status: user.status 
+            });
+        }
+
         const token = jwt.sign({ id: user._id, role: user.role, lvId: user.lvId }, process.env.JWT_SECRET || 'fallback_secret', { expiresIn: '7d' });
 
-        res.status(200).json({ token, user: { _id: user._id, name: user.name, email: user.email, role: user.role, lvId: user.lvId } });
+        res.status(200).json({ token, user: { _id: user._id, name: user.name, email: user.email, role: user.role, lvId: user.lvId, status: user.status } });
     } catch (error) {
         console.error('Login Error:', error);
         res.status(500).json({ message: 'Server Error' });
@@ -160,6 +194,38 @@ exports.changePassword = async (req, res) => {
         res.status(200).json({ message: 'Password changed successfully.' });
     } catch (error) {
         console.error('Change Password Error:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+exports.searchDoctors = async (req, res) => {
+    try {
+        const query = req.query.query || '';
+        const searchCriteria = {
+            role: 'doctor',
+            status: 'APPROVED',
+            $or: [
+                { name: { $regex: query, $options: 'i' } },
+                { email: { $regex: query, $options: 'i' } }
+            ]
+        };
+
+        const doctors = await User.find(searchCriteria).select('name email lvId avatarUrl');
+        
+        // Manually populate common doctor profile fields
+        const DoctorProfile = require('../models/DoctorProfile');
+        const doctorsWithProfiles = await Promise.all(doctors.map(async (doc) => {
+            const profile = await DoctorProfile.findOne({ userId: doc._id }).select('specialty hospitalName');
+            return {
+                ...doc.toObject(),
+                specialty: profile?.specialty || 'Healthcare Provider',
+                hospitalName: profile?.hospitalName || 'Clinic'
+            };
+        }));
+
+        res.status(200).json(doctorsWithProfiles);
+    } catch (error) {
+        console.error('Search Doctors Error:', error);
         res.status(500).json({ message: 'Server Error' });
     }
 };

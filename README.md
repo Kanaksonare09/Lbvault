@@ -35,9 +35,10 @@
 
 ### 🧠 Universal AI Intelligence Engine
 - **Schema-Free Analysis** — Dynamically extracts any biomarker from any report type using Llama 3.2
+- **Longitudinal Intelligence** — Detects "Improving" vs. "Deteriorating" health markers by analyzing proximity to normal ranges across time
 - **Single-Pass Processing** — Biomarker extraction + clinical summarization in one LLM call
-- **Anti-Hallucination** — AI cannot guess common tests if the report is of a different type
-- **Trend Analysis** — Compares current vs. historical biomarker values (Increasing / Decreasing / Stable)
+- **Atomic Dashboard Aggregation** — Loads patient metadata, history, trends, and AI analysis in one high-performance API request
+- **Anti-Hallucination** — AI grounded strictly in medical data with non-diagnostic safeguards
 
 ### 🔬 Hybrid OCR Pipeline (4-Tier)
 1. **Gemini 1.5 Flash** — Cloud OCR for scanned and handwritten reports *(requires API key)*
@@ -73,8 +74,9 @@ AI Summary → Empathy Rewrite (Llama 3.2) → Script Generator → Google TTS �
 
 ### 👥 Role-Based Dashboards
 - **Patient** — Upload reports, view AI summaries, listen to voice, ask AI, view analytics
-- **Doctor** — View shared patient reports, add clinical notes
+- **Doctor** — Access high-fidelity intelligence dashboards with longitudinal trends and clinical comparison tables
 - **Pathology Lab** — Upload verified reports for specific patients via LV-ID
+- **SuperAdmin** — Secure lifecycle management for healthcare provider verification (Approve/Reject flow)
 
 ### 🔒 Security & Privacy
 - All AI runs **100% locally** (Ollama + Tesseract + Google TTS)
@@ -289,6 +291,19 @@ npm run dev
 
 ---
 
+### Step 6 — Initialize SuperAdmin (First Time Only)
+
+Since SuperAdmin accounts cannot be registered publicly, you must run the seeding script to create the root administrator.
+
+```bash
+cd Lbvault/backend
+node scripts/seedAdmin.js
+```
+- **Login Email**: `admin@labvault.com`
+- **Login Password**: `Admin@123`
+
+---
+
 ### ✅ All Services Running
 
 | Service | URL | Terminal |
@@ -349,6 +364,24 @@ Open your browser and go to: **http://localhost:3000**
 | `GET` | `/api/reports/:id` | ✅ | Get report + biomarkers + AI summary |
 | `GET` | `/api/patient/reports/:id/summary` | ✅ | Get AI summary (auto-generates if missing) |
 | `POST` | `/api/reports/grant-access` | ✅ | Grant doctor access to a report |
+
+### Doctor Intelligence Dashboard
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/doctor/patients` | ✅ | List all authorized patients |
+| `GET` | `/api/doctor/patient/:id/dashboard` | ✅ | Aggregate Dashboard (Reports + Trends + Comparison) |
+| `GET` | `/api/doctor/patient/:id/reports` | ✅ | List all shared report metadata |
+| `POST` | `/api/doctor/reports/:id/note` | ✅ | Append clinical note to report |
+
+### SuperAdmin (Verification)
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/admin/login` | ❌ | Admin-only login portal |
+| `GET` | `/api/admin/pending-users` | ✅ | List all Doctors/Labs awaiting approval |
+| `POST` | `/api/admin/approve-user` | ✅ | Flip status PENDING → APPROVED |
+| `POST` | `/api/admin/reject-user` | ✅ | Flip status PENDING → REJECTED |
 
 ### Voice & AI
 
@@ -412,10 +445,12 @@ Lbvault/
 ├── backend/
 │   ├── app.js                          # Express app entry + route registration
 │   ├── controllers/
+│   │   ├── adminController.js          # SuperAdmin verification logic
 │   │   ├── aiController.js             # Ask AI chat endpoint
 │   │   ├── analyticsController.js      # Real biomarker analytics from DB
 │   │   ├── authController.js           # Signup, login, profile, password
-│   │   └── reportController.js         # Upload, summary, voice pipeline
+│   │   ├── patientController.js        # Doctor's view of authorized patients
+│   │   └── reportController.js         # Upload, dashboard aggregator, AI analysis
 │   ├── models/
 │   │   ├── User.js
 │   │   ├── PatientProfile.js           # DOB, gender, blood group, emergency contact
@@ -428,12 +463,16 @@ Lbvault/
 │   │   ├── scriptService.js            # Voice script structure + greetings
 │   │   └── ttsService.js               # google-tts-api MP3 generation
 │   ├── routes/
+│   │   ├── adminRoutes.js              # SuperAdmin identity management
 │   │   ├── authRoutes.js
 │   │   ├── reportRoutes.js
+│   │   ├── doctorRoutes.js             # High-intelligence dashboard routes
 │   │   └── analyticsRoutes.js
 │   ├── middleware/
 │   │   └── authMiddleware.js           # JWT verification
 │   └── .env                            # ← configure this
+│   ├── scripts/
+│   │   └── seedAdmin.js                # Root SuperAdmin seed logic
 │
 ├── ocr_service/
 │   ├── app.py                          # Flask server entry
@@ -445,12 +484,17 @@ Lbvault/
 ├── frontend/
 │   └── src/
 │       ├── app/
+│       │   └── dashboard/doctor/
+│       │       ├── patient/[id]/dashboard/ # Integrated Intelligence Hub
+│       │       └── patients/             # Authorized patient management
 │       │   └── dashboard/patient/
 │       │       ├── analytics/          # Health analytics charts
 │       │       ├── insights/           # Report insights + Ask AI
 │       │       ├── patientProfilePage.tsx   # Edit profile + change password
 │       │       └── patientDashboardPage.tsx
 │       ├── components/
+│       │   ├── doctor/
+│       │   │   └── dashboard/            # Modular Trends, Sugestions, OCR Tables
 │       │   ├── patient/
 │       │   │   ├── AskAIPanel.tsx      # AI chat panel
 │       │   │   └── VoiceSummaryButton.tsx

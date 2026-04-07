@@ -132,7 +132,7 @@ General Rules:
 Report text (STRICT DATA SOURCE - DO NOT GUESS): ${safeText}`;
 
         console.log(`[AI ENGINE] Single-pass analysis starting for ${safeText.length} chars...`);
-        
+
         const response = await axios.post('http://127.0.0.1:11434/v1/chat/completions', {
             model: 'llama3.2', // Keep llama3.2 as primary fast local model
             messages: [{ role: 'user', content: prompt }],
@@ -145,7 +145,7 @@ Report text (STRICT DATA SOURCE - DO NOT GUESS): ${safeText}`;
         });
 
         const rawContent = response.data.choices[0].message.content;
-        
+
         let parsed;
         try {
             parsed = JSON.parse(rawContent);
@@ -158,7 +158,7 @@ Report text (STRICT DATA SOURCE - DO NOT GUESS): ${safeText}`;
                 summary: summaryMatch ? summaryMatch[1].replace(/\\n/g, '\n') : 'Analysis completed, but data formatting failed. Please try again.'
             };
         }
-        
+
         return {
             biomarkers: Array.isArray(parsed.biomarkers) ? parsed.biomarkers : [],
             summary: parsed.summary || 'Summary generation failed.'
@@ -183,9 +183,9 @@ exports.generateAudio = async (textSummary, language = 'en') => {
             'telugu': 'te'
         };
         const isoCode = langMap[language.toLowerCase()] || language.toLowerCase() || 'en';
-        
+
         console.log(`[AI Service] Generating free TTS audio in language code: ${isoCode} (Original: ${language})`);
-        
+
         // Remove empty lines and limit size
         const cleanText = textSummary.replace(/\n/g, ' ').substring(0, 1000);
 

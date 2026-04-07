@@ -8,7 +8,7 @@ interface User {
     _id?: string;
     name: string;
     email: string;
-    role: 'patient' | 'doctor' | 'pathology' | 'admin';
+    role: 'patient' | 'doctor' | 'pathology' | 'admin' | 'SuperAdmin';
     phone?: string;
     age?: number;
     gender?: 'Male' | 'Female' | 'Other';
@@ -71,7 +71,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 } else if (res.ok) {
                     const userData = await res.json();
                     const id = userData.id || userData._id;
-                    const role = userData.role === 'admin' ? 'pathology' : userData.role;
+                    let role = userData.role;
+                    if (role === 'admin') role = 'pathology';
+                    
                     setUser({ ...userData, id, role });
                 } else {
                     console.warn('[AUTH] Session verification failed, status:', res.status);
@@ -94,12 +96,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (mustChangePassword) return '/dashboard/change-password';
         if (role === 'pathology') return '/dashboard/pathology';
         if (role === 'doctor') return '/dashboard/doctor';
+        if (role === 'SuperAdmin') return '/dashboard/admin';
         return '/dashboard/patient';
     };
 
     const login = (userData: any, token: string) => {
         const id = userData.id || userData._id;
-        const role = userData.role === 'admin' ? 'pathology' : userData.role;
+        let role = userData.role;
+        if (role === 'admin') role = 'pathology';
+        
         const normalizedUser = { ...userData, id, role };
 
         localStorage.setItem('user', JSON.stringify(normalizedUser));

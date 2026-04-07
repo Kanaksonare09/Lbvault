@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { doctorService } from '@/services/doctorService';
+import { useAuth } from '@/lib/AuthContext';
 
 export default function DoctorsPage() {
     const [doctors, setDoctors] = useState<any[]>([]);
@@ -13,6 +14,8 @@ export default function DoctorsPage() {
     const [formData, setFormData] = useState({ name: '', email: '', phone: '', specialization: '' });
     const [regLoading, setRegLoading] = useState(false);
     const [regError, setRegError] = useState('');
+
+    const { user } = useAuth();
 
     const fetchDoctors = async () => {
         setLoading(true);
@@ -41,7 +44,7 @@ export default function DoctorsPage() {
         setRegLoading(true);
         setRegError('');
         try {
-            await doctorService.createDoctor(formData);
+            await doctorService.createDoctor(formData, user?.id);
             setIsModalOpen(false);
             setFormData({ name: '', email: '', phone: '', specialization: '' });
             fetchDoctors();

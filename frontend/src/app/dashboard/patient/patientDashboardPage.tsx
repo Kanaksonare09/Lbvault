@@ -166,7 +166,7 @@ export default function PatientDashboardPage() {
                     <h3 className="text-[#8FB9A8] text-[10px] font-black uppercase tracking-[0.2em] mb-1">{t('recentUploads')}</h3>
                     <p className="text-md font-bold leading-tight line-clamp-1">{latestReport ? latestReport.reportName : '---'}</p>
                     <p className="text-[#8FB9A8] text-[10px] font-black mt-2 uppercase">
-                        {latestReport ? new Date(latestReport.uploadDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '---'}
+                        {latestReport?.uploadDate ? new Date(latestReport.uploadDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '---'}
                     </p>
                 </div>
             </div>

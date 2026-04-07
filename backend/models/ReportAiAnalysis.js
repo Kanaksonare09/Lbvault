@@ -6,6 +6,7 @@ const reportAiAnalysisSchema = new mongoose.Schema({
     summaryEn: { type: String, default: '' },
     insightsEn: { type: String, default: '' },
     doctorBriefEn: { type: String, default: '' },
+    suggestions: [{ type: String }],
     translations: { type: Map, of: String, default: {} },
     audioUrls: { type: Map, of: String, default: {} },
     modelVersion: { type: String },

@@ -14,6 +14,11 @@ const reportSchema = new mongoose.Schema({
     reportDate: { type: Date, default: Date.now },
     status: { type: String, enum: ['processing', 'ready', 'failed'], default: 'processing' },
     isDeleted: { type: Boolean, default: false },
+    doctorNotes: [{
+        note: { type: String, required: true },
+        doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+        createdAt: { type: Date, default: Date.now }
+    }]
 }, { timestamps: true });
 
 module.exports = mongoose.model('Report', reportSchema);

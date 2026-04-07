@@ -20,14 +20,21 @@ exports.searchPatients = async (req, res) => {
             return res.status(200).json([]);
         }
         
-        const patients = await User.find({
+        const searchCriteria = {
             role: 'patient',
             $or: [
                 { name: { $regex: query, $options: 'i' } },
                 { lvId: { $regex: query, $options: 'i' } },
                 { email: { $regex: query, $options: 'i' } }
             ]
-        }).select('-password');
+        };
+
+        // DOCTOR ACCESS CONTROL: Only show patients who granted permission
+        if (req.user.role === 'doctor') {
+            searchCriteria.doctorAccess = req.user.id;
+        }
+
+        const patients = await User.find(searchCriteria).select('-password');
         
         res.status(200).json(patients);
     } catch (error) {
@@ -53,4 +60,20 @@ exports.updatePatient = async (req, res) => {
 exports.deletePatient = async (req, res) => {
     // Stub
     res.status(200).json({ message: 'Patient deleted' });
+};
+
+exports.getAuthorizedPatients = async (req, res) => {
+    try {
+        const doctorId = req.user.id;
+        
+        // Find all patients who have granted access to this doctor
+        const patients = await User.find({ role: 'patient', doctorAccess: doctorId })
+                                   .select('name lvId email avatarUrl lastLoginAt createdAt')
+                                   .sort({ name: 1 });
+        
+        res.status(200).json(patients);
+    } catch (error) {
+        console.error('Get Authorized Patients Error:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
 };

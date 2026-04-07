@@ -1,39 +1,65 @@
 const User = require('../models/User');
 const Report = require('../models/Report');
+const mongoose = require('mongoose');
 
 exports.grantAccess = async (req, res) => {
     try {
-        const { doctorId, reportId } = req.body;
+        const { doctorId } = req.body;
         
-        // If reportId is provided, grant access to specific report
-        if (reportId) {
-            const report = await Report.findOne({ _id: reportId, patientId: req.user.id });
-            if (!report) return res.status(404).json({ message: 'Report not found' });
+        // 1. Debugging Logs
+        console.log('[DEBUG] Access Granting Request:');
+        console.log('Body:', JSON.stringify(req.body, null, 2));
+        console.log('User Context:', req.user ? { id: req.user.id, role: req.user.role } : 'Undefined');
 
-            if (!report.doctorAccess.includes(doctorId)) {
-                report.doctorAccess.push(doctorId);
-                await report.save();
-            }
-        } 
+        // 2. Validate Incoming Request
+        if (!req.user) {
+            return res.status(401).json({ message: 'Unauthorized: User context missing.' });
+        }
+        
+        if (!doctorId) {
+            return res.status(400).json({ message: 'Missing doctorId in request body.' });
+        }
+
+        if (!mongoose.Types.ObjectId.isValid(doctorId)) {
+            return res.status(400).json({ message: 'Invalid doctorId format. Must be a valid MongoDB ObjectId.' });
+        }
+
+        // 3. Grant access at the patient level (User model)
+        const patient = await User.findById(req.user.id);
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+        // Ensure doctorAccess array exists (sanity check)
+        if (!patient.doctorAccess) {
+            patient.doctorAccess = [];
+        }
+
+        if (!patient.doctorAccess.includes(doctorId)) {
+            patient.doctorAccess.push(doctorId);
+            await patient.save();
+        }
         
         res.status(200).json({ message: 'Access granted successfully' });
     } catch (error) {
-        console.error('Grant Access Error:', error);
-        res.status(500).json({ message: 'Server Error' });
+        console.error('Grant Access Fatal Error:', error);
+        
+        // Return full error details in development/debugging
+        res.status(500).json({ 
+            message: 'Internal Server Error in grantAccess controller.',
+            error: error.message,
+            stack: error.stack 
+        });
     }
 };
 
 exports.revokeAccess = async (req, res) => {
     try {
-        const { doctorId, reportId } = req.body;
+        const { doctorId } = req.body;
         
-        if (reportId) {
-            const report = await Report.findOne({ _id: reportId, patientId: req.user.id });
-            if (!report) return res.status(404).json({ message: 'Report not found' });
+        const patient = await User.findById(req.user.id);
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
 
-            report.doctorAccess = report.doctorAccess.filter(id => id.toString() !== doctorId);
-            await report.save();
-        }
+        patient.doctorAccess = patient.doctorAccess.filter(id => id.toString() !== doctorId);
+        await patient.save();
         
         res.status(200).json({ message: 'Access revoked successfully' });
     } catch (error) {
@@ -44,22 +70,14 @@ exports.revokeAccess = async (req, res) => {
 
 exports.getAccessList = async (req, res) => {
     try {
-        // Find all reports for this patient that have doctorAccess populated
-        const reports = await Report.find({ patientId: req.user.id, 'doctorAccess.0': { $exists: true } });
-        
-        // Collect unique doctor IDs currently accessing this patient's reports
-        const doctorIds = new Set();
-        reports.forEach(report => {
-            report.doctorAccess.forEach(docId => doctorIds.add(docId.toString()));
-        });
-        
-        const doctors = await User.find({ _id: { $in: Array.from(doctorIds) }, role: 'doctor' }).select('name email role');
-        
-        // Format response expected by the frontend
-        const formattedList = doctors.map(doc => ({
+        const patient = await User.findById(req.user.id).populate('doctorAccess', 'name email role');
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+        // Format response for the frontend
+        const formattedList = patient.doctorAccess.map(doc => ({
             id: doc._id,
             name: doc.name,
-            specialty: 'Doctor', // Placeholder for now
+            specialty: 'Doctor', // Default placeholder
             status: 'active'
         }));
         

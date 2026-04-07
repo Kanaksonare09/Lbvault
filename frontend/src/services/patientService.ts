@@ -33,5 +33,9 @@ export const patientService = {
     getAccessList: async (): Promise<any[]> => {
         const res = await api.get('/access/list');
         return res.data;
+    },
+    searchDoctors: async (query: string): Promise<any[]> => {
+        const res = await api.get(`/auth/search-doctors?query=${encodeURIComponent(query)}`);
+        return res.data;
     }
 };

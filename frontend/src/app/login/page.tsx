@@ -22,6 +22,7 @@ export default function LoginPage() {
                 pathology: '/dashboard/pathology',
                 doctor: '/dashboard/doctor',
                 patient: '/dashboard/patient',
+                SuperAdmin: '/dashboard/admin',
             };
             router.replace(routes[user.role] || '/dashboard/patient');
         }

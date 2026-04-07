@@ -69,14 +69,14 @@ function UploadForm() {
 
         const formData = new FormData();
         formData.append('report', file);
-        formData.append('patientId', selectedPatient._id);
+        formData.append('patientLvId', selectedPatient.lvId);
         formData.append('reportName', reportName);
         formData.append('testType', testType);
 
         try {
             await reportService.uploadReport(formData, (percent) => setProgress(percent));
 
-            setStatus({ type: 'success', message: 'Report uploaded and linked to ' + selectedPatient.name });
+            setStatus({ type: 'success', message: 'Report uploaded and linked to Patient ' + selectedPatient.lvId });
             setFile(null);
             setReportName('');
             setTestType('');
@@ -122,7 +122,7 @@ function UploadForm() {
                                     autoComplete="off"
                                     className={selectedPatient ? 'pr-20 border-emerald-500 bg-emerald-50/30' : ''}
                                 />
-                                <label htmlFor="patientSearch">Find Patient (Name/Email)</label>
+                                <label htmlFor="patientSearch">Find Patient (Name/Email/LV-ID)</label>
                                 
                                 {selectedPatient && (
                                     <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
@@ -148,14 +148,14 @@ function UploadForm() {
                                                 className="p-3 hover:bg-[#F6F7F5] cursor-pointer transition-colors border-b border-[#F6F7F5] last:border-0"
                                                 onClick={() => {
                                                     setSelectedPatient(p);
-                                                    setPatientQuery(p.name);
+                                                    setPatientQuery(`${p.name} (LV-${p.lvId})`);
                                                     setPatients([]);
                                                 }}
                                             >
                                                 <div className="flex justify-between items-center">
                                                     <div>
                                                         <p className="text-sm font-bold text-[#1F2933]">{p.name}</p>
-                                                        <p className="text-xs text-[#6B7280]">{p.email}</p>
+                                                        <p className="text-[10px] font-black text-[#4F6F6F] uppercase tracking-widest mt-0.5">LV-ID: {p.lvId}</p>
                                                     </div>
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                                                 </div>
@@ -170,10 +170,10 @@ function UploadForm() {
                                     id="patientId"
                                     placeholder=" "
                                     readOnly
-                                    value={selectedPatient?._id || ''}
-                                    className="bg-slate-50 cursor-not-allowed font-mono text-xs"
+                                    value={selectedPatient?.lvId ? `LV-${selectedPatient.lvId}` : ''}
+                                    className="bg-slate-50 cursor-not-allowed font-mono text-xs uppercase"
                                 />
-                                <label htmlFor="patientId">Patient ID (Auto-fill)</label>
+                                <label htmlFor="patientId">Vault ID (Auto-fill)</label>
                             </div>
                         </div>
 

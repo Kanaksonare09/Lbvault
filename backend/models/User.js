@@ -5,11 +5,14 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     phone: { type: String, sparse: true },
     password: { type: String, required: true }, // Equivalent to passwordHash
-    role: { type: String, enum: ['patient', 'pathology', 'doctor', 'admin'], required: true },
+    role: { type: String, enum: ['patient', 'pathology', 'doctor', 'admin', 'SuperAdmin'], required: true },
+    status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'APPROVED' },
     name: { type: String, required: true },
     avatarUrl: { type: String, default: '' },
     isActive: { type: Boolean, default: true },
     isVerified: { type: Boolean, default: false },
+    doctorAccess: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    affiliatedLabs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     lastLoginAt: { type: Date }
 }, { timestamps: true });
 

@@ -19,6 +19,8 @@ export default function SignupPage() {
         labName: '',
         registrationNumber: '',
         address: '',
+        hospitalName: '',
+        degreeCertificate: null as File | null,
     });
     const [showPassword, setShowPassword] = useState(false);
     const [passwordStrength, setPasswordStrength] = useState(0);
@@ -61,11 +63,27 @@ export default function SignupPage() {
 
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-            const res = await fetch(`${apiUrl}/api/auth/signup`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(formData),
-            });
+            let res;
+
+            if (formData.role === 'doctor') {
+                const data = new FormData();
+                Object.entries(formData).forEach(([key, value]) => {
+                    if (value !== null && value !== undefined) {
+                        data.append(key, value as string | Blob);
+                    }
+                });
+                
+                res = await fetch(`${apiUrl}/api/auth/signup/doctor`, {
+                    method: 'POST',
+                    body: data,
+                });
+            } else {
+                res = await fetch(`${apiUrl}/api/auth/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                });
+            }
 
             const data = await res.json();
 
@@ -258,8 +276,40 @@ export default function SignupPage() {
                                     <label htmlFor="medicalLicenseNumber">Medical License Number</label>
                                 </div>
                                 <div className="floating-label-group">
+                                    <input type="text" name="hospitalName" id="hospitalName" placeholder=" " required value={formData.hospitalName} onChange={handleChange} />
+                                    <label htmlFor="hospitalName">Hospital / Clinic Name</label>
+                                </div>
+                                <div className="floating-label-group">
                                     <input type="text" name="specialization" id="specialization" placeholder=" " required value={formData.specialization} onChange={handleChange} />
                                     <label htmlFor="specialization">Specialization</label>
+                                </div>
+                                <div className="mt-2">
+                                    <label className="block text-sm font-medium text-[#4F6F6F] mb-2 font-semibold">Degree / Certificate (PDF/Image)</label>
+                                    <div className="relative group/file">
+                                        <input 
+                                            type="file" 
+                                            name="degreeCertificate" 
+                                            id="degreeCertificate"
+                                            accept=".pdf,.jpg,.jpeg,.png" 
+                                            required 
+                                            onChange={(e) => {
+                                                if (e.target.files && e.target.files[0]) {
+                                                    setFormData({ ...formData, degreeCertificate: e.target.files[0] });
+                                                }
+                                            }}
+                                            className="hidden"
+                                        />
+                                        <label 
+                                            htmlFor="degreeCertificate"
+                                            className="w-full flex items-center justify-center space-x-3 px-4 py-4 border-2 border-dashed border-[#8FB9A8] rounded-xl bg-white hover:bg-[#8FB9A8]/5 hover:border-[#4F6F6F] transition-all cursor-pointer group"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#4F6F6F]"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                            <span className="text-[#4F6F6F] font-medium">
+                                                {formData.degreeCertificate ? formData.degreeCertificate.name : 'Upload Medical Certificate'}
+                                            </span>
+                                        </label>
+                                    </div>
+                                    <p className="mt-2 text-xs text-[#6B7280]">Supported: PDF, JPG, PNG (Max 5MB)</p>
                                 </div>
                             </>
                         )}

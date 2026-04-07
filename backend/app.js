@@ -8,6 +8,13 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
+const doctorRoutes = require('./routes/doctorRoutes');
+const accessRoutes = require('./routes/accessRoutes');
+const patientRoutes = require('./routes/patientRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const pathologyRoutes = require('./routes/pathologyRoutes');
 
 const app = express();
 
@@ -42,17 +49,23 @@ app.post('/api/ai/ask', authMiddleware(), aiController.askAI);
 
 app.use('/api/analytics', analyticsRoutes);
 
-const dashboardRoutes = require('./routes/dashboardRoutes');
 app.use('/api/dashboard', dashboardRoutes);
 
-const accessRoutes = require('./routes/accessRoutes');
 app.use('/api/access', accessRoutes);
 
-const patientRoutes = require('./routes/patientRoutes');
 app.use('/api/patients', patientRoutes);
 
-// Doctor routes basic stub mapping until fully implemented
-app.get('/api/doctor/patients', authMiddleware('doctor'), (req, res) => res.json([]));
+// Doctor routes for patients and shared reports
+app.use('/api/doctor', doctorRoutes);
+
+// Notification routes
+app.use('/api/notifications', notificationRoutes);
+
+// Pathology Management routes
+app.use('/api/pathology', pathologyRoutes);
+
+// SuperAdmin Management routes
+app.use('/api/admin', adminRoutes);
 
 // Error Handling Middleware
 app.use((err, req, res, next) => {
