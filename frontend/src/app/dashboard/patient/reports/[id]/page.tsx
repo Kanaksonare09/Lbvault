@@ -180,7 +180,10 @@ export default function PatientReportViewerPage() {
                                     </div>
                                 </div>
                             </div>
-                            <p className="text-[#4F6F6F] font-medium leading-relaxed text-base italic">&ldquo;{report.aiSummary}&rdquo;</p>
+                            <div 
+                                className="text-[#4F6F6F] font-medium leading-relaxed text-base whitespace-pre-line"
+                                dangerouslySetInnerHTML={{ __html: report.aiSummary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }}
+                            />
                         </div>
                     ) : (
                         <div className="bg-white p-8 rounded-3xl border border-dashed border-[#E2E8F0] text-center">

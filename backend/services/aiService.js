@@ -1,7 +1,8 @@
 const axios = require('axios');
 const path = require('path');
 const fs = require('fs');
-const pdfParse = require('pdf-parse');
+const pdfParseLib = require('pdf-parse');
+const pdfParse = typeof pdfParseLib === 'function' ? pdfParseLib : (pdfParseLib.PDFParse || pdfParseLib.default || pdfParseLib);
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
@@ -36,144 +37,138 @@ exports.extractBiomarkersFromDocument = async (filePath) => {
             if (filePath.toLowerCase().endsWith('.pdf')) {
                 console.log('[OCR PIPELINE] Falling back to pdf-parse for native PDF text extraction...');
                 const dataBuffer = fs.readFileSync(filePath);
-                const pdfData = await pdfParse(dataBuffer);
-                if (pdfData && pdfData.text) extractedText = pdfData.text;
+                try {
+                    const pdfData = await pdfParse(dataBuffer);
+                    if (pdfData && pdfData.text) extractedText = pdfData.text;
+                } catch (pdfErr) {
+                    console.error('[OCR PIPELINE ERROR] pdf-parse failed:', pdfErr.message);
+                }
             }
         }
 
-        console.log(`[OCR PIPELINE] Extracted ${extractedText.length} characters. Routing to Groq Medical Parser...`);
+        console.log(`[OCR PIPELINE] Extracted ${extractedText.length} characters. Routing to Unified AI Engine...`);
 
-        // Forward to the preexisting Groq parsing module
-        const aiBiomarkers = await exports.extractStructuredBiomarkers(extractedText);
+        // Force 'en' fallback if result is poor
+        const result = await exports.analyzeReportUniversal(extractedText, 'en');
 
         return {
             rawOcrText: extractedText,
-            biomarkers: aiBiomarkers
+            biomarkers: result.biomarkers || [],
+            summary: result.summary || 'AI Analysis was unable to generate a summary from this document.'
         };
     } catch (error) {
-        console.error('[EXTRACTION FATAL EXCEPTION]', error.message, error.stack);
+        console.error('[EXTRACTION FATAL EXCEPTION]', error.message);
         return {
-            rawOcrText: 'Native parsing failed. Please upload a clear Text PDF or image.',
-            biomarkers: []
+            rawOcrText: 'Native parsing failed.',
+            biomarkers: [],
+            summary: 'We were unable to analyze this document structure. Please upload a high-quality PDF or Image.'
         };
     }
 };
 
-exports.simplifyText = async (extractedText, language = 'en') => {
+exports.analyzeReportUniversal = async (ocrText, language = 'en') => {
     try {
-        const groqApiKey = process.env.GROQ_API_KEY;
-        
-        let safeText = String(extractedText || '');
+        let safeText = String(ocrText || '').substring(0, 4000);
         if (safeText.trim().length === 0) {
-            safeText = 'No clinical text was provided for this report.';
+            return {
+                biomarkers: [],
+                summary: 'No valid text found in report.'
+            };
         }
 
-        if (!groqApiKey || groqApiKey === 'your_groq_api_key') {
-            console.log(`[AI Service] GROQ_API_KEY not configured. Falling back to multi-lingual mapped stub for ${language}`);
-            
-            const normalizedLang = language.toLowerCase();
-            if (normalizedLang === 'hi' || normalizedLang === 'hindi') {
-                return "आपके ब्लड शुगर और हीमोग्लोबिन के स्तर सामान्य हैं। केवल हल्का कोलेस्ट्रॉल बढ़ा है, जो आहार बदल कर नियंत्रित हो सकता है।\n---\nActionable Steps:\n• आहार में ताजे फल शामिल करें\n• 3 महीने में दोबारा जांच कराएं\n• अपने चिकित्सक से परामर्श लें";
-            } else if (normalizedLang === 'mr' || normalizedLang === 'marathi') {
-                return "तुमची साखरेची पातळी सामान्य आहे. फक्त कोलेस्ट्रॉल थोडेसे वाढले आहे, जे आहाराने नियंत्रणात येऊ शकते.\n---\nActionable Steps:\n• आहारात ताजी फळे समाविष्ट करा\n• ३ महिन्यांत पुन्हा तपासणी करा\n• डॉक्टरांचा सल्ला घ्या";
-            } else if (normalizedLang === 'te' || normalizedLang === 'telugu') {
-                return "మీ షుగర్ లెవెల్స్ సాధారణంగానే ఉన్నాయి. తీసుకునే ఆహారంతో కొలెస్ట్రాల్‌ను తగ్గించుకోవచ్చు.\n---\nActionable Steps:\n• తాజా పండ్లు తినండి\n• 3 నెలల్లో మళ్లీ పరీక్ష చేయించుకోండి\n• మీ వైద్యుడిని సంప్రదించండి";
-            }
-            
-            return `Your blood sugar and hemoglobin levels are completely stable. Your cholesterol is slightly elevated but manageable.\n---\nActionable Steps:\n• Maintain a balanced diet\n• Consider a follow-up test in 3 months\n• Share these results with your primary care doctor`;
-        }
+        // Build language-specific instruction
+        const langInstructions = {
+            hi: `LANGUAGE RULE (CRITICAL): Write the ENTIRE summary in Hindi (हिंदी). 
+Every sentence, every phrase, every word MUST be in Hindi script (Devanagari).
+ONLY keep these in English: medical test names (Hemoglobin, ALT, AST, HbA1c, etc.), units (mg/dL, g/dL, U/L), and numeric values.
+Example of correct style: "आपके **Hemoglobin** का स्तर 10.5 g/dL है, जो सामान्य से थोड़ा कम है।"
+DO NOT mix random English words. All explanations, all advice, all headings must be in Hindi.`,
+            mr: `LANGUAGE RULE (CRITICAL): संपूर्ण सारांश मराठी भाषेत लिहा.
+प्रत्येक वाक्य, प्रत्येक शब्द मराठीत असणे आवश्यक आहे.
+फक्त हे इंग्रजीत ठेवा: वैद्यकीय चाचणीची नावे (Hemoglobin, ALT, AST), एकके (mg/dL, g/dL), आणि संख्यात्मक मूल्ये.
+उदाहरण: "तुमच्या **Hemoglobin** ची पातळी 10.5 g/dL आहे, जी सामान्यपेक्षा थोडी कमी आहे."
+इतर सर्व स्पष्टीकरण, सल्ला आणि शीर्षके मराठीत असावीत.`,
+            te: `LANGUAGE RULE (CRITICAL): మొత్తం సారాంశాన్ని తెలుగులో రాయండి.
+ప్రతి వాక్యం, ప్రతి మాట తెలుగులో ఉండాలి.
+ఇవి మాత్రమే ఇంగ్లీషులో ఉంచండి: వైద్య పరీక్ష పేర్లు (Hemoglobin, ALT, AST), యూనిట్లు (mg/dL), మరియు సంఖ్యా విలువలు.
+ఉదాహరణ: "మీ **Hemoglobin** స్థాయి 10.5 g/dL గా ఉంది, ఇది సాధారణం కంటే కొంచెం తక్కువ."
+మిగిలిన అన్ని వివరణలు, సూచనలు తెలుగులో రాయండి.`,
+            en: `LANGUAGE RULE: Write the summary in clear, simple English. Use emojis and bold headers.`
+        };
 
-        const prompt = `You are a clinical AI assistant providing a highly accurate, patient-friendly explanation of a pathology report.
-Read the findings and adhere to strict global medical standards. DO NOT hallucinate. Keep the tone reassuring, warm, and extremely simple to understand (no medical jargon).
+        const langCode = String(language).toLowerCase().substring(0, 2);
+        const langRule = langInstructions[langCode] || langInstructions['en'];
 
-You MUST format your EXACT response like this:
-(Provide a 2-3 sentence summary of the core results. Identify normal and abnormal markers plainly)
----
-Actionable Steps:
-• (Suggestion 1: Safe lifestyle or follow up step)
-• (Suggestion 2)
-• (Suggestion 3)
+        const prompt = `You are a Universal Medical Intelligence Engine.
+Your task is to analyze the following medical report OCR text and perform TWO tasks in one pass:
+1. Extract ALL measurable parameters/biomarkers as a JSON array.
+2. Generate a patient-friendly summary with emojis and actionable steps.
 
-Language strictly requested: ${language}. Report text: ${safeText.substring(0, 3000)}`;
-
-        const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
-            model: 'llama-3.1-8b-instant',
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.3,
-            max_tokens: 500
-        }, {
-            headers: { 'Authorization': `Bearer ${groqApiKey}`, 'Content-Type': 'application/json' }
-        });
-
-        return response.data.choices[0].message.content;
-    } catch (error) {
-        console.error('Groq Service Error:', error.message);
-        return 'We are unable to generate a summary at this time. Please consult your doctor for detailed insights.';
-    }
-};
-
-exports.extractStructuredBiomarkers = async (ocrText) => {
-    try {
-        const groqApiKey = process.env.GROQ_API_KEY;
-        
-        let safeText = String(ocrText || '');
-        if (safeText.trim().length === 0) {
-            safeText = 'No valid biomarker text available.';
-        }
-
-        if (!groqApiKey || groqApiKey === 'your_groq_api_key') {
-            console.log(`[AI Service] GROQ_API_KEY not configured. Falling back to dummy structured biomarkers.`);
-            // Return dummy JSON array
-            return [
-                { name: 'glucose', value: 105, unit: 'mg/dL', min: 70, max: 100 },
-                { name: 'hemoglobin', value: 14.2, unit: 'g/dL', min: 13.5, max: 17.5 },
-                { name: 'cholesterol', value: 180, unit: 'mg/dL', min: 125, max: 200 }
-            ];
-        }
-
-        const prompt = `You are a clinical AI. Your sole task is to extract medical biomarker test results from the provided pathology OCR text.
-Output strictly a valid JSON array of objects and absolutely nothing else. No markdown wrapping.
-Each object must exactly match this structure:
+Output strictly a valid JSON object with this exact structure:
 {
-  "name": "string (lowercase marker name, e.g., 'glucose')",
-  "value": number (the float/int test result),
-  "unit": "string (e.g., 'mg/dL')",
-  "min": number (the minimum normal reference range value),
-  "max": number (the maximum normal reference range value)
+  "biomarkers": [
+    {
+      "name": "string",
+      "value": number,
+      "unit": "string",
+      "min": number,
+      "max": number,
+      "severity": "Normal|Mild|Moderate|Critical",
+      "interpretation": "string",
+      "confidence": number
+    }
+  ],
+  "summary": "string (formatted with **bold** for headers and emojis, exactly 3-4 paragraphs with an Actionable Steps section at the end)"
 }
-If min or max is not found in the text, make your best clinical guess based on the unit.
 
-Report text: ${safeText.substring(0, 3000)}`;
+${langRule}
 
-        const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
-            model: 'llama-3.1-8b-instant',
+General Rules:
+- DO NOT hallucinate common tests (like Hemoglobin or Blood) if the OCR text belongs to a different test (like Liver, Urine, or Radiology).
+- IF THE OCR TEXT IS UNREADABLE or missing core markers, set parameters to empty and include "No clear medical data detected in this scan" in the summary.
+- If reference ranges (min/max) are missing, use your internal medical knowledge for severity/interpretation.
+- Output ONLY the JSON object.
+
+Report text (STRICT DATA SOURCE - DO NOT GUESS): ${safeText}`;
+
+        console.log(`[AI ENGINE] Single-pass analysis starting for ${safeText.length} chars...`);
+        
+        const response = await axios.post('http://127.0.0.1:11434/v1/chat/completions', {
+            model: 'llama3.2', // Keep llama3.2 as primary fast local model
             messages: [{ role: 'user', content: prompt }],
-            temperature: 0.1, // Minimum temperature for strict JSON consistency
-            response_format: { type: "json_object" } // Enforce JSON
+            temperature: 0.1,
+            max_tokens: 2000, // Increased for long summaries
+            response_format: { type: "json_object" }
         }, {
-            headers: { 'Authorization': `Bearer ${groqApiKey}`, 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
+            timeout: 60000 // 60s timeout for complex reports
         });
 
-        // The response format might require returning an object with the array inside, let's parse it safely
         const rawContent = response.data.choices[0].message.content;
+        
         let parsed;
         try {
             parsed = JSON.parse(rawContent);
-            // Handle if the LLM returned { "biomarkers": [...] } instead of just [...]
-            if (parsed && !Array.isArray(parsed) && Array.isArray(Object.values(parsed)[0])) {
-                parsed = Object.values(parsed)[0];
-            } else if (!Array.isArray(parsed)) {
-                parsed = [];
-            }
-        } catch (e) {
-            console.error('[AI Extraction Error] Invalid JSON returned:', rawContent);
-            parsed = [];
+        } catch (jsonErr) {
+            console.error('[AI ENGINE] JSON Fixup Required:', jsonErr.message);
+            // Fallback: If JSON is malformed, try to extract summary via regex as a safety net
+            const summaryMatch = rawContent.match(/"summary"\s*:\s*"(.*)"/s);
+            parsed = {
+                biomarkers: [],
+                summary: summaryMatch ? summaryMatch[1].replace(/\\n/g, '\n') : 'Analysis completed, but data formatting failed. Please try again.'
+            };
         }
         
-        return parsed;
+        return {
+            biomarkers: Array.isArray(parsed.biomarkers) ? parsed.biomarkers : [],
+            summary: parsed.summary || 'Summary generation failed.'
+        };
     } catch (error) {
-        console.error('Groq Extraction Error:', error.message);
-        return [];
+        console.error('[AI ENGINE ERROR]', error.message);
+        return {
+            biomarkers: [],
+            summary: 'The medical analysis engine is currently busy. Please consult your doctor directly.'
+        };
     }
 };
 

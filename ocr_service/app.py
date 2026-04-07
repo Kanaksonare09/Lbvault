@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 import logging
 from services.ocr_service import process_file_in_memory
+from services.tts_service import generate_tts_audio
 
 app = Flask(__name__)
 
@@ -51,6 +52,23 @@ def process_report():
     except Exception as e:
         logger.error(f"Internal Server Error: {str(e)}")
         return jsonify({"error": str(e), "status": "error"}), 500
+
+@app.route('/tts', methods=['POST'])
+def run_tts():
+    try:
+        data = request.json
+        if not data or 'text' not in data:
+            return jsonify({"error": "Missing 'text' inside JSON body"}), 400
+            
+        text = data['text']
+        language = data.get('language', 'hi')
+        
+        logger.info(f"Generating TTS fallback for {language} with gTTS")
+        audio_stream = generate_tts_audio(text, language)
+        return send_file(audio_stream, mimetype='audio/mpeg', as_attachment=False, download_name='output.mp3')
+    except Exception as e:
+        logger.error(f"TTS Endpoint Error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5001, debug=True)

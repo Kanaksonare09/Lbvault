@@ -84,12 +84,82 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        res.status(200).json(user);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        
+        // Also fetch patient profile for extended fields
+        const PatientProfile = require('../models/PatientProfile');
+        const profile = await PatientProfile.findOne({ userId: req.user.id }).lean();
+        
+        res.status(200).json({ ...user.toObject(), profile: profile || {} });
     } catch (error) {
         console.error('Get Me Error:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+exports.updateProfile = async (req, res) => {
+    try {
+        const { name, phone, address, dateOfBirth, gender, bloodGroup, emergencyContactName, emergencyContactPhone, preferredLanguage } = req.body;
+
+        // Update User core fields
+        const userUpdates = {};
+        if (name) userUpdates.name = name.trim();
+        if (phone !== undefined) userUpdates.phone = phone;
+        if (address !== undefined) userUpdates.address = address;
+
+        if (Object.keys(userUpdates).length > 0) {
+            await User.findByIdAndUpdate(req.user.id, userUpdates);
+        }
+
+        // Update PatientProfile extended fields
+        const PatientProfile = require('../models/PatientProfile');
+        const profileUpdates = {};
+        if (dateOfBirth !== undefined) profileUpdates.dateOfBirth = dateOfBirth || null;
+        if (gender !== undefined) profileUpdates.gender = gender;
+        if (bloodGroup !== undefined) profileUpdates.bloodGroup = bloodGroup;
+        if (emergencyContactName !== undefined) profileUpdates.emergencyContactName = emergencyContactName;
+        if (emergencyContactPhone !== undefined) profileUpdates.emergencyContactPhone = emergencyContactPhone;
+        if (preferredLanguage !== undefined) profileUpdates.preferredLanguage = preferredLanguage;
+
+        await PatientProfile.findOneAndUpdate(
+            { userId: req.user.id },
+            profileUpdates,
+            { upsert: true, new: true }
+        );
+
+        const updatedUser = await User.findById(req.user.id).select('-password');
+        const profile = await PatientProfile.findOne({ userId: req.user.id }).lean();
+
+        res.status(200).json({ message: 'Profile updated successfully', user: { ...updatedUser.toObject(), profile: profile || {} } });
+    } catch (error) {
+        console.error('Update Profile Error:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+exports.changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ message: 'Both current and new password are required.' });
+        }
+        if (newPassword.length < 6) {
+            return res.status(400).json({ message: 'New password must be at least 6 characters.' });
+        }
+
+        const user = await User.findById(req.user.id);
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Current password is incorrect.' });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        await user.save();
+
+        res.status(200).json({ message: 'Password changed successfully.' });
+    } catch (error) {
+        console.error('Change Password Error:', error);
         res.status(500).json({ message: 'Server Error' });
     }
 };

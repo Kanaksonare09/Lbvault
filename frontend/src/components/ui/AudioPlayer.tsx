@@ -34,26 +34,52 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
     };
   }, [audioUrl]);
 
+  const [isReady, setIsReady] = useState(false);
+
   const fetchAudio = async () => {
     setIsLoading(true);
     setError(null);
+    setIsReady(false);
     try {
-      const responseUrl = await reportService.getVoiceAudio(reportId, language);
+      const res = await reportService.getVoiceAudio(reportId, language);
       
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      // Fallback relative resolution to absolute backend path
-      const url = responseUrl.startsWith('http') ? responseUrl : `${apiUrl}${responseUrl}`;
+      // Safely extract audioUrl from new rich response object
+      const audioPath: string = (res && typeof res === 'object' && res.audioUrl)
+        ? String(res.audioUrl)
+        : typeof res === 'string' ? res : '';
+
+      if (!audioPath) throw new Error('No audio URL returned from server.');
+
+      const apiUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5010').replace(/\/$/, '');
+      const url = audioPath.startsWith('http') ? audioPath : `${apiUrl}${audioPath}`;
       
       setAudioUrl(url);
+
+      // Stop and clean up previous audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+
       const audio = new Audio(url);
       audioRef.current = audio;
       audio.onloadedmetadata = () => setDuration(audio.duration);
       audio.onended = () => { setIsPlaying(false); setProgress(0); };
-      audio.play();
-      setIsPlaying(true);
-      intervalRef.current = setInterval(() => {
-        if (audio.duration) setProgress((audio.currentTime / audio.duration) * 100);
-      }, 200);
+      
+      // Handle browser autoplay policy — play() returns a Promise
+      audio.play()
+        .then(() => {
+          setIsPlaying(true);
+          setIsReady(false);
+          intervalRef.current = setInterval(() => {
+            if (audio.duration) setProgress((audio.currentTime / audio.duration) * 100);
+          }, 200);
+        })
+        .catch(() => {
+          // Autoplay blocked — show "Tap to Play" button instead of crashing
+          setIsReady(true);
+          setIsPlaying(false);
+        });
     } catch (err: any) {
       setError(err?.message || 'Audio generation failed. Please try again.');
     } finally {
@@ -62,6 +88,18 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
   };
 
   const togglePlay = () => {
+    if (!audioRef.current && !isReady) { fetchAudio(); return; }
+    if (isReady && audioRef.current) {
+      // User tapped after autoplay was blocked — now allowed
+      audioRef.current.play().then(() => {
+        setIsPlaying(true);
+        setIsReady(false);
+        intervalRef.current = setInterval(() => {
+          if (audioRef.current?.duration) setProgress((audioRef.current.currentTime / audioRef.current.duration) * 100);
+        }, 200);
+      });
+      return;
+    }
     if (!audioRef.current) { fetchAudio(); return; }
     if (isPlaying) {
       audioRef.current.pause();
@@ -109,6 +147,8 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
         >
           {isLoading ? (
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : isReady ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           ) : isPlaying ? (
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
           ) : (
@@ -182,6 +222,8 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : isReady ? (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           ) : isPlaying ? (
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
           ) : (
@@ -189,6 +231,12 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
           )}
         </button>
       </div>
+
+      {isReady && (
+        <p className="text-center text-xs font-bold text-[#4F6F6F] mt-3 animate-pulse">
+          ✅ Audio ready — tap ▶ to play
+        </p>
+      )}
 
       {error && (
         <div className="mt-4 p-3 bg-rose-50 border border-rose-100 rounded-2xl">

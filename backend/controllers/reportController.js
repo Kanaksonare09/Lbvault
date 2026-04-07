@@ -46,90 +46,94 @@ exports.uploadReport = async (req, res) => {
 
         await report.save();
 
-        // Respond to the user immediately so they don't have to wait for the LLM
-        res.status(201).json({ message: 'Report uploaded! Processing in background.', report });
-
-        // --- Asynchronous AI Pipeline --- //
-        // Call Unified Native Gemini Pipeline
-        const path = require('path');
-        const fs = require('fs');
-        
-        let extractedText = "Raw extracted text for " + reportName;
-        let aiBiomarkers = [];
-        
+        // 2. Synchronous AI Pipeline (Wait for results so user sees them in one click)
         try {
-            const absoluteFilePath = path.join(__dirname, '..', report.fileUrl.lstrip ? report.fileUrl.lstrip('/') : report.fileUrl.replace(/^\//, ''));
-            
-            console.log(`[PIPELINE] Pushing document to Gemini: ${absoluteFilePath}`);
+            const path = require('path');
+            const fs = require('fs');
+            const absoluteFilePath = path.join(__dirname, '..', report.fileUrl.replace(/^\//, ''));
+            console.log(`[SYNC PIPELINE] Pushing document to AI Engine: ${absoluteFilePath}`);
+
+            let geminiResult;
             if (fs.existsSync(absoluteFilePath)) {
-                const geminiResult = await aiService.extractBiomarkersFromDocument(absoluteFilePath);
-                
-                if (geminiResult && geminiResult.rawOcrText) {
-                    extractedText = geminiResult.rawOcrText;
-                }
-                if (geminiResult && Array.isArray(geminiResult.biomarkers)) {
-                    aiBiomarkers = geminiResult.biomarkers;
-                }
-                console.log(`[PIPELINE] Gemini extracted ${aiBiomarkers.length} biomarkers natively.`);
-            } else {
-                console.error('[GEMINI ERROR] File not found locally:', absoluteFilePath);
+                geminiResult = await aiService.extractBiomarkersFromDocument(absoluteFilePath);
             }
-        } catch (visionErr) {
-            console.error('[GEMINI FATAL] Could not parse document via Gemini:', visionErr.message);
-        }
 
-        // 3. Save extracted Biomarkers to NoSQL Relation
-        for (const b of aiBiomarkers) {
-            // Guard against hallucinated non-numbers
-            const val = Number(b.value) || 0;
-            const min = Number(b.min) || 0;
-            const max = Number(b.max) || 0;
+            if (!geminiResult) throw new Error("Document analysis failed.");
+
+            const extractedText = geminiResult.rawOcrText || "Raw extracted text for " + reportName;
+            const aiBiomarkers = geminiResult.biomarkers || [];
+            const clinicalSummary = geminiResult.summary || "No summary generated.";
+
+            // Save extracted Biomarkers to NoSQL Relation
+            for (const b of aiBiomarkers) {
+                try {
+                    const val = Number(b.value) || 0;
+                    
+                    // Normalize severity to valid enum values
+                    const raw = (b.severity || 'Normal').toLowerCase();
+                    let severity = 'Normal';
+                    if (raw.includes('critical') || raw.includes('danger')) severity = 'Critical';
+                    else if (raw.includes('moderate') || raw.includes('elevated') || raw.includes('high') || raw.includes('low')) severity = 'Moderate';
+                    else if (raw.includes('mild') || raw.includes('slight') || raw.includes('border')) severity = 'Mild';
+
+                    // TREND ANALYSIS
+                    const lastResult = await ReportBiomarker.findOne({ 
+                        patientId: patient._id, 
+                        biomarkerName: String(b.name || 'Unknown').toLowerCase() 
+                    }).sort({ testDate: -1 });
+
+                    let trend = 'Stable';
+                    if (lastResult) {
+                        if (val > lastResult.value) trend = 'Increasing';
+                        else if (val < lastResult.value) trend = 'Decreasing';
+                    }
+
+                    await ReportBiomarker.create({
+                        reportId: report._id,
+                        patientId: patient._id,
+                        biomarkerName: String(b.name || 'Unknown').toLowerCase(),
+                        value: val,
+                        unit: String(b.unit || ''),
+                        referenceMin: b.min || 0,
+                        referenceMax: b.max || 0,
+                        isAbnormal: severity !== 'Normal',
+                        severity,
+                        interpretation: b.interpretation || `Value detected as ${trend.toLowerCase()}.`,
+                        confidence: b.confidence || 0.9,
+                        source: 'ai_extracted',
+                        testDate: report.createdAt
+                    });
+                } catch (bioErr) {
+                    console.warn(`[SYNC PIPELINE] Skipping biomarker "${b.name}":`, bioErr.message);
+                }
+            }
+
+            console.log(`[SYNC PIPELINE] Saving Clinical Observation...`);
             
-            await ReportBiomarker.create({
-                reportId: report._id,
-                patientId: patient._id,
-                biomarkerName: String(b.name || 'Unknown').toLowerCase(),
-                value: val,
-                unit: String(b.unit || ''),
-                referenceMin: min,
-                referenceMax: max,
-                isAbnormal: val < min || val > max,
-                source: 'ai_extracted',
-                testDate: report.createdAt
-            });
+            await ReportAiAnalysis.findOneAndUpdate(
+                { reportId: report._id },
+                { ocrText: extractedText, summaryEn: clinicalSummary },
+                { upsert: true, new: true }
+            );
+
+            console.log(`[SYNC PIPELINE] Fully complete for Report ${report._id}`);
+        } catch (pipelineErr) {
+            console.error('[SYNC PIPELINE ERROR]:', pipelineErr.message);
         }
 
-        // 4. Generate Clinical Summary & Create Analysis Record
-        console.log(`[PIPELINE] Generating Clinical Observation...`);
-        const clinicalSummary = await aiService.simplifyText(extractedText, 'en');
-        
-        await ReportAiAnalysis.create({
-            reportId: report._id,
-            ocrText: extractedText,
-            summaryEn: clinicalSummary
+        // 3. Respond only AFTER analysis is ready
+        res.status(201).json({ 
+            message: 'Report uploaded and analyzed!', 
+            report: {
+                ...report.toObject(),
+                processingStatus: 'completed'
+            } 
         });
-
-        // 5. Update Legacy Analytics
-        let analytics = await Analytics.findOne({ patientId: patient._id });
-        if (!analytics) {
-            analytics = new Analytics({ patientId: patient._id, biomarkerHistory: [] });
-        }
-        
-        if (aiBiomarkers.length > 0) {
-            analytics.biomarkerHistory.push({
-                date: report.createdAt,
-                reportId: report._id,
-                biomarkers: aiBiomarkers.reduce((acc, curr) => ({ ...acc, [curr.name || 'unknown']: curr.value }), {})
-            });
-            await analytics.save();
-        }
-        
-        console.log(`[PIPELINE] Fully complete for Report ${report._id}`);
-        // --------------------------------- //
-
     } catch (error) {
         console.error('Upload Error:', error);
-        res.status(500).json({ message: 'Server Error' });
+        if (!res.headersSent) {
+            res.status(500).json({ message: 'Server Error' });
+        }
     }
 };
 
@@ -190,18 +194,29 @@ exports.getReportById = async (req, res) => {
 
 exports.getReportSummary = async (req, res) => {
     try {
-        const analysis = await ReportAiAnalysis.findOne({ reportId: req.params.id });
-        if (!analysis) return res.status(404).json({ message: 'Report analysis not found' });
+        let analysis = await ReportAiAnalysis.findOne({ reportId: req.params.id });
+        if (!analysis) {
+            analysis = await ReportAiAnalysis.findOneAndUpdate(
+                { reportId: req.params.id },
+                { ocrText: 'Missing OCR data.', summaryEn: '' },
+                { upsert: true, new: true }
+            );
+        }
         
         const language = req.query.lang || 'en';
+        const force = req.query.force === 'true';
 
-        // Check if we need to generate it
-        if (!analysis.summaryEn && language === 'en') {
-            analysis.summaryEn = await aiService.simplifyText(analysis.ocrText, language);
-            await analysis.save();
-        } else if (language !== 'en' && !analysis.translations.has(language)) {
-            const translation = await aiService.simplifyText(analysis.ocrText, language);
-            analysis.translations.set(language, translation);
+        // Use the new single-pass engine if summary is missing OR force-recalculating
+        if (!analysis.summaryEn || force || (language !== 'en' && !analysis.translations.get(language))) {
+            console.log(`[AI CONTROLLER] Generating/Updating analysis for ${req.params.id}...`);
+            const result = await aiService.analyzeReportUniversal(analysis.ocrText, language);
+            
+            if (language === 'en') {
+                analysis.summaryEn = result.summary;
+            } else {
+                if (!analysis.translations) analysis.translations = new Map();
+                analysis.translations.set(language, result.summary);
+            }
             await analysis.save();
         }
         
@@ -210,45 +225,79 @@ exports.getReportSummary = async (req, res) => {
 
         res.status(200).json({ summary, voiceSummaryUrl: voiceUrl });
     } catch (error) {
-        console.error('Summary Error:', error);
-        res.status(500).json({ message: 'Server Error' });
+        console.error('Summary Generation Fatal:', error.message);
+        res.status(500).json({ message: 'AI processing failed locally. Please check Ollama logs.' });
     }
 };
 
 exports.generateVoice = async (req, res) => {
     try {
         const { reportId, language, text } = req.body;
-        
-        let summaryText = text;
-        const analysis = reportId ? await ReportAiAnalysis.findOne({ reportId }) : null;
+        const rewriteService = require('../services/rewriteService');
+        const scriptService = require('../services/scriptService');
 
+        let summaryText = text;
+        let analysis = reportId ? await ReportAiAnalysis.findOne({ reportId }) : null;
+
+        if (!analysis && reportId) {
+            analysis = await ReportAiAnalysis.findOneAndUpdate(
+                { reportId },
+                { ocrText: 'Regenerating insights.', summaryEn: '' },
+                { upsert: true, new: true }
+            );
+        }
+
+        // Step 1: Get the base summary text
         if (!summaryText && analysis) {
             summaryText = language === 'en' ? analysis.summaryEn : analysis.translations?.get(language);
-            
             if (!summaryText) {
-                // generate missing summary
-                summaryText = await aiService.simplifyText(analysis.ocrText, language);
+                const result = await aiService.analyzeReportUniversal(analysis.ocrText, language);
+                summaryText = result.summary;
                 if (language === 'en') analysis.summaryEn = summaryText;
-                else analysis.translations.set(language, summaryText);
+                else {
+                    if (!analysis.translations) analysis.translations = new Map();
+                    analysis.translations.set(language, summaryText);
+                }
                 await analysis.save();
             }
         }
 
-        if (!summaryText) return res.status(400).json({ message: 'Text payload is required.' });
+        if (!summaryText) return res.status(400).json({ message: 'No summary text available.' });
 
-        const audioUrl = await ttsService.generateAndStoreAudio(summaryText, language);
-        
-        // Save back to DB
+        // Step 2: EMPATHY LAYER — Rewrite as a warm, doctor-like message
+        const langCode = language?.toLowerCase().includes('hi') ? 'hi'
+            : language?.toLowerCase().includes('mr') ? 'mr'
+            : language?.toLowerCase().includes('te') ? 'te' : 'en';
+
+        console.log(`[VOICE PIPELINE] Applying Empathy Layer for language: ${langCode}`);
+        const empatheticText = await rewriteService.rewriteAsEmpathetic(summaryText, langCode);
+
+        // Step 3: SCRIPT GENERATOR — Build structured voice script
+        const voiceScript = scriptService.buildVoiceScript(empatheticText, langCode);
+        console.log(`[VOICE PIPELINE] Voice script (${voiceScript.length} chars) ready for TTS.`);
+
+        // Step 4: TTS — Convert script to audio
+        const audioUrl = await ttsService.generateAndStoreAudio(voiceScript, langCode);
+
+        // Step 5: Save everything to DB
         if (analysis) {
             if (!analysis.audioUrls) analysis.audioUrls = new Map();
-            analysis.audioUrls.set(language, audioUrl);
+            analysis.audioUrls.set(langCode, audioUrl);
+            // Cache the voice script too
+            if (!analysis.translations) analysis.translations = new Map();
+            analysis.translations.set(`script_${langCode}`, voiceScript);
             await analysis.save();
         }
 
-        res.status(200).json({ audioUrl });
+        res.status(200).json({
+            audioUrl,
+            voiceScript,
+            empatheticSummary: empatheticText,
+            language: langCode
+        });
     } catch (error) {
-        console.error('Voice Generation Error:', error);
-        res.status(500).json({ message: 'Server Error' });
+        console.error('Voice Generation Error:', error.message);
+        res.status(500).json({ message: 'Voice generation failed. Please try again.' });
     }
 };
 

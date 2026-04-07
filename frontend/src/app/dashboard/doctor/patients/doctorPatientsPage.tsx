@@ -171,7 +171,10 @@ export default function DoctorPatientsPage() {
                   {report.aiSummary && (
                     <div className="px-6 py-4 bg-[#F8FAF9] border-b border-[#F6F7F5]">
                       <p className="text-[10px] font-black text-[#4F6F6F] uppercase tracking-widest mb-2">AI Summary</p>
-                      <p className="text-sm text-[#1F2933] font-medium leading-relaxed line-clamp-3">{report.aiSummary}</p>
+                      <div 
+                          className="text-sm text-[#1F2933] font-medium leading-relaxed line-clamp-3 whitespace-pre-line"
+                          dangerouslySetInnerHTML={{ __html: report.aiSummary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }}
+                      />
                     </div>
                   )}
 

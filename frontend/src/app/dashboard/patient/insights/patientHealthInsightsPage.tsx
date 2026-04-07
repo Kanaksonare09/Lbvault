@@ -5,6 +5,7 @@ import { reportService } from '@/services/reportService';
 import { useAuth } from '@/lib/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
 import VoiceSummaryButton from '@/components/patient/VoiceSummaryButton';
+import AskAIPanel from '@/components/patient/AskAIPanel';
 
 export default function PatientHealthInsightsPage() {
     const { user, loading: authLoading } = useAuth();
@@ -16,6 +17,7 @@ export default function PatientHealthInsightsPage() {
     const [activeReportDetails, setActiveReportDetails] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [detailLoading, setDetailLoading] = useState(false);
+    const [showAskAI, setShowAskAI] = useState(false);
 
     // Fetch master list of reports
     useEffect(() => {
@@ -333,11 +335,23 @@ export default function PatientHealthInsightsPage() {
                             Save PDF
                         </a>
 
-                        <button className="bg-[#8FB9A8] hover:bg-white text-[#1F2933] px-6 py-2.5 rounded-full text-sm font-black flex items-center transition-all shadow-lg shadow-[#8FB9A8]/20">
+                        <button 
+                            id="ask-ai-open-btn"
+                            onClick={() => setShowAskAI(true)}
+                            className="bg-[#8FB9A8] hover:bg-white text-[#1F2933] px-6 py-2.5 rounded-full text-sm font-black flex items-center transition-all shadow-lg shadow-[#8FB9A8]/20">
                             <svg className="mr-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                             Ask AI
                         </button>
                     </div>
+
+                    {/* Ask AI Chat Panel */}
+                    {showAskAI && report && (
+                        <AskAIPanel
+                            reportId={report._id}
+                            reportName={report.reportName}
+                            onClose={() => setShowAskAI(false)}
+                        />
+                    )}
                 </div>
             )}
         </div>

@@ -36,6 +36,10 @@ app.post('/api/voice', authMiddleware(), reportController.generateVoice);
 // New unified instruction routes
 app.post('/api/ai/audio', authMiddleware(), reportController.generateVoice);
 
+// Ask AI — patient chat with their report context
+const aiController = require('./controllers/aiController');
+app.post('/api/ai/ask', authMiddleware(), aiController.askAI);
+
 app.use('/api/analytics', analyticsRoutes);
 
 const dashboardRoutes = require('./routes/dashboardRoutes');

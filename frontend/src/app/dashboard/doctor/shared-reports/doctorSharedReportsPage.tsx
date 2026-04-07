@@ -123,7 +123,10 @@ export default function DoctorSharedReportsPage() {
                           <div className="w-2 h-2 bg-[#8FB9A8] rounded-full animate-pulse" />
                           <p className="text-[10px] font-black text-[#4F6F6F] uppercase tracking-widest">AI Analysis Summary</p>
                         </div>
-                        <p className="text-sm font-medium text-[#1F2933] leading-relaxed">{report.aiSummary}</p>
+                        <div 
+                            className="text-sm font-medium text-[#1F2933] leading-relaxed whitespace-pre-line"
+                            dangerouslySetInnerHTML={{ __html: report.aiSummary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }}
+                        />
                       </div>
                     )}
 

@@ -39,21 +39,12 @@ export const reportService = {
             }
         });
     },
-    getVoiceAudio: async (reportId: string, language: string = 'English'): Promise<string> => {
+    getVoiceAudio: async (reportId: string, language: string = 'English'): Promise<any> => {
         try {
             const res = await api.post('/voice', { reportId, language });
-            return res.data.audioUrl;
+            // New API returns: { audioUrl, voiceScript, empatheticSummary, language }
+            return res.data;
         } catch (err: any) {
-            // Check if error response is a blob (Axios does this when responseType is 'blob')
-            if (err.response && err.response.data instanceof Blob) {
-                const errorText = await err.response.data.text();
-                try {
-                    const errorJson = JSON.parse(errorText);
-                    err.message = errorJson.message || errorJson.error || err.message;
-                } catch (e) {
-                    console.error('[VOICE ERROR] Failed to parse error blob:', e);
-                }
-            }
             throw err;
         }
     }
