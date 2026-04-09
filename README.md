@@ -34,11 +34,12 @@
 ## ✨ Features
 
 ### 🧠 Universal AI Intelligence Engine
-- **Schema-Free Analysis** — Dynamically extracts any biomarker from any report type using Llama 3.2
-- **Longitudinal Intelligence** — Detects "Improving" vs. "Deteriorating" health markers by analyzing proximity to normal ranges across time
-- **Single-Pass Processing** — Biomarker extraction + clinical summarization in one LLM call
-- **Atomic Dashboard Aggregation** — Loads patient metadata, history, trends, and AI analysis in one high-performance API request
-- **Anti-Hallucination** — AI grounded strictly in medical data with non-diagnostic safeguards
+- **Ultra-Fast Cloud Integration** — Seamlessly integrates with Groq for ~1-2s cloud inference using `llama-3.1-8b-instant`, with automatic fallback to local Ollama (`llama3.2`).
+- **Asynchronous AI Pipeline** — File uploads respond instantly (~1s), while extensive OCR and AI inferences run in the background. Features real-time frontend status polling.
+- **Schema-Free Analysis** — Dynamically extracts any biomarker from any report type.
+- **Longitudinal Intelligence** — Detects "Improving" vs. "Deteriorating" health markers by analyzing proximity to normal ranges across time.
+- **Single-Pass Processing** — Biomarker extraction + clinical summarization in one LLM call.
+- **Anti-Hallucination** — AI grounded strictly in medical data with non-diagnostic safeguards.
 
 ### 🔬 Hybrid OCR Pipeline (4-Tier)
 1. **Gemini 1.5 Flash** — Cloud OCR for scanned and handwritten reports *(requires API key)*
@@ -50,9 +51,11 @@
 ```
 AI Summary → Empathy Rewrite (Llama 3.2) → Script Generator → Google TTS → Audio (.mp3)
 ```
-- Warm, doctor-like conversational tone
-- Full native-language output for Hindi, Marathi, Telugu
-- Medical terms (Hemoglobin, ALT, mg/dL) always kept in English
+- **Biomarker-First Generation** — Voice pipelines derive scripts from exact database biomarkers ensuring precision instead of reading raw OCR text.
+- **Actionable Health Tips** — Voice scripts include 3 practical lifestyle recommendations tailored to the patient's report.
+- Warm, doctor-like conversational tone avoiding heavy medical jargon for improved patient relatability.
+- Full native-language output for Hindi, Marathi, Telugu.
+- Medical terms (Hemoglobin, ALT, mg/dL) always kept in English.
 
 ### 🗣️ Ask AI — Report Chat
 - Ask questions about your report in natural language
@@ -210,6 +213,9 @@ MONGODB_URI=mongodb://localhost:27017/labvault
 # Security (use any long random string)
 JWT_SECRET=your_strong_jwt_secret_here
 
+# AI Config (Optional - makes AI 20x faster than local)
+GROQ_API_KEY=your_groq_api_key_here
+
 # Email (optional — for notification features)
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_gmail_app_password
@@ -331,6 +337,7 @@ Open your browser and go to: **http://localhost:3000**
 | `PORT` | ✅ | Server port (use `5010`) |
 | `MONGODB_URI` | ✅ | MongoDB connection string |
 | `JWT_SECRET` | ✅ | Secret for signing JWT tokens |
+| `GROQ_API_KEY` | ❌ | Sub-second AI inference API key from console.groq.com |
 | `EMAIL_USER` | ❌ | Gmail address for email notifications |
 | `EMAIL_PASS` | ❌ | Gmail app password |
 
