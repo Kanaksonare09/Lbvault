@@ -21,6 +21,7 @@ export interface Report {
     testType: string;
     category?: string;
     fileUrl: string;
+    status?: 'processing' | 'ready' | 'failed';
     uploadDate?: string;
     reportDate?: string;
     createdAt?: string;

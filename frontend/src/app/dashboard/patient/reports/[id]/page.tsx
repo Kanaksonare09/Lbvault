@@ -1,30 +1,94 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import HealthInsightCard from '@/components/patient/HealthInsightCard';
 import AudioPlayer from '@/components/ui/AudioPlayer';
 import { reportService } from '@/services/reportService';
 import { Report } from '@/types';
 
-// We no longer use a static frontend NORMS mapping because the AI-extracted markers 
-// supply their precise clinical bounds entirely dynamically inside 'report.biomarkers'.
-
 export default function PatientReportViewerPage() {
     const { id } = useParams();
     const router = useRouter();
     const [report, setReport] = useState<Report | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isProcessing, setIsProcessing] = useState(false);
     const [isRegenerating, setIsRegenerating] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'preview' | 'analysis' | 'audio'>('preview');
+    const [processingDots, setProcessingDots] = useState('');
+    const pollRef = useRef<NodeJS.Timeout | null>(null);
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+    const fetchReport = useCallback(async () => {
+        if (!id) return;
+        try {
+            const data = await reportService.getReportById(id as string);
+            setReport(data);
+            return data;
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Failed to load report.');
+            return null;
+        }
+    }, [id]);
+
+    // Animated dots for processing state
+    useEffect(() => {
+        if (!isProcessing) return;
+        const interval = setInterval(() => {
+            setProcessingDots(d => d.length >= 3 ? '' : d + '.');
+        }, 500);
+        return () => clearInterval(interval);
+    }, [isProcessing]);
+
+    // Polling: check status every 2s while report is processing
+    const startPolling = useCallback(() => {
+        if (pollRef.current) return; // already polling
+        pollRef.current = setInterval(async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await fetch(`${apiBase}/api/reports/${id}/status`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const statusData = await res.json();
+
+                if (statusData.status === 'ready') {
+                    // Stop polling, fetch full report
+                    if (pollRef.current) clearInterval(pollRef.current);
+                    pollRef.current = null;
+                    setIsProcessing(false);
+                    const data = await fetchReport();
+                    if (data) {
+                        setActiveTab('analysis'); // Auto-switch to analysis tab
+                    }
+                } else if (statusData.status === 'failed') {
+                    if (pollRef.current) clearInterval(pollRef.current);
+                    pollRef.current = null;
+                    setIsProcessing(false);
+                    // Still fetch report to show whatever was saved
+                    fetchReport();
+                }
+            } catch (e) {
+                // Network error during poll — keep retrying
+            }
+        }, 2000);
+    }, [id, apiBase, fetchReport]);
+
+    // Stop polling on unmount
+    useEffect(() => {
+        return () => { if (pollRef.current) clearInterval(pollRef.current); };
+    }, []);
 
     useEffect(() => {
         if (!id) return;
         setLoading(true);
-        reportService.getReportById(id as string)
-            .then(data => setReport(data))
-            .catch((err: any) => setError(err.response?.data?.message || 'Failed to load report.'))
+        fetchReport()
+            .then(data => {
+                if (data?.status === 'processing') {
+                    setIsProcessing(true);
+                    startPolling();
+                }
+            })
             .finally(() => setLoading(false));
     }, [id]);
 
@@ -33,8 +97,8 @@ export default function PatientReportViewerPage() {
         try {
             setIsRegenerating(true);
             await reportService.getAISummary(id as string, 'en', true);
-            const data = await reportService.getReportById(id as string);
-            setReport(data);
+            const data = await fetchReport();
+            if (data) setReport(data);
         } catch (err) {
             console.error('Regeneration failed:', err);
         } finally {
@@ -62,7 +126,6 @@ export default function PatientReportViewerPage() {
         </div>
     );
 
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
     const isPdf = report.fileUrl.toLowerCase().endsWith('.pdf');
     const fullFileUrl = `${apiBase}${report.fileUrl}`;
     const pathologyName = typeof report.pathologyId === 'object' ? report.pathologyId?.name : 'Diagnostic Lab';
@@ -75,23 +138,21 @@ export default function PatientReportViewerPage() {
         if (!isNaN(numVal) && b.referenceMin !== undefined && b.referenceMax !== undefined) {
             status = b.isAbnormal ? (numVal < b.referenceMin ? 'low' : 'high') : 'normal';
         }
-        return { 
-            key: b.biomarkerName, 
-            val: b.value, 
-            unit: b.unit, 
+        return {
+            key: b.biomarkerName,
+            val: b.value,
+            unit: b.unit,
             norm: { min: b.referenceMin, max: b.referenceMax, unit: b.unit },
-            status 
+            status
         };
     });
 
-    const insights = rawBiomarkers.map((b: any) => {
-        return { 
-            label: b.biomarkerName.toLowerCase(), 
-            value: Number(b.value), 
-            unit: b.unit, 
-            ranges: { min: b.referenceMin, max: b.referenceMax } 
-        };
-    });
+    const insights = rawBiomarkers.map((b: any) => ({
+        label: b.biomarkerName.toLowerCase(),
+        value: Number(b.value),
+        unit: b.unit,
+        ranges: { min: b.referenceMin, max: b.referenceMax }
+    }));
 
     const TABS = [
         { id: 'preview' as const, label: 'File Preview' },
@@ -101,6 +162,17 @@ export default function PatientReportViewerPage() {
 
     return (
         <div className="space-y-6 pb-12 animate-in fade-in duration-700">
+            {/* Processing Banner */}
+            {isProcessing && (
+                <div className="flex items-center gap-4 bg-gradient-to-r from-[#4F6F6F]/10 to-[#8FB9A8]/10 border border-[#8FB9A8]/30 rounded-2xl px-6 py-4">
+                    <div className="w-8 h-8 border-3 border-[#8FB9A8] border-t-[#4F6F6F] rounded-full animate-spin flex-shrink-0" style={{ borderWidth: 3 }} />
+                    <div>
+                        <p className="font-black text-[#4F6F6F] text-sm">🧠 AI is analyzing your report{processingDots}</p>
+                        <p className="text-xs text-[#6B7280] font-medium mt-0.5">This page will automatically update when analysis is complete. No need to refresh.</p>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -109,7 +181,12 @@ export default function PatientReportViewerPage() {
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
                         </button>
                         <h1 className="text-2xl font-black text-[#1F2933] tracking-tight">{report.reportName}</h1>
-                        {report.aiSummary && <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-widest">AI Ready</span>}
+                        {report.aiSummary && !isProcessing && (
+                            <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-widest">AI Ready</span>
+                        )}
+                        {isProcessing && (
+                            <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100 uppercase tracking-widest animate-pulse">Analyzing…</span>
+                        )}
                     </div>
                     <p className="text-[#6B7280] text-sm font-bold uppercase tracking-widest flex items-center gap-2 pl-10">
                         <span className="w-2 h-2 bg-[#8FB9A8] rounded-full" />
@@ -117,7 +194,7 @@ export default function PatientReportViewerPage() {
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
-                    <button onClick={handleRegenerate} disabled={isRegenerating}
+                    <button onClick={handleRegenerate} disabled={isRegenerating || isProcessing}
                         className="flex items-center gap-2 bg-[#F6F7F5] text-[#4F6F6F] border border-[#E2E8F0] px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-white hover:shadow-md transition-all disabled:opacity-50">
                         {isRegenerating
                             ? <div className="w-4 h-4 border-2 border-[#4F6F6F]/30 border-t-[#4F6F6F] rounded-full animate-spin" />
@@ -165,8 +242,30 @@ export default function PatientReportViewerPage() {
             {/* AI ANALYSIS TAB */}
             {activeTab === 'analysis' && (
                 <div className="space-y-6">
+                    {/* Processing placeholder */}
+                    {isProcessing && (
+                        <div className="bg-gradient-to-br from-[#F8FAF9] to-white p-8 rounded-3xl border border-dashed border-[#8FB9A8]/50">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-10 h-10 bg-[#4F6F6F]/10 rounded-2xl flex items-center justify-center">
+                                    <div className="w-5 h-5 border-2 border-[#8FB9A8] border-t-[#4F6F6F] rounded-full animate-spin" />
+                                </div>
+                                <div>
+                                    <p className="text-xs font-black text-[#4F6F6F] uppercase tracking-widest">AI Engine Running</p>
+                                    <p className="text-[10px] text-[#6B7280] font-medium mt-0.5">OCR → Biomarker Extraction → Summary Generation{processingDots}</p>
+                                </div>
+                            </div>
+                            {/* Skeleton loaders */}
+                            <div className="space-y-3 animate-pulse">
+                                <div className="h-4 bg-[#E2E8F0] rounded-full w-3/4" />
+                                <div className="h-4 bg-[#E2E8F0] rounded-full w-full" />
+                                <div className="h-4 bg-[#E2E8F0] rounded-full w-5/6" />
+                                <div className="h-4 bg-[#E2E8F0] rounded-full w-2/3" />
+                            </div>
+                        </div>
+                    )}
+
                     {/* AI Summary */}
-                    {report.aiSummary ? (
+                    {report.aiSummary && !isProcessing && (
                         <div className="bg-gradient-to-br from-[#F8FAF9] to-white p-8 rounded-3xl border border-[#E2E8F0] shadow-sm">
                             <div className="flex items-center gap-3 mb-5">
                                 <div className="w-10 h-10 bg-[#4F6F6F]/10 rounded-2xl flex items-center justify-center">
@@ -180,23 +279,15 @@ export default function PatientReportViewerPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div 
+                            <div
                                 className="text-[#4F6F6F] font-medium leading-relaxed text-base whitespace-pre-line"
                                 dangerouslySetInnerHTML={{ __html: report.aiSummary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }}
                             />
                         </div>
-                    ) : (
-                        <div className="bg-white p-8 rounded-3xl border border-dashed border-[#E2E8F0] text-center">
-                            <div className="w-14 h-14 bg-[#F6F7F5] rounded-2xl flex items-center justify-center mx-auto mb-3">
-                                <div className="w-6 h-6 border-2 border-[#8FB9A8] border-t-[#4F6F6F] rounded-full animate-spin" />
-                            </div>
-                            <p className="font-black text-[#1F2933]">AI Summary Not Yet Generated</p>
-                            <p className="text-sm text-[#6B7280] font-medium mt-1">Click Re-scan to trigger AI analysis.</p>
-                        </div>
                     )}
 
                     {/* Biomarker Table */}
-                    {biomarkerRows.length > 0 && (
+                    {biomarkerRows.length > 0 && !isProcessing && (
                         <div className="bg-white rounded-3xl border border-[#E2E8F0] shadow-sm overflow-hidden">
                             <div className="p-6 border-b border-[#F6F7F5]">
                                 <h3 className="text-lg font-black text-[#1F2933]">Biomarker Results</h3>
@@ -214,7 +305,7 @@ export default function PatientReportViewerPage() {
                                     <tbody className="divide-y divide-[#F6F7F5]">
                                         {biomarkerRows.map(({ key, val, norm, status }) => (
                                             <tr key={key} className="hover:bg-[#F6F7F5] transition-colors">
-                                                <td className="px-6 py-4 font-black text-[#1F2933] text-sm">{key}</td>
+                                                <td className="px-6 py-4 font-black text-[#1F2933] text-sm capitalize">{key}</td>
                                                 <td className="px-6 py-4">
                                                     <span className={`font-black text-lg ${status === 'normal' ? 'text-emerald-600' : status === 'low' ? 'text-amber-600' : status === 'high' ? 'text-rose-600' : 'text-[#1F2933]'}`}>
                                                         {typeof val === 'number' ? val.toLocaleString() : String(val)}
@@ -251,7 +342,7 @@ export default function PatientReportViewerPage() {
                     )}
 
                     {/* Insight Gauge Cards */}
-                    {insights.length > 0 && (
+                    {insights.length > 0 && !isProcessing && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                             {insights.map((insight, idx) => (
                                 <HealthInsightCard key={idx} label={insight.label} value={insight.value} unit={insight.unit} ranges={insight.ranges} />
@@ -260,7 +351,7 @@ export default function PatientReportViewerPage() {
                     )}
 
                     {/* Doctor Comment */}
-                    {report.doctorComment && (
+                    {report.doctorComment && !isProcessing && (
                         <div className="bg-white p-8 rounded-3xl border border-[#E2E8F0] shadow-sm">
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="w-10 h-10 bg-[#F6F7F5] rounded-full flex items-center justify-center border border-[#E2E8F0]">
@@ -274,7 +365,7 @@ export default function PatientReportViewerPage() {
                         </div>
                     )}
 
-                    {insights.length === 0 && !report.aiSummary && (
+                    {insights.length === 0 && !report.aiSummary && !isProcessing && (
                         <div className="bg-white p-12 rounded-3xl border border-dashed border-[#E2E8F0] text-center">
                             <p className="text-[#6B7280] font-bold">No biomarkers extracted yet.</p>
                             <p className="text-xs text-[#94A3B8] mt-1">Click Re-scan above to trigger AI analysis.</p>

@@ -1,66 +1,94 @@
 const axios = require('axios');
 
 /**
- * STEP 2: EMPATHETIC REWRITE ENGINE
- * Transforms clinical AI summaries into calm, doctor-like patient explanations.
+ * EMPATHETIC REWRITE ENGINE
+ * Transforms clinical lab values into a simple, friendly patient explanation
+ * with plain-language explanations and actionable lifestyle tips.
  */
 exports.rewriteAsEmpathetic = async (summary, language = 'en') => {
     try {
         const langInstructions = {
             hi: `भाषा नियम (अनिवार्य): पूरा संदेश हिंदी में लिखें।
-हर वाक्य, हर शब्द देवनागरी लिपि में होना चाहिए।
-केवल ये अंग्रेजी में रखें: टेस्ट के नाम (Hemoglobin, ALT, AST, Creatinine आदि), इकाइयाँ (mg/dL, g/dL, U/L) और संख्याएँ।
-सही उदाहरण: "मैंने देखा कि आपका **Hemoglobin** स्तर 10.5 g/dL है, जो सामान्य से थोड़ा कम है।"
-गलत: "I noticed your Hemoglobin..." — यह स्वीकार्य नहीं है।
-सभी सलाह, शुभकामनाएँ और स्पष्टीकरण हिंदी में होने चाहिए।`,
+हर वाक्य देवनागरी लिपि में होना चाहिए।
+केवल ये अंग्रेजी में रखें: टेस्ट के नाम (Cholesterol, Hemoglobin आदि), इकाइयाँ (mg/dL) और संख्याएँ।
+सलाह सरल हिंदी में दें जैसे: "तला हुआ खाना कम खाएं", "रोज 30 मिनट चलें"।`,
             mr: `भाषा नियम (अनिवार्य): संपूर्ण संदेश मराठीत लिहा।
-प्रत्येक वाक्य, प्रत्येक शब्द मराठीत असणे आवश्यक आहे।
-फक्त हे इंग्रजीत ठेवा: चाचणीची नावे (Hemoglobin, ALT, AST), एकके (mg/dL, g/dL) आणि संख्या.
-बरोबर उदाहरण: "मी पाहिले की तुमचे **Hemoglobin** 10.5 g/dL आहे, जे सामान्यपेक्षा थोडे कमी आहे."
-सर्व सल्ला, शुभेच्छा आणि स्पष्टीकरण मराठीत असावे.`,
+सरळ मराठी वापरा. फक्त चाचणीची नावे आणि एकके इंग्रजीत ठेवा.
+टिप्स मराठीत द्या: "तळलेले पदार्थ टाळा", "दररोज 30 मिनिटे चाला".`,
             te: `భాషా నియమం (తప్పనిసరి): మొత్తం సందేశాన్ని తెలుగులో రాయండి.
-ప్రతి వాక్యం, ప్రతి మాట తెలుగులో ఉండాలి.
-ఇవి మాత్రమే ఇంగ్లీషులో ఉంచండి: పరీక్ష పేర్లు (Hemoglobin, ALT, AST), యూనిట్లు (mg/dL) మరియు సంఖ్యలు.
-సరైన ఉదాహరణ: "నేను గమనించాను మీ **Hemoglobin** స్థాయి 10.5 g/dL గా ఉంది, ఇది సాధారణం కంటే కొంచెం తక్కువ."
-అన్ని సలహాలు, శుభాకాంక్షలు తెలుగులో రాయండి.`,
-            en: `Language: Write entirely in English. Use simple, conversational words a non-medical person can understand.`
+సాదా తెలుగు వాడండి. పరీక్ష పేర్లు మాత్రమే ఇంగ్లీషులో ఉంచండి.
+చిట్కాలు తెలుగులో ఇవ్వండి: "వేయించిన ఆహారం తగ్గించండి", "రోజూ 30 నిమిషాలు నడవండి".`,
+            en: `Language: Write entirely in simple English that anyone can understand. No medical jargon.`
         };
 
         const langCode = String(language).toLowerCase().substring(0, 2);
         const langRule = langInstructions[langCode] || langInstructions['en'];
-        const langInstruction = langRule;
 
-        const prompt = `You are a compassionate, senior doctor writing a message to your patient after reviewing their medical report.
-Your task is to rewrite the following AI-generated medical summary into a warm, empathetic, and easy-to-understand explanation.
+        const prompt = `You are a friendly family doctor explaining a patient's lab report in simple everyday language.
+The patient may not know any medical terms — your job is to make them understand their results clearly and tell them what they can do.
 
 STRICT RULES:
-1. Use a calm, caring, conversational tone — like a trusted doctor speaking directly to the patient.
-2. Start with "Hello," and address the patient directly using "you/your".
-3. Use reassuring phrases: "I noticed that...", "This is quite common...", "There's no need to panic...".
-4. NEVER use alarming words: critical, dangerous, severe, emergency, life-threatening.
-5. Avoid repeating raw numbers. Describe values as "slightly high", "a little low", "within a healthy range".
-6. Keep the message under 150 words — concise and clear.
-7. End with a warm, encouraging closing line.
-8. ${langInstruction}
+1. Start with "Hello," — address the patient warmly and directly.
+2. Explain what each ABNORMAL value means in plain everyday words:
+   - Example: Instead of "Your LDL is elevated", say "LDL is the bad fat in your blood — yours is a bit high, which can clog blood vessels over time."
+   - Example: Instead of "Triglycerides 210 mg/dL", say "Your blood fat level (Triglycerides) is slightly above the safe limit of 150."
+3. For NORMAL values, just say they are "healthy" or "in a good range" — don't dwell on them.
+4. Add a section called "Simple Tips For You:" with 3 specific, practical actions the patient can take TODAY based on their results. Examples:
+   - Reduce fried and oily foods
+   - Walk 30 minutes every day
+   - Eat more fruits, vegetables, and whole grains
+   - Avoid sugary drinks and sweets
+   - Get a follow-up blood test in 3 months
+5. NEVER use scary words: dangerous, severe, critical, life-threatening, emergency.
+6. Use phrases like: "There's no need to panic", "Small changes go a long way", "You're doing the right thing by checking regularly".
+7. Keep total response under 200 words — concise and clear.
+8. End with an encouraging closing line.
+9. ${langRule}
 
-Medical Summary to Rewrite:
+Lab Report Data:
 """
 ${summary}
 """
 
-Output ONLY the rewritten patient message. No JSON. No labels.`;
+Output ONLY the patient-friendly message. No JSON. No labels. No headers.`;
 
-        const response = await axios.post('http://127.0.0.1:11434/v1/chat/completions', {
-            model: 'llama3.2',
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.4,
-            max_tokens: 300
-        }, { headers: { 'Content-Type': 'application/json' }, timeout: 45000 });
+        const GROQ_API_KEY = process.env.GROQ_API_KEY;
+        const useGroq = GROQ_API_KEY && !GROQ_API_KEY.includes('your_groq');
+
+        let response;
+        if (useGroq) {
+            response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+                model: 'llama-3.1-8b-instant',
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.5,
+                max_tokens: 400
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${GROQ_API_KEY}`
+                },
+                timeout: 15000
+            });
+        } else {
+            response = await axios.post('http://127.0.0.1:11434/v1/chat/completions', {
+                model: 'llama3.2',
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.5,
+                max_tokens: 400
+            }, { headers: { 'Content-Type': 'application/json' }, timeout: 30000 });
+        }
 
         return response.data.choices[0].message.content.trim();
     } catch (err) {
         console.error('[REWRITE SERVICE ERROR]', err.message);
-        // Return a sensible fallback that doesn't alarm the patient
-        return `Hello, I've reviewed your recent medical report. The results show some values we'd like to monitor. There's no need to worry — these findings are quite common. I'd recommend scheduling a follow-up appointment to discuss next steps. Take care and stay healthy!`;
+        // Fallback: clean up the summary and add generic tips
+        const clean = summary
+            .replace(/\*\*/g, '')
+            .replace(/#{1,6}\s/g, '')
+            .replace(/^[•\-\*]\s*/gm, '')
+            .replace(/\n{2,}/g, ' ')
+            .replace(/\n/g, ' ')
+            .trim();
+        return `Hello! I've reviewed your health report. ${clean} Simple Tips For You: Eat more fruits and vegetables, reduce fried and oily foods, walk 30 minutes every day, and stay well hydrated. Please consult your doctor for personalized advice. You are taking a great step for your health — stay positive and keep it up!`;
     }
 };

@@ -13,6 +13,8 @@ router.get('/:id', authMiddleware(), reportController.getReportById);
 // Get exhaustive details for a report (OCR + AI + Biomarkers)
 router.get('/:reportId/details', authMiddleware(), reportController.getReportDetails);
 router.get('/:id/summary', authMiddleware(), reportController.getReportSummary);
+router.post('/generate-voice', authMiddleware(), reportController.generateVoice);
+router.get('/:id/status', authMiddleware(), reportController.getReportStatus);
 router.post('/grant-access', authMiddleware('patient'), reportController.grantAccess);
 
 module.exports = router;

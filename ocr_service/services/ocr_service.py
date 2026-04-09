@@ -1,10 +1,8 @@
 import os
 import logging
-import google.generativeai as genai
-from dotenv import load_dotenv
-from pdf2image import convert_from_bytes
-from PIL import Image
 import io
+from dotenv import load_dotenv
+from PIL import Image
 
 # Load environment variables
 load_dotenv()
@@ -13,96 +11,162 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Poppler path is automatically handled by the system on Mac if installed via brew
-POPPLER_PATH = None
+# Configure Gemini if API key is available
+api_key = os.getenv("GOOGLE_AI_STUDIO_API_KEY", "").strip()
+gemini_model = None
 
-# Configure Gemini
-api_key = os.getenv("GOOGLE_AI_STUDIO_API_KEY")
-if not api_key:
-    logger.error("GOOGLE_AI_STUDIO_API_KEY not found in environment")
+if api_key:
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=api_key)
+        gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+        logger.info("Gemini AI configured successfully.")
+    except Exception as e:
+        logger.warning(f"Gemini setup failed: {e}. Will use fallback OCR.")
+        api_key = None
 else:
-    genai.configure(api_key=api_key)
+    logger.warning("GOOGLE_AI_STUDIO_API_KEY not set. Using local OCR fallbacks.")
+
+
+def _extract_native_pdf_text(file_bytes):
+    """Strategy 1: Extract native text layer from digital PDFs using pdfplumber.
+    This is the BEST method for typed/digital lab reports (lipid panels, CBC, etc.)
+    because it reads the actual embedded text with 100% accuracy."""
+    try:
+        import pdfplumber
+        with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
+            pages_text = []
+            for page in pdf.pages:
+                text = page.extract_text(x_tolerance=3, y_tolerance=3) or ""
+                # Also try extracting tables explicitly for structured lab reports
+                tables = page.extract_tables()
+                if tables:
+                    for table in tables:
+                        for row in table:
+                            if row:
+                                row_text = " | ".join(cell or "" for cell in row)
+                                if any(c.isdigit() for c in row_text):  # Only add rows with numbers
+                                    text += "\n" + row_text
+                pages_text.append(text.strip())
+            
+            combined = "\n\n".join(pages_text).strip()
+            if combined:
+                logger.info(f"[Strategy 1 - pdfplumber] Extracted {len(combined)} chars from native PDF.")
+            return combined
+    except ImportError:
+        logger.warning("pdfplumber not installed. Skipping native text extraction.")
+        return ""
+    except Exception as e:
+        logger.warning(f"[Strategy 1 - pdfplumber] Failed: {e}")
+        return ""
+
+
+def _extract_with_gemini(images):
+    """Strategy 2: Use Gemini Vision for scanned PDFs or images."""
+    if not gemini_model:
+        return ""
+    try:
+        logger.info("[Strategy 2 - Gemini] Using Gemini AI for high-accuracy OCR...")
+        prompt = (
+            "You are a clinical OCR system specializing in medical lab reports.\n"
+            "Your task: Extract ALL text from this medical report image VERBATIM and COMPLETELY.\n"
+            "CRITICAL RULES:\n"
+            "1. Preserve every table row exactly — include test names, numeric values, units, and reference ranges.\n"
+            "2. For lipid panels, CBC, LFT, KFT and similar tests: capture EVERY parameter.\n"
+            "   Lipid panel parameters: Total Cholesterol, LDL Cholesterol, HDL Cholesterol, Triglycerides, VLDL, Non-HDL.\n"
+            "3. Do NOT skip rows containing numbers.\n"
+            "4. Preserve column headers and reference range columns (e.g. 'Desirable < 200 mg/dL').\n"
+            "5. Output plain text only — no markdown, no commentary."
+        )
+        consolidated_payload = []
+        for img in images:
+            img_byte_arr = io.BytesIO()
+            img.save(img_byte_arr, format='JPEG')
+            consolidated_payload.append({"mime_type": "image/jpeg", "data": img_byte_arr.getvalue()})
+
+        response = gemini_model.generate_content(consolidated_payload + [prompt])
+        text = response.text.strip()
+        logger.info(f"[Strategy 2 - Gemini] Extracted {len(text)} chars.")
+        return text
+    except Exception as e:
+        logger.warning(f"[Strategy 2 - Gemini] Failed: {e}")
+        return ""
+
+
+def _extract_with_tesseract(images):
+    """Strategy 3: Local Tesseract OCR as final fallback."""
+    try:
+        import pytesseract
+        from PIL import ImageFilter, ImageEnhance
+        logger.info("[Strategy 3 - Tesseract] Using local Tesseract OCR...")
+        text_blocks = []
+        for i, img in enumerate(images):
+            logger.info(f"  Preprocessing page {i+1}...")
+            img_gray = img.convert('L')
+            enhancer = ImageEnhance.Contrast(img_gray)
+            img_enhanced = enhancer.enhance(2.0)
+            img_sharp = img_enhanced.filter(ImageFilter.SHARPEN)
+            text = pytesseract.image_to_string(img_sharp, config='--psm 6 --oem 3')
+            text_blocks.append(text)
+        combined = "\n\n".join(text_blocks).strip()
+        logger.info(f"[Strategy 3 - Tesseract] Extracted {len(combined)} chars.")
+        return combined
+    except ImportError:
+        logger.warning("pytesseract not installed. Tesseract fallback unavailable.")
+        return ""
+    except Exception as e:
+        logger.warning(f"[Strategy 3 - Tesseract] Failed: {e}")
+        return ""
+
 
 def process_file_in_memory(file_stream, filename, enable_preprocessing=True):
     """
-    Hybrid OCR: Uses local Poppler for PDF conversion to optimize 
-    and Gemini 1.5 Flash for high-accuracy text extraction.
+    Smart multi-strategy OCR:
+    1. pdfplumber (native text layer) — best for typed/digital PDFs like lab reports
+    2. Gemini Vision — best for scanned PDFs/images (if API key set)
+    3. Tesseract — local fallback for scanned documents
     """
-    extracted_text = ""
     file_bytes = file_stream.read()
-    
     if not file_bytes:
-        logger.warning(f"Empty file stream provided for {filename}")
+        logger.warning(f"Empty file stream for {filename}")
         return ""
 
     is_pdf = filename.lower().endswith('.pdf')
-    
-    # --- STEP 1: Always try to get images (OCR data) ---
+    extracted_text = ""
+
+    # --- Strategy 1: Try native PDF text extraction first (fastest, most accurate for digital PDFs) ---
+    if is_pdf:
+        extracted_text = _extract_native_pdf_text(file_bytes)
+        if len(extracted_text) > 100:  # Only use if we got substantial text
+            logger.info(f"Strategy 1 succeeded with {len(extracted_text)} chars. Skipping image OCR.")
+            return extracted_text
+
+    # --- Strategy 2 & 3: Convert to images, then try Gemini or Tesseract ---
     try:
         images = []
         if is_pdf:
-            # Use Poppler to convert PDF to images locally
-            images = convert_from_bytes(file_bytes)
+            try:
+                from pdf2image import convert_from_bytes
+                images = convert_from_bytes(file_bytes)
+                logger.info(f"Converted PDF to {len(images)} images for visual OCR.")
+            except Exception as pdf_err:
+                logger.warning(f"pdf2image failed: {pdf_err}. Trying Tesseract directly on bytes.")
         else:
-            # It's an image already
             images = [Image.open(io.BytesIO(file_bytes))]
-            
-        logger.info(f"Loaded {len(images)} document pages for processing.")
-        
-        # --- STEP 2: Logic for AI vs Local OCR ---
-        if api_key:
-            logger.info("Using Gemini AI for high-accuracy OCR...")
-            model = genai.GenerativeModel('gemini-1.5-flash')
-            prompt = "You are a clinical OCR system. Read this medical report and extract ALL verbatim text."
-            
-            consolidated_payload = []
-            for img in images:
-                img_byte_arr = io.BytesIO()
-                img.save(img_byte_arr, format='JPEG')
-                consolidated_payload.append({"mime_type": "image/jpeg", "data": img_byte_arr.getvalue()})
-            
-            response = model.generate_content(consolidated_payload + [prompt])
-            extracted_text = response.text
-        else:
-            # FALLBACK: Use Pytesseract (Local and Free)
-            import pytesseract
-            from PIL import ImageFilter, ImageEnhance
-            logger.info("GOOGLE_API_KEY missing. Using Local Tesseract OCR Engine with preprocessing...")
-            text_blocks = []
-            for i, img in enumerate(images):
-                logger.info(f"Preprocessing and OCR-ing page {i+1} locally...")
-                # Convert to grayscale for better OCR accuracy
-                img_gray = img.convert('L')
-                # Enhance contrast to make text pop out from background
-                enhancer = ImageEnhance.Contrast(img_gray)
-                img_enhanced = enhancer.enhance(2.0)
-                # Sharpen to improve character recognition
-                img_sharp = img_enhanced.filter(ImageFilter.SHARPEN)
-                # Run Tesseract with medical document config
-                text = pytesseract.image_to_string(img_sharp, config='--psm 6 --oem 3')
-                text_blocks.append(text)
-            extracted_text = "\n\n".join(text_blocks)
-            
-            # If Tesseract returned nothing and it's a PDF, try native text layer
-            if not extracted_text.strip() and is_pdf:
-                import pdfplumber
-                try:
-                    logger.info("Tesseract empty — trying native PDF text layer via pdfplumber...")
-                    import io as _io
-                    with pdfplumber.open(_io.BytesIO(file_bytes)) as pdf:
-                        pages_text = [page.extract_text() or "" for page in pdf.pages]
-                        extracted_text = "\n\n".join(pages_text)
-                except Exception as plumber_err:
-                    logger.warning(f"pdfplumber fallback failed: {plumber_err}")
+            logger.info("Single image file loaded for OCR.")
 
-        if not extracted_text.strip():
-            # Final fallback to standard PDF text strip if OCR fails
-            logger.warning("OCR returned no text. This might be an empty scan or lacks text layer.")
-            return ""
+        if images:
+            # Prefer Gemini if configured, else Tesseract
+            extracted_text = _extract_with_gemini(images) if api_key else ""
+            if not extracted_text.strip():
+                extracted_text = _extract_with_tesseract(images)
 
-        logger.info(f"Successfully extracted {len(extracted_text)} characters.")
-        return extracted_text.strip()
-        
     except Exception as e:
-        logger.error(f"Error during Hybrid OCR processing: {str(e)}")
-        return "" # Allow backend to try native parsing if this fails too
+        logger.error(f"Image conversion/OCR failed: {e}")
+
+    if not extracted_text.strip():
+        logger.warning("All OCR strategies returned empty text. File may be corrupt or unsupported.")
+        return ""
+
+    logger.info(f"Final extracted text: {len(extracted_text)} characters.")
+    return extracted_text.strip()
