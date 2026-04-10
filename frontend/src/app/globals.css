@@ -2,20 +2,27 @@
 
 
 :root {
-  --background: #F6F7F5;
-  --primary: #4F6F6F;
+  --background: #F8FAFC;
+  --primary: #2B59FF;
   --primary-foreground: #FFFFFF;
-  --secondary: #8FB9A8;
+  --secondary: #FFEAB0;
   --secondary-foreground: #1F2933;
   --foreground: #1F2933;
   --card: #FFFFFF;
   --card-foreground: #1F2933;
-  --muted: #E5E7EB;
-  --muted-foreground: #6B7280;
-  --accent: #8FB9A8;
-  --accent-foreground: #FFFFFF;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  --accent: #FFEAB0;
+  --accent-foreground: #1F2933;
   --border: #E2E8F0;
-  --radius: 1rem;
+  --radius: 1.5rem;
+  
+  /* Sanctuary Specifics */
+  --sidebar: #1E40AF;
+  --accent-soft: #FFFBEB;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
 }
 
 body {
@@ -139,4 +146,38 @@ body {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 16px;
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  padding: 1rem 2rem;
+  border-radius: var(--radius);
+  font-weight: 800;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-accent:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(255, 234, 176, 0.4);
+}
+
+.card-premium {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.card-premium:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
 }

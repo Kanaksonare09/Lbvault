@@ -6,12 +6,21 @@ export interface User {
     name: string;
     email: string;
     role: UserRole;
+    lvId?: string;
+    profile?: {
+        phone?: string;
+        specialization?: string;
+        hospital?: string;
+        bio?: string;
+        avatar?: string;
+    };
 }
 
 export interface Patient {
     _id: string;
     name: string;
     email: string;
+    lvId?: string;
 }
 
 export interface Report {

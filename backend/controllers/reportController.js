@@ -118,8 +118,12 @@ exports.uploadReport = async (req, res) => {
             );
 
             console.log(`[SYNC PIPELINE] Fully complete for Report ${report._id}`);
+            report.status = 'ready';
+            await report.save();
         } catch (pipelineErr) {
             console.error('[SYNC PIPELINE ERROR]:', pipelineErr.message);
+            report.status = 'failed';
+            await report.save();
         }
 
         // TRIGGER NOTIFICATION: Patient notified if pathology uploads
@@ -138,7 +142,7 @@ exports.uploadReport = async (req, res) => {
             message: 'Report uploaded and analyzed!', 
             report: {
                 ...report.toObject(),
-                processingStatus: 'completed'
+                status: report.status
             } 
         });
     } catch (error) {
@@ -234,6 +238,21 @@ exports.getReportById = async (req, res) => {
         res.status(200).json(responseData);
     } catch (error) {
         console.error('Get Report By Id Error:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+exports.getReportStatus = async (req, res) => {
+    try {
+        const report = await Report.findById(req.params.id).select('status createdAt');
+        if (!report) return res.status(404).json({ message: 'Report not found' });
+        res.status(200).json({ 
+            status: report.status, 
+            createdAt: report.createdAt,
+            isProcessing: report.status === 'processing'
+        });
+    } catch (error) {
+        console.error('Get Report Status Error:', error);
         res.status(500).json({ message: 'Server Error' });
     }
 };

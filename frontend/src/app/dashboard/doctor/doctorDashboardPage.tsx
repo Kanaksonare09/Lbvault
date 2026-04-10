@@ -7,6 +7,13 @@ import { patientService } from '@/services/patientService';
 import { Patient } from '@/types';
 import api from '@/services/api';
 
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good Morning';
+  if (hour < 17) return 'Good Afternoon';
+  return 'Good Evening';
+}
+
 export default function DoctorDashboard() {
   const { user } = useAuth();
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -36,151 +43,204 @@ export default function DoctorDashboard() {
     load();
   }, []);
 
-  const StatCard = ({ icon, label, value, accent = false }: any) => (
-    <div className={`p-6 rounded-3xl border shadow-sm flex flex-col gap-3 ${accent ? 'bg-[#4F6F6F] border-[#4F6F6F] text-white' : 'bg-white border-[#E2E8F0]'}`}>
-      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${accent ? 'bg-white/20' : 'bg-[#F6F7F5]'}`}>
-        {icon}
-      </div>
-      <p className={`text-[10px] font-black uppercase tracking-widest ${accent ? 'text-[#8FB9A8]' : 'text-[#6B7280]'}`}>{label}</p>
-      <p className={`text-3xl font-black ${accent ? 'text-white' : 'text-[#1F2933]'}`}>{loading ? '—' : value}</p>
-    </div>
-  );
+  const pendingCount = recentReports.filter((r: any) => !r.doctorComment).length;
+  const doctorLastName = user?.name?.split(' ').pop() ?? 'Doctor';
+
+  const scheduleItems = [
+    { time: '09:00', title: 'General Consult', sub: 'Room 402 • David K.', accent: 'bg-[#4A6FA5]' },
+    { time: '10:30', title: 'Lab Review', sub: 'Remote • Sarah J.', accent: 'bg-[#A8C5DA]' },
+    { time: '13:00', title: 'Surgical Planning', sub: 'Main OR • Team Alpha', accent: 'bg-[#F5C842]' },
+  ];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-12">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-[#1F2933] tracking-tight">Doctor Portal</h1>
-          <p className="text-[#6B7280] mt-1 text-lg font-medium">
-            Welcome, <span className="text-[#4F6F6F] font-black">Dr. {user?.name}</span>. Review patient reports and clinical data.
-          </p>
-        </div>
-        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-4 py-2 rounded-2xl">
-          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-          <span className="text-xs font-black text-emerald-700 uppercase tracking-widest">Verified Doctor</span>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>}
-          label="Assigned Patients"
-          value={patients.length}
-        />
-        <StatCard
-          icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>}
-          label="Shared Reports"
-          value={sharedCount}
-        />
-        <StatCard
-          icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>}
-          label="Pending Reviews"
-          value={recentReports.filter((r: any) => !r.doctorComment).length}
-        />
-        <StatCard
-          icon={<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>}
-          label="Notes Written"
-          value={recentReports.filter((r: any) => r.doctorComment).length}
-          accent
-        />
-      </div>
-
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Shared Reports */}
-        <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-[#E2E8F0] overflow-hidden">
-          <div className="p-6 border-b border-[#E2E8F0] flex items-center justify-between">
-            <h2 className="text-xl font-black text-[#1F2933]">Recent Shared Reports</h2>
-            <Link href="/dashboard/doctor/shared-reports" className="text-sm font-bold text-[#4F6F6F] hover:underline">View All</Link>
+    <div className="-m-8 flex-1 bg-[#F5F7FA] min-h-screen">
+      {/* Hero Section — cream/warm gradient top area */}
+      <div className="bg-gradient-to-br from-[#FFFDF5] to-[#F0F4FF] px-10 pt-10 pb-8">
+        {/* Greeting + Actions */}
+        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 mb-10">
+          <div>
+            <h1 className="text-4xl font-extrabold text-[#1a1a2e] leading-tight">
+              {getGreeting()},{' '}
+              <span className="text-[#B8860B]">Dr. {doctorLastName}</span>
+            </h1>
+            <p className="text-gray-500 mt-2 text-base max-w-lg leading-relaxed">
+              Your sanctuary for patient care and clinical excellence. You have{' '}
+              <span className="font-semibold text-gray-700">{pendingCount} reviews pending</span> for this afternoon.
+            </p>
           </div>
-          <div className="divide-y divide-[#F6F7F5]">
-            {loading ? (
-              <div className="p-12 flex items-center justify-center">
-                <div className="w-10 h-10 border-4 border-[#8FB9A8] border-t-[#4F6F6F] rounded-full animate-spin" />
-              </div>
-            ) : recentReports.length === 0 ? (
-              <div className="p-12 text-center">
-                <p className="text-[#6B7280] font-bold">No shared reports yet.</p>
-                <p className="text-sm text-[#94A3B8] mt-1">Patients will share reports with you from their dashboard.</p>
-              </div>
-            ) : recentReports.map((report: any) => (
-              <div key={report._id} className="p-6 flex items-center gap-4 hover:bg-[#F6F7F5] transition-colors group">
-                <div className="w-12 h-12 bg-[#F6F7F5] rounded-2xl flex items-center justify-center group-hover:bg-[#8FB9A8]/20 transition-colors shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-black text-[#1F2933] truncate">{report.reportName}</p>
-                  <p className="text-xs text-[#6B7280] font-medium mt-0.5">
-                    {typeof report.patientId === 'object' ? report.patientId?.name : 'Patient'} · {report.testType}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {report.doctorComment ? (
-                    <span className="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg uppercase tracking-wider">Reviewed</span>
-                  ) : (
-                    <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-1 rounded-lg uppercase tracking-wider">Pending</span>
-                  )}
-                  <Link
-                    href={`/dashboard/doctor/shared-reports`}
-                    className="p-2 text-[#4F6F6F] bg-[#F6F7F5] rounded-xl hover:bg-[#E2E8F0] transition-colors"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                  </Link>
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center gap-3 shrink-0 mt-1">
+            <Link
+              href="/dashboard/doctor/shared-reports"
+              className="flex items-center gap-2.5 bg-white border border-gray-200 text-gray-700 font-semibold text-sm px-5 py-3 rounded-2xl shadow-sm hover:shadow-md transition-all"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/>
+              </svg>
+              Review Reports
+            </Link>
+            <button className="flex items-center gap-2.5 bg-[#F5C842] text-[#1a1a2e] font-semibold text-sm px-5 py-3 rounded-2xl shadow-sm hover:bg-[#f0c030] transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M16 11h6"/>
+              </svg>
+              Add Patient
+            </button>
           </div>
         </div>
 
-        {/* Quick Actions + Recent Patients */}
-        <div className="space-y-6">
-          {/* Quick Nav */}
-          <div className="bg-[#4F6F6F] rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full -mr-20 -mt-20" />
-            <h3 className="text-lg font-black mb-4 relative z-10">Quick Access</h3>
-            <div className="space-y-3 relative z-10">
-              <Link href="/dashboard/doctor/patients" className="flex items-center gap-3 p-3 bg-white/10 rounded-2xl hover:bg-white/20 transition-all border border-white/10">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <span className="text-sm font-black">My Patients</span>
+        {/* Stats Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {/* Total Patients */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </div>
+              <span className="text-xs font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">+12%</span>
+            </div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Total Patients</p>
+            <p className="text-3xl font-extrabold text-gray-800">{loading ? '—' : patients.length.toLocaleString()}</p>
+          </div>
+
+          {/* Shared Reports */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E3799" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/>
+                </svg>
+              </div>
+              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">New</span>
+            </div>
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Shared Reports</p>
+            <p className="text-3xl font-extrabold text-gray-800">{loading ? '—' : sharedCount}</p>
+          </div>
+
+          {/* Pending Reviews — highlighted yellow */}
+          <div className="bg-[#FFFBDC] rounded-2xl p-6 shadow-sm border border-yellow-100">
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="11" y2="15"/>
+                </svg>
+              </div>
+              <span className="text-xs font-bold text-orange-500 bg-orange-50 px-2.5 py-1 rounded-full">Urgent</span>
+            </div>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-1">Pending Reviews</p>
+            <p className="text-3xl font-extrabold text-gray-800">
+              {loading ? '—' : String(pendingCount).padStart(2, '0')}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <div className="px-10 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Recent Patient Reports — 2/3 width */}
+          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="flex items-center justify-between px-7 py-5 border-b border-gray-50">
+              <h2 className="text-lg font-bold text-gray-800">Recent Patient Reports</h2>
+              <Link href="/dashboard/doctor/shared-reports" className="text-sm font-semibold text-blue-600 hover:underline">
+                View all
               </Link>
-              <Link href="/dashboard/doctor/shared-reports" className="flex items-center gap-3 p-3 bg-white/10 rounded-2xl hover:bg-white/20 transition-all border border-white/10">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span className="text-sm font-black">Shared Reports</span>
-              </Link>
-              <Link href="/dashboard/doctor/profile" className="flex items-center gap-3 p-3 bg-white/10 rounded-2xl hover:bg-white/20 transition-all border border-white/10">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                <span className="text-sm font-black">My Profile</span>
-              </Link>
+            </div>
+
+            <div className="divide-y divide-gray-50">
+              {loading ? (
+                <div className="py-20 flex items-center justify-center">
+                  <div className="w-8 h-8 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin" />
+                </div>
+              ) : recentReports.length === 0 ? (
+                <div className="py-16 text-center">
+                  <p className="text-gray-400 font-medium text-sm">No shared reports yet.</p>
+                </div>
+              ) : recentReports.map((report: any) => {
+                const patientName = report.patientId?.name || 'Anonymous Patient';
+                const initial = patientName.charAt(0).toUpperCase();
+                const hasComment = !!report.doctorComment;
+                const date = new Date(report.uploadDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                return (
+                  <div key={report._id} className="flex items-center gap-4 px-7 py-4 hover:bg-gray-50 transition-all group">
+                    {/* Avatar */}
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center font-bold text-gray-600 text-base shrink-0">
+                      {initial}
+                    </div>
+
+                    {/* Name & Report */}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-800 text-sm">{patientName}</p>
+                      <p className="text-xs text-gray-400 mt-0.5 truncate">{report.reportName || report.testType}</p>
+                    </div>
+
+                    {/* Date + Status */}
+                    <div className="text-right shrink-0 hidden sm:block">
+                      <p className="text-xs text-gray-500 font-medium">{date}</p>
+                      {hasComment ? (
+                        <span className="inline-block mt-1 text-[10px] font-bold text-green-600 bg-green-50 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Ready</span>
+                      ) : report.status === 'processing' ? (
+                        <span className="inline-block mt-1 text-[10px] font-bold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Processing</span>
+                      ) : (
+                        <span className="inline-block mt-1 text-[10px] font-bold text-red-600 bg-red-50 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Urgent</span>
+                      )}
+                    </div>
+
+                    {/* Arrow */}
+                    <Link
+                      href="/dashboard/doctor/shared-reports"
+                      className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white transition-all ml-2 shrink-0"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Recent Patients */}
-          <div className="bg-white rounded-3xl p-6 shadow-sm border border-[#E2E8F0]">
-            <h3 className="text-lg font-black text-[#1F2933] mb-4">Recent Patients</h3>
-            <div className="space-y-3">
-              {loading ? (
-                <p className="text-sm text-[#6B7280] font-medium">Loading…</p>
-              ) : patients.slice(0, 4).map((p) => (
-                <div key={p._id} className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-[#8FB9A8]/20 rounded-full flex items-center justify-center text-[#4F6F6F] font-black text-sm shrink-0">
-                    {p.name?.[0]?.toUpperCase()}
+          {/* Right Column */}
+          <div className="space-y-6">
+            {/* Today's Schedule */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h3 className="text-base font-bold text-gray-800 mb-5">Today's Schedule</h3>
+              <div className="space-y-3">
+                {scheduleItems.map((item, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <span className="text-xs font-semibold text-gray-400 w-10 shrink-0">{item.time}</span>
+                    <div className={`flex-1 ${item.accent === 'bg-[#F5C842]' ? 'bg-[#FFFBDC]' : item.accent === 'bg-[#A8C5DA]' ? 'bg-[#F0F6FF]' : 'bg-[#F0F4FF]'} rounded-xl px-4 py-3 relative overflow-hidden`}>
+                      <div className={`absolute left-0 top-0 bottom-0 w-1 ${item.accent} rounded-l-xl`} />
+                      <p className="text-sm font-semibold text-gray-700 pl-1">{item.title}</p>
+                      <p className="text-xs text-gray-400 pl-1 mt-0.5">{item.sub}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-black text-[#1F2933] truncate">{p.name}</p>
-                    <p className="text-xs text-[#6B7280] truncate">{p.email}</p>
-                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Practice Insights */}
+            <div className="bg-[#1E3799] rounded-2xl p-6 text-white relative overflow-hidden">
+              <div className="relative z-10">
+                <h3 className="text-base font-bold mb-2">Practice Insights</h3>
+                <p className="text-sm text-blue-200 leading-relaxed mb-5">
+                  You've reached 98% patient satisfaction this month. Keep it up!
+                </p>
+                <div className="w-full bg-white/20 h-1.5 rounded-full overflow-hidden mb-5">
+                  <div className="h-full bg-[#F5C842] w-[98%] rounded-full" />
                 </div>
-              ))}
-              {!loading && patients.length === 0 && (
-                <p className="text-sm text-[#6B7280] font-medium">No patients assigned yet.</p>
-              )}
-              {patients.length > 4 && (
-                <Link href="/dashboard/doctor/patients" className="text-xs font-black text-[#4F6F6F] hover:underline block text-center pt-2">
-                  +{patients.length - 4} more patients
-                </Link>
-              )}
+                <button className="flex items-center gap-2 text-sm font-semibold text-white hover:text-[#F5C842] transition-colors">
+                  Full Analytics
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                </button>
+              </div>
+              {/* Decorative star */}
+              <div className="absolute bottom-4 right-4 opacity-20">
+                <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </div>
             </div>
           </div>
         </div>

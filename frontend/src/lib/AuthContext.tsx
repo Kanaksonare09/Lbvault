@@ -15,6 +15,8 @@ interface User {
     bloodGroup?: string;
     address?: string;
     mustChangePassword?: boolean;
+    lvId?: string;
+    profile?: any;
 }
 
 interface AuthContextType {
@@ -22,6 +24,7 @@ interface AuthContextType {
     loading: boolean;
     login: (userData: User, token: string) => void;
     logout: () => void;
+    refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -31,66 +34,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
-    useEffect(() => {
-        const verifySession = async () => {
-            const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-            
-            if (!token) {
-                console.log('[AUTH] No session token found');
-                setUser(null);
-                setLoading(false);
-                return;
+    const verifySession = async (silent = false) => {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        
+        if (!token) {
+            console.log('[AUTH] No session token found');
+            setUser(null);
+            if (!silent) setLoading(false);
+            return;
+        }
+
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            let res = null;
+            try {
+                res = await fetch(`${apiUrl}/api/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+            } catch (fetchErr) {
+                console.warn('[AUTH] Backend offline or unreachable:', fetchErr);
             }
 
-            try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-                let res = null;
-                try {
-                    res = await fetch(`${apiUrl}/api/auth/me`, {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
-                } catch (fetchErr) {
-                    console.warn('[AUTH] Backend offline or unreachable:', fetchErr);
-                    // Swallow the network throw so Next.js doesn't show the error overlay
-                }
-
-                if (!res) {
-                    // Backend connection failed handling: fall back to cached localStorage user
-                    console.warn('[AUTH] Using fallback cached user session.');
-                    const cachedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
-                    if (cachedUser) {
-                        try {
-                            const parsed = JSON.parse(cachedUser);
-                            setUser(parsed);
-                        } catch { setUser(null); }
-                    } else {
-                        setUser(null);
-                    }
-                } else if (res.ok) {
-                    const userData = await res.json();
-                    const id = userData.id || userData._id;
-                    let role = userData.role;
-                    if (role === 'admin') role = 'pathology';
-                    
-                    setUser({ ...userData, id, role });
+            if (!res) {
+                console.warn('[AUTH] Using fallback cached user session.');
+                const cachedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+                if (cachedUser) {
+                    try {
+                        const parsed = JSON.parse(cachedUser);
+                        setUser(parsed);
+                    } catch { setUser(null); }
                 } else {
-                    console.warn('[AUTH] Session verification failed, status:', res.status);
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
                     setUser(null);
                 }
-            } catch (err) {
-                console.warn('[AUTH] Session verification processing error:', err);
+            } else if (res.ok) {
+                const userData = await res.json();
+                const id = userData.id || userData._id;
+                let role = userData.role;
+                if (role === 'admin') role = 'pathology';
+                
+                const normalizedUser = { ...userData, id, role };
+                setUser(normalizedUser);
+                // Sync to localStorage
+                localStorage.setItem('user', JSON.stringify(normalizedUser));
+            } else {
+                console.warn('[AUTH] Session verification failed, status:', res.status);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
                 setUser(null);
-            } finally {
-                setLoading(false);
             }
-        };
+        } catch (err) {
+            console.warn('[AUTH] Session verification processing error:', err);
+            setUser(null);
+        } finally {
+            if (!silent) setLoading(false);
+        }
+    };
 
+    useEffect(() => {
         verifySession();
     }, []);
+
+    const refreshUser = async () => {
+        await verifySession(true);
+    };
 
     const getDashboardRoute = (role: string, mustChangePassword?: boolean) => {
         if (mustChangePassword) return '/dashboard/change-password';
@@ -122,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, refreshUser }}>
             {children}
         </AuthContext.Provider>
     );

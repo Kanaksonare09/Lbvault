@@ -39,7 +39,7 @@ function ErrorBanner({ message }: { message: string }) {
 }
 
 export default function PatientProfilePage() {
-    const { user, setUser } = useAuth() as any;
+    const { user, refreshUser } = useAuth();
 
     // Profile form state
     const [form, setForm] = useState({
@@ -80,7 +80,7 @@ export default function PatientProfilePage() {
                     preferredLanguage: p.preferredLanguage || 'en',
                 });
             })
-            .catch(() => {})
+            .catch(() => { })
             .finally(() => setProfileLoading(false));
     }, []);
 
@@ -92,7 +92,7 @@ export default function PatientProfilePage() {
         try {
             const res = await api.put('/auth/profile', form);
             setProfileMsg('Profile updated successfully! ✅');
-            if (setUser && res.data.user) setUser(res.data.user);
+            await refreshUser();
         } catch (err: any) {
             setProfileErr(err?.response?.data?.message || 'Failed to save profile.');
         } finally {
@@ -193,9 +193,8 @@ export default function PatientProfilePage() {
                             { key: 'security', icon: '🔒', label: 'Change Password' },
                         ].map(t => (
                             <button key={t.key} onClick={() => setTab(t.key as any)}
-                                className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-black transition-all text-left ${
-                                    tab === t.key ? 'bg-[#4F6F6F] text-white' : 'text-[#6B7280] hover:bg-[#F6F7F5]'
-                                }`}>
+                                className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-black transition-all text-left ${tab === t.key ? 'bg-[#4F6F6F] text-white' : 'text-[#6B7280] hover:bg-[#F6F7F5]'
+                                    }`}>
                                 <span>{t.icon}</span>
                                 <span>{t.label}</span>
                             </button>
@@ -309,9 +308,9 @@ export default function PatientProfilePage() {
                                         <button type="button" onClick={field.toggle}
                                             className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#4F6F6F] transition-colors p-1">
                                             {field.show ? (
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
                                             ) : (
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
                                             )}
                                         </button>
                                     </div>

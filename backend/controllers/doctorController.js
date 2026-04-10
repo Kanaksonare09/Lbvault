@@ -23,7 +23,8 @@ exports.getProfile = async (req, res) => {
                 degree: 'Not specified',
                 experience: '0 Years',
                 hospital: 'Not specified',
-                address: 'Not specified'
+                address: 'Not specified',
+                registrationNumber: `PENDING-${user.lvId || user._id}`
             });
         }
 
@@ -50,12 +51,14 @@ exports.getProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { name, phone, specialty, degree, experience, hospital, address } = req.body;
+        const { name, phone, specialty, degree, experience, hospital, address, registrationNumber } = req.body;
 
         // 1. Update base User info (name, phone)
         await User.findByIdAndUpdate(userId, { name, phone });
 
-        // 2. Update/Create professional profile
+        // 2. Check if DoctorProfile exists to handle required registrationNumber
+        const existingProfile = await DoctorProfile.findOne({ userId });
+        
         const profileUpdates = {
             specialty,
             degree,
@@ -64,10 +67,18 @@ exports.updateProfile = async (req, res) => {
             clinicAddress: address
         };
 
+        // If creating for the first time or updating registrationNumber
+        if (!existingProfile && !registrationNumber) {
+            const user = await User.findById(userId);
+            profileUpdates.registrationNumber = `PENDING-${user.lvId || Date.now()}`;
+        } else if (registrationNumber) {
+            profileUpdates.registrationNumber = registrationNumber;
+        }
+
         const profile = await DoctorProfile.findOneAndUpdate(
             { userId },
             { $set: profileUpdates },
-            { new: true, upsert: true }
+            { new: true, upsert: true, runValidators: true }
         );
 
         res.status(200).json({
@@ -77,6 +88,9 @@ exports.updateProfile = async (req, res) => {
         });
     } catch (error) {
         console.error('Update Doctor Profile Error:', error);
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ 
+            message: 'Failed to update profile', 
+            error: error.message 
+        });
     }
 };

@@ -53,8 +53,8 @@ export default function PatientDashboardPage() {
 
     const reportsList = Array.isArray(reports) ? reports : [];
     const latestReport = reportsList.length > 0 ? reportsList[0] : null;
-    const insightsReport = reportsList.find(r => 
-        (r.aiSummary && r.aiSummary.length > 0) || 
+    const insightsReport = reportsList.find(r =>
+        (r.aiSummary && r.aiSummary.length > 0) ||
         (r.extractedData && Object.keys(r.extractedData).length > 0)
     );
 
@@ -79,7 +79,7 @@ export default function PatientDashboardPage() {
                         onClick={() => setShowUpload(true)}
                         className="flex items-center gap-2 bg-[#4F6F6F] text-white px-5 py-2.5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#1F2933] transition-all shadow-md active:scale-95"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
                         Upload Report
                     </button>
                     <div className="bg-[#8FB9A8]/10 px-4 py-2 rounded-2xl border border-[#8FB9A8]/20">
@@ -107,8 +107,8 @@ export default function PatientDashboardPage() {
                         </div>
                         <p className="text-[#4F6F6F] font-bold mt-1 max-w-3xl leading-relaxed text-lg italic">
                             "{insightsReport.aiSummary ? (
-                                insightsReport.aiSummary.length > 200 
-                                    ? `${insightsReport.aiSummary.substring(0, 200)}...` 
+                                insightsReport.aiSummary.length > 200
+                                    ? `${insightsReport.aiSummary.substring(0, 200)}...`
                                     : insightsReport.aiSummary
                             ) : (
                                 `${t('healthSummary')} for ${insightsReport.reportName}. ${Object.entries(insightsReport.extractedData || {}).slice(0, 2).map(([k, v]) => `${t(k.toLowerCase())} is ${v}`).join('. ')}`
@@ -132,7 +132,7 @@ export default function PatientDashboardPage() {
                 {/* LV-ID Card */}
                 <div className="bg-gradient-to-br from-[#1F2933] to-[#4F6F6F] p-6 rounded-3xl shadow-lg text-white">
                     <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center mb-4 border border-white/20">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
                     </div>
                     <h3 className="text-[#8FB9A8] text-[10px] font-black uppercase tracking-[0.2em] mb-1">Your LV-ID</h3>
                     <p className="text-sm font-black tracking-widest font-mono text-white/90 break-all">

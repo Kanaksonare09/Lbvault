@@ -6,7 +6,7 @@ import { pathologyService, PathologyProfile } from '@/services/pathologyService'
 import { useAuth } from '@/lib/AuthContext';
 
 export default function PathologyProfilePage() {
-    const { user: authUser } = useAuth();
+    const { user: authUser, refreshUser } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -42,6 +42,7 @@ export default function PathologyProfilePage() {
         try {
             setSaving(true);
             await pathologyService.updateProfile(profile);
+            await refreshUser();
             setIsEditing(false);
         } catch (error) {
             console.error('Update failed:', error);

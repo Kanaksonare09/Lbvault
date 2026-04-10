@@ -20,7 +20,7 @@ export default function PatientIntelligenceDashboard() {
     const fetchDashboard = async () => {
       try {
         setLoading(true);
-        const result = await doctorService.getPatientDashboardData(patientId);
+        const result = await doctorService.getPatientDashboard(patientId);
         setData(result);
         if (result.reports?.length > 0) {
           setSelectedReportId(result.reports[0]._id);

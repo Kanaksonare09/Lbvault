@@ -58,16 +58,14 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
 
     return (
-        <div className="flex h-screen bg-[#F6F7F5] overflow-hidden">
+        <div className="flex h-screen bg-[#F5F7FA] overflow-hidden">
             <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
             <div className="flex-1 flex flex-col h-full overflow-hidden">
                 <Header />
 
-                <main className="p-8 flex-1 overflow-y-auto">
-                    <div className="max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
-                        {children}
-                    </div>
+                <main className="flex-1 overflow-y-auto p-8">
+                    {children}
                 </main>
             </div>
         </div>
