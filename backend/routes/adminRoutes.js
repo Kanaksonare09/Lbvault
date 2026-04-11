@@ -10,5 +10,5 @@ router.post('/login', adminController.adminLogin);
 router.get('/pending-users', authMiddleware('SuperAdmin'), adminController.getPendingUsers);
 router.post('/approve-user', authMiddleware('SuperAdmin'), adminController.approveUser);
 router.post('/reject-user', authMiddleware('SuperAdmin'), adminController.rejectUser);
-
+router.post('/suspend-user', authMiddleware('SuperAdmin'), adminController.suspendUser);
 module.exports = router;

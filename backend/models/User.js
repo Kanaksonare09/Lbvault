@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
     phone: { type: String, sparse: true },
     password: { type: String, required: true }, // Equivalent to passwordHash
     role: { type: String, enum: ['patient', 'pathology', 'doctor', 'admin', 'SuperAdmin'], required: true },
-    status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED'], default: 'APPROVED' },
+    status: { type: String, enum: ['PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED'], default: 'APPROVED' },
     name: { type: String, required: true },
     avatarUrl: { type: String, default: '' },
     isActive: { type: Boolean, default: true },

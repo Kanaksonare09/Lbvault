@@ -129,3 +129,33 @@ exports.rejectUser = async (req, res) => {
         res.status(500).json({ message: 'Server Error' });
     }
 };
+
+exports.suspendUser = async (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Only doctors and labs can be suspended (not SuperAdmin)
+        if (user.role === 'SuperAdmin') {
+            return res.status(400).json({ message: 'Cannot suspend a SuperAdmin' });
+        }
+
+        user.status = 'SUSPENDED';
+        await user.save();
+
+        console.log(`[ADMIN ACTION] User ${userId} SUSPENDED by Admin ${req.user.id} at ${new Date().toISOString()}`);
+
+        res.status(200).json({
+            success: true,
+            message: 'User suspended successfully',
+            user: { id: user._id, status: user.status }
+        });
+    } catch (error) {
+        console.error('Suspend User Error:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};

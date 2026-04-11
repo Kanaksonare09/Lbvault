@@ -23,7 +23,7 @@ exports.signup = async (req, res) => {
         // Set status based on role
         const { affiliatedLabId } = req.body;
         let status = 'APPROVED';
-        if ((role === 'doctor' || role === 'pathology') && !affiliatedLabId) {
+        if (role === 'doctor' || role === 'pathology') {
             status = 'PENDING';
         }
 
