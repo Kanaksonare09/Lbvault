@@ -63,34 +63,29 @@ export default function PatientHealthInsightsPage() {
     // Parser for AI text
     const parseSummary = (text: string) => {
         if (!text) return { intro: '', recommendations: [] };
-        // Clean out markdown noise
-        let cleanText = text.replace(/###/g, '').replace(/\*\*/g, '');
         
-        let intro = cleanText;
-        let recommendations: string[] = [];
-
-        // Try to split on common headers that signify actions/recommendations
-        const splitKeywords = ['Recommendation:', 'Recommendations:', 'Actionable Steps:', 'Next Steps:', '---'];
+        // Split on Recommendations header if present, otherwise treat all as intro
+        const splitKeywords = ['Simple Tips For You:', 'Recommendations:', 'Actionable Steps:', '---'];
         let splitIndex = -1;
+        let foundKeyword = '';
         
         for (const kw of splitKeywords) {
-            const idx = cleanText.indexOf(kw);
+            const idx = text.indexOf(kw);
             if (idx !== -1) {
                 splitIndex = idx;
+                foundKeyword = kw;
                 break;
             }
         }
 
         if (splitIndex !== -1) {
-            intro = cleanText.substring(0, splitIndex).trim();
-            const recRaw = cleanText.substring(splitIndex).replace(/^(Recommendation[s]?[:]*|Actionable Steps[:]*|Next Steps[:]*|---)/i, '').trim();
-            recommendations = recRaw.split(/[•\n-]/).map(r => r.trim()).filter(r => r.length > 5);
-        } else {
-            // Give a soft fallback if no keywords found
-            recommendations = ["Consider sharing these results with your doctor.", "Maintain a balanced diet and stay hydrated."];
+            const intro = text.substring(0, splitIndex).trim();
+            const recRaw = text.substring(splitIndex + foundKeyword.length).trim();
+            const recommendations = recRaw.split('\n').map(r => r.replace(/^[•\-*]\s*/, '').trim()).filter(r => r.length > 3);
+            return { intro: intro.replace(/\*\*/g, ''), recommendations };
         }
 
-        return { intro, recommendations };
+        return { intro: text.replace(/\*\*/g, ''), recommendations: [] };
     };
 
     if (loading) {
@@ -139,8 +134,8 @@ export default function PatientHealthInsightsPage() {
             {/* Header & Report Selector Pill Navbar */}
             <div className="space-y-6">
                 <div>
-                    <h1 className="text-4xl font-black text-[#1F2933] tracking-tight">{t('healthInsights')}</h1>
-                    <p className="text-[#6B7280] mt-2 font-medium text-lg">Your lab results translated into plain language, simplified for you.</p>
+                    <h1 className="text-3xl font-black text-[#1F2933] tracking-tight">{t('healthInsights')}</h1>
+                    <p className="text-[#6B7280] mt-1 font-medium text-base">Your lab results translated into plain language, simplified for you.</p>
                 </div>
 
                 <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
@@ -172,11 +167,11 @@ export default function PatientHealthInsightsPage() {
                         
                         <div className="relative z-10 flex flex-col md:flex-row md:items-start justify-between gap-8 mb-8">
                             <div>
-                                <div className="flex items-center space-x-3 text-[#8FB9A8] font-black uppercase tracking-widest text-xs mb-3">
-                                    <svg className="animate-pulse" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                <div className="flex items-center space-x-3 text-[#8FB9A8] font-black uppercase tracking-widest text-[10px] mb-2">
+                                    <svg className="animate-pulse" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                                     <span>AI Analysis</span>
                                 </div>
-                                <h2 className="text-3xl font-black text-[#1F2933]">{report.reportName}</h2>
+                                <h2 className="text-2xl font-black text-[#1F2933]">{report.reportName}</h2>
                             </div>
                             
                             <div className="flex flex-col items-end shrink-0 gap-3">
@@ -190,10 +185,35 @@ export default function PatientHealthInsightsPage() {
                             </div>
                         </div>
 
-                        <div className="relative z-10 prose prose-lg prose-[#1F2933]">
-                            <p className="text-xl leading-relaxed font-medium text-[#4F6F6F]">
-                                {intro ? intro : "Your report data has been mapped successfully. The AI observation model is currently optimizing for your language."}
-                            </p>
+                        <div className="relative z-10 space-y-4">
+                            {intro ? (
+                                <div className="space-y-4">
+                                    {intro.split('\n').filter(line => line.trim().length > 0).map((line, i) => {
+                                        const isPoint = line.trim().startsWith('•') || line.trim().startsWith('-') || line.trim().startsWith('*');
+                                        const cleanLine = line.replace(/^[•\-*]\s*/, '').trim();
+                                        
+                                        if (isPoint) {
+                                            return (
+                                                <div key={i} className="flex items-start gap-4 animate-in slide-in-from-left duration-500" style={{ animationDelay: `${i * 100}ms` }}>
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-[#8FB9A8] mt-2.5 shrink-0" />
+                                                    <p className="text-lg leading-relaxed font-medium text-[#4F6F6F]">
+                                                        {cleanLine}
+                                                    </p>
+                                                </div>
+                                            );
+                                        }
+                                        return (
+                                            <p key={i} className="text-lg leading-relaxed font-medium text-[#4F6F6F]">
+                                                {line}
+                                            </p>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <p className="text-lg leading-relaxed font-medium text-[#4F6F6F]">
+                                    Your report data has been mapped successfully. The AI observation model is currently optimizing for your language.
+                                </p>
+                            )}
                         </div>
                     </div>
 
@@ -218,11 +238,11 @@ export default function PatientHealthInsightsPage() {
                                             <div key={idx} className={`p-4 rounded-2xl transition-colors ${bgPulse} cursor-pointer group`}>
                                                 <div className="flex justify-between items-end mb-3">
                                                     <div>
-                                                        <h4 className="font-bold text-[#1F2933] text-lg capitalize">{b.biomarkerName}</h4>
+                                                        <h4 className="font-bold text-[#1F2933] text-base capitalize">{b.biomarkerName}</h4>
                                                     </div>
                                                     <div className="text-right">
-                                                        <span className={`text-2xl font-black ${b.isAbnormal ? 'text-rose-600' : 'text-[#1F2933]'}`}>{b.value}</span>
-                                                        <span className="text-[#6B7280] font-bold text-sm ml-1">{b.unit}</span>
+                                                        <span className={`text-xl font-black ${b.isAbnormal ? 'text-rose-600' : 'text-[#1F2933]'}`}>{b.value}</span>
+                                                        <span className="text-[#6B7280] font-bold text-xs ml-1">{b.unit}</span>
                                                     </div>
                                                 </div>
 

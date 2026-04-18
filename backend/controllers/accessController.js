@@ -73,11 +73,14 @@ exports.getAccessList = async (req, res) => {
         const patient = await User.findById(req.user.id).populate('doctorAccess', 'name email role');
         if (!patient) return res.status(404).json({ message: 'Patient not found' });
 
-        // Format response for the frontend
+        // Format response for the frontend (Expected: { doctorId: { _id, name }, ... })
         const formattedList = patient.doctorAccess.map(doc => ({
-            id: doc._id,
-            name: doc.name,
-            specialty: 'Doctor', // Default placeholder
+            _id: doc._id,
+            doctorId: {
+                _id: doc._id,
+                name: doc.name,
+                email: doc.email
+            },
             status: 'active'
         }));
         

@@ -24,10 +24,15 @@ export default function PatientReportCard({ report: initialReport }: PatientRepo
         if (!report.extractedData) return 'normal';
         
         let isAbnormal = false;
-        Object.entries(report.extractedData).forEach(([key, value]) => {
-            const config = getMetricConfig(key);
-            if (config && (typeof value === 'number')) {
-                if (value < config.min || value > config.max) isAbnormal = true;
+        Object.values(report.extractedData).forEach((data: any) => {
+            // Check if it's a rich object from our recent backend update
+            if (data && typeof data === 'object' && data.isAbnormal) {
+                isAbnormal = true;
+            } 
+            // Fallback for legacy simple numeric values
+            else if (typeof data === 'number') {
+                const config = getMetricConfig(Object.keys(report.extractedData!).find(key => report.extractedData![key] === data) || '');
+                if (config && (data < config.min || data > config.max)) isAbnormal = true;
             }
         });
 

@@ -89,43 +89,7 @@ export default function PatientDashboardPage() {
                 </div>
             </div>
 
-            {/* Quick Health Insight - Moved to Top */}
-            {insightsReport && (
-                <div className="bg-gradient-to-br from-[#8FB9A8]/20 to-[#4F6F6F]/5 border border-[#8FB9A8]/30 p-8 rounded-[40px] flex flex-col md:flex-row items-center gap-8 shadow-sm">
-                    <div className="relative">
-                        <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-md border border-[#8FB9A8]/20 shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
-                        </div>
-                        <div className="absolute -top-2 -right-2 w-8 h-8 bg-[#4F6F6F] rounded-full flex items-center justify-center border-4 border-white">
-                            <span className="text-white text-[10px] font-black">AI</span>
-                        </div>
-                    </div>
-                    <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="bg-[#4F6F6F] text-white text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider">Dynamic Summary</span>
-                            <h3 className="text-xl font-black text-[#1F2933]">{t('quickHealthInsight')}</h3>
-                        </div>
-                        <p className="text-[#4F6F6F] font-bold mt-1 max-w-3xl leading-relaxed text-lg italic">
-                            "{insightsReport.aiSummary ? (
-                                insightsReport.aiSummary.length > 200
-                                    ? `${insightsReport.aiSummary.substring(0, 200)}...`
-                                    : insightsReport.aiSummary
-                            ) : (
-                                `${t('healthSummary')} for ${insightsReport.reportName}. ${Object.entries(insightsReport.extractedData || {}).slice(0, 2).map(([k, v]) => `${t(k.toLowerCase())} is ${v}`).join('. ')}`
-                            )}"
-                        </p>
-                        <div className="flex gap-4 mt-6">
-                            <button
-                                onClick={() => router.replace('/dashboard/patient/insights')}
-                                className="bg-[#4F6F6F] text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#1F2933] transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center gap-2"
-                            >
-                                {t('viewDetailedAnalysis')}
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+
 
             {/* Overview Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

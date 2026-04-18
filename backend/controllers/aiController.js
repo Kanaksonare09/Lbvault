@@ -65,19 +65,39 @@ Answer ONLY based on the context provided. If something is not in the context, s
 
         console.log(`[Ask AI] Question: "${question}" | reportId: ${reportId || 'none'}`);
 
-        const response = await axios.post('http://127.0.0.1:11434/v1/chat/completions', {
-            model: 'llama3.2',
-            messages,
-            temperature: 0.4,
-            max_tokens: 400,
-            stream: false
-        }, {
-            headers: { 'Content-Type': 'application/json' },
-            timeout: 60000
-        });
+        const GROQ_API_KEY = process.env.GROQ_API_KEY;
+        let answer = '';
 
-        const answer = response.data.choices?.[0]?.message?.content?.trim()
-            || 'I could not generate an answer. Please try again.';
+        if (GROQ_API_KEY) {
+            // HIGH-PERFORMANCE CLOUD AI (Groq)
+            const response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+                model: 'llama-3.1-8b-instant',
+                messages,
+                temperature: 0.4,
+                max_tokens: 500
+            }, {
+                headers: { 
+                    'Authorization': `Bearer ${GROQ_API_KEY}`,
+                    'Content-Type': 'application/json' 
+                },
+                timeout: 20000 
+            });
+            answer = response.data.choices?.[0]?.message?.content?.trim();
+        } else {
+            // LOCAL FALLBACK (Ollama)
+            const response = await axios.post('http://127.0.0.1:11434/v1/chat/completions', {
+                model: 'llama3.2',
+                messages,
+                temperature: 0.4,
+                max_tokens: 400
+            }, {
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 60000
+            });
+            answer = response.data.choices?.[0]?.message?.content?.trim();
+        }
+
+        if (!answer) answer = 'I could not generate an answer. Please try again.';
 
         console.log(`[Ask AI] Answer generated (${answer.length} chars)`);
         res.status(200).json({ answer });
