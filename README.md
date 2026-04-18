@@ -35,11 +35,17 @@
 
 ### 🧠 Universal AI Intelligence Engine
 - **Ultra-Fast Cloud Integration** — Seamlessly integrates with Groq for ~1-2s cloud inference using `llama-3.1-8b-instant`, with automatic fallback to local Ollama (`llama3.2`).
+- **Structured Clinical Insights** — Replaces dense diagnostic paragraphs with actionable, bulleted findings, significantly improving scannability for both patients and clinicians.
 - **Asynchronous AI Pipeline** — File uploads respond instantly (~1s), while extensive OCR and AI inferences run in the background. Features real-time frontend status polling.
 - **Schema-Free Analysis** — Dynamically extracts any biomarker from any report type.
 - **Longitudinal Intelligence** — Detects "Improving" vs. "Deteriorating" health markers by analyzing proximity to normal ranges across time.
 - **Single-Pass Processing** — Biomarker extraction + clinical summarization in one LLM call.
 - **Anti-Hallucination** — AI grounded strictly in medical data with non-diagnostic safeguards.
+
+### 🔍 Role-Aware Global Search
+- **Doctor Search** — Real-time lookup of patients by Name, LV-ID, or Medical Condition with instant dashboard navigation.
+- **Patient Search** — Intelligent filtering of lab results by test type, report name, or biomarker keywords.
+- **High-Speed UI** — Professional results dropdown with loading indicators and "click-outside" auto-closing.
 
 ### 🔬 Hybrid OCR Pipeline (4-Tier)
 1. **Gemini 1.5 Flash** — Cloud OCR for scanned and handwritten reports *(requires API key)*
@@ -58,33 +64,23 @@ AI Summary → Empathy Rewrite (Llama 3.2) → Script Generator → Google TTS �
 - Medical terms (Hemoglobin, ALT, mg/dL) always kept in English.
 
 ### 🗣️ Ask AI — Report Chat
-- Ask questions about your report in natural language
-- AI answers are grounded in your actual biomarker data
-- Conversation history maintained within session
-- Quick question shortcuts on first open
+- **Low-Latency Chat** — Powered by Groq cloud acceleration for millisecond-speed medical Q&A.
+- Ask questions about your report in natural language.
+- AI answers are grounded in your actual biomarker data.
+- Conversation history maintained within session.
+- Quick question shortcuts on first open.
 
 ### 📊 Health Analytics Dashboard
-- Real biomarker trend charts (area/line) from actual DB data
-- Risk distribution pie chart (Normal / Mild / Moderate / Critical)
-- Full biomarker snapshot table with trend arrows (↑↓→), severity, and AI interpretation
-- Report upload timeline with abnormal count per report
-
-### 👤 Profile Settings
-- Edit name, phone, date of birth, gender, blood group, address
-- Emergency contact information
-- Preferred language selection (English / Hindi / Marathi / Telugu)
-- Change password (with current password verification)
+- Real biomarker trend charts (area/line) from actual DB data.
+- Risk distribution pie chart (Normal / Mild / Moderate / Critical).
+- Full biomarker snapshot table with trend arrows (↑↓→), severity, and AI interpretation.
+- Report upload timeline with abnormal count per report.
 
 ### 👥 Role-Based Command Centers
-- **Patient** — Upload reports, view AI summaries, listen to voice, ask AI, view analytics
-- **Doctor** — Access high-fidelity intelligence dashboards with longitudinal trends and clinical comparison tables
-- **Pathology Lab** — **Command Center** with real-time Recharts analytics (volume trends, diagnostic mix) and private practitioner management
-- **SuperAdmin** — Secure lifecycle management for healthcare provider verification (Approve/Reject flow) with real-time session invalidation
-
-### 🛡️ Secure Lab Infrastructure
-- **Private Provider Directory** — Labs manage their own "Affiliated Doctors," ensuring data isolation and privacy.
-- **Dynamic Analytics (Recharts)** — Real-time MongoDB aggregation pipelines for daily volume and test distribution mapping.
-- **Provider Status Control** — Doctors and Labs are restricted to a `PENDING` state until verified by a SuperAdmin.
+- **Patient** — Upload reports, view structured AI insights, listen to voice, ask AI, view global report search.
+- **Doctor** — Access high-fidelity intelligence dashboards with longitudinal trends, clinical comparison tables, and global patient search.
+- **Pathology Lab** — **Command Center** with real-time Recharts analytics (volume trends, diagnostic mix) and private practitioner management.
+- **SuperAdmin** — Secure lifecycle management for healthcare provider verification (Approve/Reject flow) with real-time session invalidation.
 
 ### 🔒 Security & Privacy
 - All AI runs **100% locally** (Ollama + Tesseract + Google TTS)
