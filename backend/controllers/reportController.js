@@ -47,86 +47,92 @@ exports.uploadReport = async (req, res) => {
 
         await report.save();
 
-        // 2. Synchronous AI Pipeline (Wait for results so user sees them in one click)
-        try {
-            const path = require('path');
-            const fs = require('fs');
-            const absoluteFilePath = path.join(__dirname, '..', report.fileUrl.replace(/^\//, ''));
-            console.log(`[SYNC PIPELINE] Pushing document to AI Engine: ${absoluteFilePath}`);
+        // 2. Respond IMMEDIATELY — don't make user wait for OCR + AI
+        res.status(201).json({ 
+            message: 'Report uploaded! Analysis is running in the background.', 
+            report: {
+                ...report.toObject(),
+                status: 'processing'
+            } 
+        });
 
-            let geminiResult;
-            if (fs.existsSync(absoluteFilePath)) {
-                geminiResult = await aiService.extractBiomarkersFromDocument(absoluteFilePath);
-            }
+        // 3. Run Full AI Pipeline in background (fire-and-forget)
+        setImmediate(async () => {
+            try {
+                const path = require('path');
+                const fs = require('fs');
+                const absoluteFilePath = path.join(__dirname, '..', report.fileUrl.replace(/^\//, ''));
+                console.log(`[BG PIPELINE] Pushing document to AI Engine: ${absoluteFilePath}`);
 
-            if (!geminiResult) throw new Error("Document analysis failed.");
-
-            const extractedText = geminiResult.rawOcrText || "Raw extracted text for " + reportName;
-            const aiBiomarkers = geminiResult.biomarkers || [];
-            const clinicalSummary = geminiResult.summary || "No summary generated.";
-
-            // Save extracted Biomarkers to NoSQL Relation
-            for (const b of aiBiomarkers) {
-                try {
-                    const val = Number(b.value) || 0;
-                    
-                    // Normalize severity to valid enum values
-                    const raw = (b.severity || 'Normal').toLowerCase();
-                    let severity = 'Normal';
-                    if (raw.includes('critical') || raw.includes('danger')) severity = 'Critical';
-                    else if (raw.includes('moderate') || raw.includes('elevated') || raw.includes('high') || raw.includes('low')) severity = 'Moderate';
-                    else if (raw.includes('mild') || raw.includes('slight') || raw.includes('border')) severity = 'Mild';
-
-                    // TREND ANALYSIS
-                    const lastResult = await ReportBiomarker.findOne({ 
-                        patientId: patient._id, 
-                        biomarkerName: String(b.name || 'Unknown').toLowerCase() 
-                    }).sort({ testDate: -1 });
-
-                    let trend = 'Stable';
-                    if (lastResult) {
-                        if (val > lastResult.value) trend = 'Increasing';
-                        else if (val < lastResult.value) trend = 'Decreasing';
-                    }
-
-                    await ReportBiomarker.create({
-                        reportId: report._id,
-                        patientId: patient._id,
-                        biomarkerName: String(b.name || 'Unknown').toLowerCase(),
-                        value: val,
-                        unit: String(b.unit || ''),
-                        referenceMin: b.min || 0,
-                        referenceMax: b.max || 0,
-                        isAbnormal: severity !== 'Normal',
-                        severity,
-                        interpretation: b.interpretation || `Value detected as ${trend.toLowerCase()}.`,
-                        confidence: b.confidence || 0.9,
-                        source: 'ai_extracted',
-                        testDate: report.createdAt
-                    });
-                } catch (bioErr) {
-                    console.warn(`[SYNC PIPELINE] Skipping biomarker "${b.name}":`, bioErr.message);
+                let geminiResult;
+                if (fs.existsSync(absoluteFilePath)) {
+                    geminiResult = await aiService.extractBiomarkersFromDocument(absoluteFilePath);
                 }
+
+                if (!geminiResult) throw new Error("Document analysis failed.");
+
+                const extractedText = geminiResult.rawOcrText || "Raw extracted text for " + reportName;
+                const aiBiomarkers = geminiResult.biomarkers || [];
+                const clinicalSummary = geminiResult.summary || "No summary generated.";
+
+                for (const b of aiBiomarkers) {
+                    try {
+                        const val = Number(b.value) || 0;
+                        const raw = (b.severity || 'Normal').toLowerCase();
+                        let severity = 'Normal';
+                        if (raw.includes('critical') || raw.includes('danger')) severity = 'Critical';
+                        else if (raw.includes('moderate') || raw.includes('elevated') || raw.includes('high') || raw.includes('low')) severity = 'Moderate';
+                        else if (raw.includes('mild') || raw.includes('slight') || raw.includes('border')) severity = 'Mild';
+
+                        const lastResult = await ReportBiomarker.findOne({ 
+                            patientId: patient._id, 
+                            biomarkerName: String(b.name || 'Unknown').toLowerCase() 
+                        }).sort({ testDate: -1 });
+
+                        let trend = 'Stable';
+                        if (lastResult) {
+                            if (val > lastResult.value) trend = 'Increasing';
+                            else if (val < lastResult.value) trend = 'Decreasing';
+                        }
+
+                        await ReportBiomarker.create({
+                            reportId: report._id,
+                            patientId: patient._id,
+                            biomarkerName: String(b.name || 'Unknown').toLowerCase(),
+                            value: val,
+                            unit: String(b.unit || ''),
+                            referenceMin: b.min || 0,
+                            referenceMax: b.max || 0,
+                            isAbnormal: severity !== 'Normal',
+                            severity,
+                            interpretation: b.interpretation || `Value detected as ${trend.toLowerCase()}.`,
+                            confidence: b.confidence || 0.9,
+                            source: 'ai_extracted',
+                            testDate: report.createdAt
+                        });
+                    } catch (bioErr) {
+                        console.warn(`[BG PIPELINE] Skipping biomarker "${b.name}":`, bioErr.message);
+                    }
+                }
+
+                console.log(`[BG PIPELINE] Saving Clinical Observation...`);
+                await ReportAiAnalysis.findOneAndUpdate(
+                    { reportId: report._id },
+                    { ocrText: extractedText, summaryEn: clinicalSummary },
+                    { upsert: true, new: true }
+                );
+
+                report.status = 'ready';
+                await report.save();
+                console.log(`[BG PIPELINE] ✅ Fully complete for Report ${report._id}`);
+            } catch (pipelineErr) {
+                console.error('[BG PIPELINE ERROR]:', pipelineErr.message);
+                report.status = 'failed';
+                await report.save();
             }
+        });
 
-            console.log(`[SYNC PIPELINE] Saving Clinical Observation...`);
-            
-            await ReportAiAnalysis.findOneAndUpdate(
-                { reportId: report._id },
-                { ocrText: extractedText, summaryEn: clinicalSummary },
-                { upsert: true, new: true }
-            );
-
-            console.log(`[SYNC PIPELINE] Fully complete for Report ${report._id}`);
-            report.status = 'ready';
-            await report.save();
-        } catch (pipelineErr) {
-            console.error('[SYNC PIPELINE ERROR]:', pipelineErr.message);
-            report.status = 'failed';
-            await report.save();
-        }
-
-        // TRIGGER NOTIFICATION: Patient notified if pathology uploads
+        // TRIGGER NOTIFICATION
         if (req.user.role === 'pathology') {
             await createNotification({
                 recipient: patient._id,
@@ -136,15 +142,6 @@ exports.uploadReport = async (req, res) => {
                 link: `/dashboard/patient/insights?id=${report._id}`
             });
         }
-
-        // 3. Respond only AFTER analysis is ready
-        res.status(201).json({ 
-            message: 'Report uploaded and analyzed!', 
-            report: {
-                ...report.toObject(),
-                status: report.status
-            } 
-        });
     } catch (error) {
         console.error('Upload Error:', error);
         if (!res.headersSent) {
@@ -171,9 +168,44 @@ exports.getReports = async (req, res) => {
         const reports = await Report.find(query)
             .sort({ reportDate: -1 })
             .populate('patientId', 'name lvId email')
-            .populate('pathologyId', 'name lvId'); // name refers to labName via users table
+            .populate('pathologyId', 'name lvId')
+            .lean();
             
-        res.status(200).json(reports);
+        // Batch fetch AI Summaries and Biomarkers
+        const reportIds = reports.map(r => r._id);
+        const [analyses, biomarkers] = await Promise.all([
+            ReportAiAnalysis.find({ reportId: { $in: reportIds } }).select('reportId summaryEn').lean(),
+            ReportBiomarker.find({ reportId: { $in: reportIds } }).lean()
+        ]);
+
+        const analysisMap = analyses.reduce((acc, a) => ({ ...acc, [a.reportId.toString()]: a.summaryEn }), {});
+        const biomarkerMap = biomarkers.reduce((acc, b) => {
+            const rId = b.reportId.toString();
+            if (!acc[rId]) acc[rId] = {};
+            acc[rId][b.biomarkerName] = {
+                value: b.value,
+                unit: b.unit || '',
+                min: b.referenceMin,
+                max: b.referenceMax,
+                isAbnormal: b.isAbnormal,
+                severity: b.severity
+            };
+            return acc;
+        }, {});
+
+        const reportsWithData = reports.map(r => {
+            const lastNote = r.doctorNotes && r.doctorNotes.length > 0 
+                ? r.doctorNotes[r.doctorNotes.length - 1].note 
+                : "";
+            return {
+                ...r,
+                doctorComment: lastNote,
+                aiSummary: analysisMap[r._id.toString()] || null,
+                extractedData: biomarkerMap[r._id.toString()] || {}
+            };
+        });
+
+        res.status(200).json(reportsWithData);
     } catch (error) {
         console.error('Get Reports Error:', error);
         res.status(500).json({ message: 'Server Error' });
@@ -197,9 +229,46 @@ exports.getSharedReportsForDoctor = async (req, res) => {
         const reports = await Report.find({ patientId: { $in: patientIds }, isDeleted: false })
             .sort({ reportDate: -1 })
             .populate('patientId', 'name lvId email')
-            .populate('pathologyId', 'name lvId');
+            .populate('pathologyId', 'name lvId')
+            .lean();
 
-        res.status(200).json(reports);
+        // 3. Batch fetch AI Summaries and Biomarkers
+        const reportIds = reports.map(r => r._id);
+        const [analyses, biomarkers] = await Promise.all([
+            ReportAiAnalysis.find({ reportId: { $in: reportIds } }).select('reportId summaryEn').lean(),
+            ReportBiomarker.find({ reportId: { $in: reportIds } }).lean()
+        ]);
+
+        const analysisMap = analyses.reduce((acc, a) => ({ ...acc, [a.reportId.toString()]: a.summaryEn }), {});
+        
+        // Group biomarkers by reportId as an object for the frontend
+        const biomarkerMap = biomarkers.reduce((acc, b) => {
+            const rId = b.reportId.toString();
+            if (!acc[rId]) acc[rId] = {};
+            acc[rId][b.biomarkerName] = {
+                value: b.value,
+                unit: b.unit || '',
+                min: b.referenceMin,
+                max: b.referenceMax,
+                isAbnormal: b.isAbnormal,
+                severity: b.severity
+            };
+            return acc;
+        }, {});
+
+        const reportsWithData = reports.map(r => {
+            const lastNote = r.doctorNotes && r.doctorNotes.length > 0 
+                ? r.doctorNotes[r.doctorNotes.length - 1].note 
+                : "";
+            return {
+                ...r,
+                doctorComment: lastNote,
+                aiSummary: analysisMap[r._id.toString()] || null,
+                extractedData: biomarkerMap[r._id.toString()] || {}
+            };
+        });
+
+        res.status(200).json(reportsWithData);
     } catch (error) {
         console.error('Get Shared Reports Error:', error);
         res.status(500).json({ message: 'Server Error' });
@@ -308,23 +377,53 @@ exports.getReportSummary = async (req, res) => {
 
 exports.generateVoice = async (req, res) => {
     try {
-        const { reportId, language, text } = req.body;
+        const { reportId, patientId, language, text } = req.body;
+        const isDoctor = req.user.role === 'doctor';
         
-        if (reportId) {
-            const report = await Report.findById(reportId).populate('patientId', 'doctorAccess');
-            if (!report) return res.status(404).json({ message: 'Report not found' });
-
-            // DOCTOR ACCESS CONTROL Check
-            if (req.user.role === 'doctor') {
-                const patient = report.patientId;
-                if (!patient || !patient.doctorAccess || !patient.doctorAccess.some(id => id.toString() === req.user.id)) {
-                    return res.status(403).json({ message: 'Access Denied: You are not authorized to generate voice for this report.' });
-                }
-            }
-        }
+        const langCode = language?.toLowerCase().includes('hi') ? 'hi'
+            : language?.toLowerCase().includes('mr') ? 'mr'
+            : language?.toLowerCase().includes('te') ? 'te' : 'en';
 
         const rewriteService = require('../services/rewriteService');
         const scriptService = require('../services/scriptService');
+
+        // ─── MODE 1: LONGITUDINAL PATIENT SUMMARY (DOCTOR ONLY) ───────────────
+        if (patientId && !reportId && isDoctor) {
+            const patient = await User.findOne({ _id: patientId, role: 'patient' });
+            if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+            if (!patient.doctorAccess || !patient.doctorAccess.some(id => id.toString() === req.user.id)) {
+                return res.status(403).json({ message: 'Access Denied: Permission required for longitudinal analysis.' });
+            }
+
+            // Fetch trends
+            const biomarkers = await ReportBiomarker.find({ patientId: patient._id }).sort({ testDate: 1 });
+            const trends = biomarkers.reduce((acc, curr) => {
+                const name = curr.biomarkerName;
+                if (!acc[name]) acc[name] = { parameter: name, values: [] };
+                acc[name].values.push({ value: curr.value, unit: curr.unit, isAbnormal: curr.isAbnormal });
+                return acc;
+            }, {});
+
+            const voiceScript = await rewriteService.rewriteAsLongitudinal(patient.name, Object.values(trends), langCode);
+            const audioUrl = await ttsService.generateAndStoreAudio(voiceScript, langCode);
+
+            return res.status(200).json({ audioUrl, voiceScript, language: langCode, mode: 'longitudinal' });
+        }
+
+        // ─── MODE 2: SINGLE REPORT SUMMARY (DOCTOR OR PATIENT) ────────────────
+        let report = null;
+        if (reportId) {
+            report = await Report.findById(reportId).populate('patientId', 'name doctorAccess');
+            if (!report) return res.status(404).json({ message: 'Report not found' });
+
+            if (isDoctor) {
+                const patient = report.patientId;
+                if (!patient || !patient.doctorAccess || !patient.doctorAccess.some(id => id.toString() === req.user.id)) {
+                    return res.status(403).json({ message: 'Access Denied: Unauthorized report access.' });
+                }
+            }
+        }
 
         let summaryText = text;
         let analysis = reportId ? await ReportAiAnalysis.findOne({ reportId }) : null;
@@ -337,59 +436,58 @@ exports.generateVoice = async (req, res) => {
             );
         }
 
-        // Step 1: Get the base summary text
-        if (!summaryText && analysis) {
-            summaryText = language === 'en' ? analysis.summaryEn : analysis.translations?.get(language);
-            if (!summaryText) {
-                const result = await aiService.analyzeReportUniversal(analysis.ocrText, language);
-                summaryText = result.summary;
-                if (language === 'en') analysis.summaryEn = summaryText;
-                else {
-                    if (!analysis.translations) analysis.translations = new Map();
-                    analysis.translations.set(language, summaryText);
-                }
+        // DOCTOR BRANCH (Single Report)
+        if (isDoctor && reportId) {
+            const doctorCacheKey = `doctor_${langCode}`;
+            if (analysis?.audioUrls?.get(doctorCacheKey)) {
+                return res.status(200).json({ 
+                    audioUrl: analysis.audioUrls.get(doctorCacheKey), 
+                    voiceScript: analysis.translations?.get(`script_${doctorCacheKey}`) || '', 
+                    cached: true 
+                });
+            }
+
+            if (!summaryText && analysis) summaryText = analysis.summaryEn || '';
+            const biomarkers = await ReportBiomarker.find({ reportId }).lean();
+            const clinicalText = await rewriteService.rewriteAsClinical(summaryText, report.patientId?.name, biomarkers, langCode);
+            const voiceScript = clinicalText.replace(/\*\*/g, '').replace(/\n+/g, ' ').slice(0, 400).trim();
+
+            const audioUrl = await ttsService.generateAndStoreAudio(voiceScript, langCode);
+            if (analysis) {
+                if (!analysis.audioUrls) analysis.audioUrls = new Map();
+                if (!analysis.translations) analysis.translations = new Map();
+                analysis.audioUrls.set(doctorCacheKey, audioUrl);
+                analysis.translations.set(`script_${doctorCacheKey}`, voiceScript);
                 await analysis.save();
             }
+            return res.status(200).json({ audioUrl, voiceScript, language: langCode });
         }
 
+        // PATIENT BRANCH (Single Report)
+        if (!summaryText && analysis) {
+            summaryText = langCode === 'en' ? analysis.summaryEn : analysis.translations.get(langCode);
+        }
         if (!summaryText) return res.status(400).json({ message: 'No summary text available.' });
 
-        // Step 2: EMPATHY LAYER — Rewrite as a warm, doctor-like message
-        const langCode = language?.toLowerCase().includes('hi') ? 'hi'
-            : language?.toLowerCase().includes('mr') ? 'mr'
-            : language?.toLowerCase().includes('te') ? 'te' : 'en';
+        const cachedUrl = analysis?.audioUrls?.get(langCode);
+        if (cachedUrl) return res.status(200).json({ audioUrl: cachedUrl, cached: true });
 
-        console.log(`[VOICE PIPELINE] Applying Empathy Layer for language: ${langCode}`);
         const empatheticText = await rewriteService.rewriteAsEmpathetic(summaryText, langCode);
+        const script = await scriptService.wrapInSpeechMarkers(empatheticText, language);
+        const audioUrl = await ttsService.generateAndStoreAudio(script, langCode);
 
-        // Step 3: SCRIPT GENERATOR — Build structured voice script
-        const voiceScript = scriptService.buildVoiceScript(empatheticText, langCode);
-        console.log(`[VOICE PIPELINE] Voice script (${voiceScript.length} chars) ready for TTS.`);
-
-        // Step 4: TTS — Convert script to audio
-        const audioUrl = await ttsService.generateAndStoreAudio(voiceScript, langCode);
-
-        // Step 5: Save everything to DB
         if (analysis) {
             if (!analysis.audioUrls) analysis.audioUrls = new Map();
             analysis.audioUrls.set(langCode, audioUrl);
-            // Cache the voice script too
-            if (!analysis.translations) analysis.translations = new Map();
-            analysis.translations.set(`script_${langCode}`, voiceScript);
             await analysis.save();
         }
-
-        res.status(200).json({
-            audioUrl,
-            voiceScript,
-            empatheticSummary: empatheticText,
-            language: langCode
-        });
+        res.status(200).json({ audioUrl, voiceScript: script, language: langCode });
     } catch (error) {
         console.error('Voice Generation Error:', error.message);
-        res.status(500).json({ message: 'Voice generation failed. Please try again.' });
+        res.status(500).json({ message: 'Voice generation failed.' });
     }
 };
+
 
 exports.grantAccess = async (req, res) => {
     try {

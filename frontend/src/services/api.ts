@@ -38,6 +38,10 @@ api.interceptors.response.use(
         console.error('DATA:', typeof error.response?.data === 'string' && error.response.data.includes('<!DOCTYPE html>') 
             ? 'HTML Response Received (Check if API route exists)' 
             : error.response?.data);
+            
+        if (typeof window !== 'undefined' && error.config) {
+            alert(`[AXIOS ERROR]\nMethod: ${error.config.method?.toUpperCase()}\nURL: ${error.config.url}\nStatus: ${error.response?.status}\n\nCheck browser console for more details.`);
+        }
         
         return Promise.reject(error);
     }

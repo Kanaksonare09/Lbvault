@@ -180,10 +180,6 @@ export default function PatientHealthInsightsPage() {
                             </div>
                             
                             <div className="flex flex-col items-end shrink-0 gap-3">
-                                <VoiceSummaryButton 
-                                    text={intro || `${report.reportName} processed.`}
-                                    reportId={report._id}
-                                />
                                 <div className="flex bg-[#F6F7F5] rounded-full p-1 border border-[#E2E8F0] shadow-inner">
                                     {['EN'].map(l => (
                                         <button key={l} className="px-3 py-1 bg-white rounded-full text-[10px] font-black text-[#4F6F6F] shadow-sm tracking-wider">
@@ -335,13 +331,6 @@ export default function PatientHealthInsightsPage() {
                             Save PDF
                         </a>
 
-                        <button 
-                            id="ask-ai-open-btn"
-                            onClick={() => setShowAskAI(true)}
-                            className="bg-[#8FB9A8] hover:bg-white text-[#1F2933] px-6 py-2.5 rounded-full text-sm font-black flex items-center transition-all shadow-lg shadow-[#8FB9A8]/20">
-                            <svg className="mr-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                            Ask AI
-                        </button>
                     </div>
 
                     {/* Ask AI Chat Panel */}
@@ -352,6 +341,27 @@ export default function PatientHealthInsightsPage() {
                             onClose={() => setShowAskAI(false)}
                         />
                     )}
+
+                    {/* Floating Action Buttons (FABs) */}
+                    <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
+                        {report && (
+                            <VoiceSummaryButton 
+                                text={intro || `${report.reportName} processed.`}
+                                reportId={report._id}
+                                isIcon={true}
+                            />
+                        )}
+                        <button
+                            id="ask-ai-fab"
+                            onClick={() => setShowAskAI(true)}
+                            className="w-14 h-14 rounded-full bg-[#4F6F6F] text-white shadow-[0_4px_24px_rgba(79,111,111,0.4)] hover:bg-[#1F2933] flex items-center justify-center transition-all hover:scale-105 group relative"
+                            title="Ask AI"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z" /><path d="M22 2 11 13" /></svg>
+                            {/* Pulse dot */}
+                            <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-[#8FB9A8] rounded-full border-2 border-transparent group-hover:border-white transition-colors"></span>
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

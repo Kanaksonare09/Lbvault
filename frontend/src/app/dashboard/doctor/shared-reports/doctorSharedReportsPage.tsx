@@ -3,25 +3,33 @@
 import { useState, useEffect } from 'react';
 import api from '@/services/api';
 import AudioPlayer from '@/components/ui/AudioPlayer';
+import VoiceSummaryButton from '@/components/patient/VoiceSummaryButton';
 
 const FILTER_TABS = ['All Reports', 'Hematology', 'Cardiology', 'Neurology', 'Urgent Review'];
 
 function getReportStatus(report: any): { label: string; pillClass: string } {
-  if (!report.doctorComment) {
+  // Check if any biomarker has a critical or abnormal status
+  const hasCritical = Object.values(report.extractedData || {}).some(
+    (b: any) => typeof b === 'object' && (b.severity === 'Critical' || b.isAbnormal)
+  );
+
+  if (report.doctorComment) {
+    return {
+      label: 'REVIEWED',
+      pillClass: 'bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-3 py-1 rounded-lg tracking-widest uppercase',
+    };
+  }
+
+  if (hasCritical) {
     return {
       label: 'URGENT REVIEW',
-      pillClass: 'bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-lg tracking-widest',
+      pillClass: 'bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-lg tracking-widest uppercase shadow-sm animate-pulse',
     };
   }
-  if (report.status === 'ready' || report.doctorComment) {
-    return {
-      label: 'NORMAL',
-      pillClass: 'bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-3 py-1 rounded-lg tracking-widest',
-    };
-  }
+
   return {
-    label: 'PENDING CLINICAL REVIEW',
-    pillClass: 'bg-cyan-50 text-cyan-700 border border-cyan-200 text-[10px] font-bold px-3 py-1 rounded-lg tracking-widest',
+    label: 'PENDING REVIEW',
+    pillClass: 'bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-3 py-1 rounded-lg tracking-widest uppercase',
   };
 }
 
@@ -56,14 +64,27 @@ const ICON_CONFIGS = [
 ];
 
 function getBioStatus(key: string, val: any) {
+  // If val is the new object structure from the backend
+  if (val && typeof val === 'object' && val.hasOwnProperty('value')) {
+    if (val.isAbnormal) {
+      const sev = val.severity || 'Abnormal';
+      if (sev === 'Critical') return { label: 'CRITICAL', cls: 'bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-[0.1em] shadow-sm' };
+      if (sev === 'Moderate') return { label: 'MODERATE', cls: 'bg-orange-100 text-orange-700 border border-orange-200 text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wider' };
+      if (sev === 'Mild') return { label: 'MILD', cls: 'bg-amber-100 text-amber-700 border border-amber-200 text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wider' };
+      return { label: sev.toUpperCase(), cls: 'text-red-500 text-[11px] font-bold' };
+    }
+    return { label: 'NORMAL', cls: 'bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wider' };
+  }
+
+  // Fallback for legacy data/simple values
   const v = parseFloat(String(val));
-  if (isNaN(v)) return { label: 'Normal', cls: 'text-gray-400 text-sm' };
+  if (isNaN(v)) return { label: 'NORMAL', cls: 'text-gray-400 text-sm' };
   const k = key.toLowerCase();
-  if (k.includes('glucose') && v > 99 && v <= 125) return { label: 'Borderline High', cls: 'text-orange-500 text-sm font-semibold' };
-  if (k.includes('glucose') && v > 125) return { label: 'High', cls: 'text-red-500 text-sm font-semibold' };
-  if ((k.includes('creatinine') || k.includes('creat')) && v > 1.3)
-    return { label: 'CRITICAL', cls: 'bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-md tracking-widest' };
-  return { label: 'Normal', cls: 'text-gray-400 text-sm' };
+  
+  if (k.includes('glucose') && v > 99 && v <= 125) return { label: 'MODERATE', cls: 'bg-orange-100 text-orange-700 border border-orange-200 text-[10px] font-bold px-2.5 py-1 rounded-md' };
+  if (k.includes('glucose') && v > 125) return { label: 'CRITICAL', cls: 'bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-md' };
+  
+  return { label: 'NORMAL', cls: 'bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2.5 py-1 rounded-md' };
 }
 
 export default function DoctorSharedReportsPage() {
@@ -247,26 +268,12 @@ export default function DoctorSharedReportsPage() {
                       </div>
 
                       {/* Audio Summary Player */}
-                      <div className="bg-[#F0F4FF] rounded-2xl border border-blue-100/60 px-5 py-4 flex items-center gap-4">
-                        <button className="w-11 h-11 bg-[#2B4BC4] hover:bg-[#1E3799] rounded-full flex items-center justify-center shrink-0 transition-all shadow-md">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="white" strokeWidth="1">
-                            <polygon points="5 3 19 12 5 21 5 3"/>
-                          </svg>
-                        </button>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Audio Summary for Patient</p>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] text-gray-400 font-medium tabular-nums">0:45</span>
-                            <div className="flex-1 h-[5px] bg-white rounded-full overflow-hidden shadow-inner">
-                              <div className="h-full w-[35%] bg-[#F5C842] rounded-full" />
-                            </div>
-                            <span className="text-[11px] text-gray-400 font-medium tabular-nums">3:15</span>
-                          </div>
-                        </div>
-                        {/* Hidden actual player */}
-                        <div className="hidden">
-                          <AudioPlayer reportId={report._id} reportName={report.reportName} compact />
-                        </div>
+                      <div className="bg-[#F0F4FF] rounded-2xl border border-blue-100/60 p-5">
+                         <VoiceSummaryButton 
+                            reportId={report._id}
+                            label="Clinical Brief"
+                         />
+                         <p className="text-[10px] text-gray-400 mt-2 font-medium">Rachel V2.1 AI Engine generated clinical vocalization.</p>
                       </div>
                     </div>
 
@@ -282,14 +289,19 @@ export default function DoctorSharedReportsPage() {
                         {/* Rows */}
                         {report.extractedData && Object.keys(report.extractedData).length > 0 ? (
                           <div className="divide-y divide-gray-50">
-                            {Object.entries(report.extractedData).slice(0, 6).map(([key, val]: [string, any]) => {
+                            {Object.entries(report.extractedData).slice(0, 10).map(([key, val]: [string, any]) => {
                               const bs = getBioStatus(key, val);
-                              const isCrit = bs.label === 'CRITICAL';
+                              const isRich = typeof val === 'object' && val !== null;
+                              const displayVal = isRich ? `${val.value} ${val.unit}` : val;
+                              const range = isRich && (val.min !== undefined || val.max !== undefined) 
+                                ? `${val.min ?? '0'} - ${val.max ?? '∞'} ${val.unit}`
+                                : '—';
+
                               return (
                                 <div key={key} className="grid grid-cols-4 px-5 py-3.5 items-center hover:bg-gray-50/60 transition-colors">
                                   <span className="text-[13px] text-gray-700 font-medium">{key}</span>
-                                  <span className={`text-[13px] font-bold ${isCrit ? 'text-red-500' : 'text-gray-800'}`}>{val}</span>
-                                  <span className="text-[12px] text-gray-400">—</span>
+                                  <span className={`text-[13px] font-bold ${bs.label === 'CRITICAL' || bs.label === 'Abnormal' || bs.label === 'High'  ? 'text-red-500' : 'text-gray-800'}`}>{displayVal}</span>
+                                  <span className="text-[12px] text-gray-400">{range}</span>
                                   <span className={bs.cls}>{bs.label}</span>
                                 </div>
                               );

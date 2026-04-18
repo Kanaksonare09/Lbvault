@@ -1,5 +1,5 @@
-import DoctorDashboardPage from './doctorDashboardPage';
+import DoctorOverviewDashboard from './DoctorOverviewDashboard';
 
 export default function Page() {
-    return <DoctorDashboardPage />;
+    return <DoctorOverviewDashboard />;
 }

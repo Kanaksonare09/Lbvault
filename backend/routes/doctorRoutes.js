@@ -27,4 +27,7 @@ router.get('/patient/:patientId/trends', authMiddleware('doctor'), reportControl
 // Add a clinical note to a specific report
 router.post('/reports/:id/note', authMiddleware('doctor'), reportController.addDoctorNote);
 
+// Doctor AI Chat — synthesize patient's entire health history
+router.post('/patient/:patientId/chat', authMiddleware('doctor'), doctorController.doctorChatWithPatient);
+
 module.exports = router;

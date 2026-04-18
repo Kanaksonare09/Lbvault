@@ -6,6 +6,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { patientService } from '@/services/patientService';
 import { Patient } from '@/types';
 import api from '@/services/api';
+import DoctorPatientChat from '@/components/doctor/DoctorPatientChat';
+import VoiceSummaryButton from '@/components/patient/VoiceSummaryButton';
 
 // ─── LabVault Design Tokens — exact match to login page ─────────────────────
 // Login page uses: bg=#F6F7F5, btn=#2B59FF (--primary), text=#1F2933,
@@ -127,16 +129,7 @@ export default function DoctorDashboard() {
   const [savingNote,      setSavingNote]      = useState(false);
   const [noteSaved,       setNoteSaved]       = useState(false);
 
-  const [chatMessages,    setChatMessages]    = useState<ChatMessage[]>([]);
-  const [chatInput,       setChatInput]       = useState('');
-  const [chatLoading,     setChatLoading]     = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
-
-  const [voiceLoading,    setVoiceLoading]    = useState(false);
-  const [audioUrl,        setAudioUrl]        = useState<string | null>(null);
-  const [rightTab,        setRightTab]        = useState<'insights' | 'chat' | 'voice'>('insights');
-
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [chatMessages]);
+  // Removed obsolete chat and voice manual state (handled by FABs)
 
   useEffect(() => {
     patientService.getDoctorPatients()
@@ -148,7 +141,7 @@ export default function DoctorDashboard() {
 
   const loadPatient = useCallback(async (p: Patient) => {
     setSelectedPt(p); setDashData(null); setSelectedReport(null);
-    setDashError(''); setAudioUrl(null); setChatMessages([]); setDashLoading(true);
+    setDashError(''); setDashLoading(true);
     try {
       const res = await api.get(`/doctor/patient/${p._id}/dashboard`);
       setDashData(res.data);
@@ -157,7 +150,7 @@ export default function DoctorDashboard() {
     finally { setDashLoading(false); }
   }, []);
 
-  useEffect(() => { setNoteText(''); setAudioUrl(null); setNoteSaved(false); }, [selectedReport?._id]);
+  useEffect(() => { setNoteText(''); setNoteSaved(false); }, [selectedReport?._id]);
 
   const saveNote = async () => {
     if (!noteText.trim() || !selectedReport) return;
@@ -175,27 +168,7 @@ export default function DoctorDashboard() {
     finally { setSavingNote(false); }
   };
 
-  const sendChat = async (overrideQ?: string) => {
-    const q = (overrideQ ?? chatInput).trim();
-    if (!q || !selectedReport) return;
-    setChatMessages(p => [...p, { role: 'doctor', text: q }]); setChatInput(''); setChatLoading(true);
-    try {
-      const res = await api.post('/ai/ask', { reportId: selectedReport._id, question: q,
-        history: chatMessages.map(m => ({ role: m.role === 'doctor' ? 'user' : 'assistant', content: m.text })) });
-      setChatMessages(p => [...p, { role: 'ai', text: res.data?.answer || res.data?.response || 'No response.' }]);
-    } catch { setChatMessages(p => [...p, { role: 'ai', text: 'AI unavailable right now.' }]); }
-    finally { setChatLoading(false); }
-  };
 
-  const loadVoice = async () => {
-    if (!selectedReport) return;
-    setVoiceLoading(true); setAudioUrl(null);
-    try {
-      const res = await api.post('/voice', { reportId: selectedReport._id, language: 'en' });
-      if (res.data?.audioUrl) setAudioUrl(`${apiBase}${res.data.audioUrl}`);
-    } catch { console.error('Voice failed'); }
-    finally { setVoiceLoading(false); }
-  };
 
   const filtered      = patients.filter(p =>
     p.name?.toLowerCase().includes(search.toLowerCase()) ||
@@ -547,22 +520,13 @@ export default function DoctorDashboard() {
         <div className="w-[268px] shrink-0 flex flex-col overflow-hidden"
           style={{ background: CLR.card, borderLeft: `1px solid ${CLR.border}` }}>
 
-          {/* Tabs */}
-          <div className="flex shrink-0" style={{ borderBottom: `1px solid ${CLR.border}` }}>
-            {([{k:'insights',l:'🧠 Insights'},{k:'chat',l:'💬 Chat'},{k:'voice',l:'🎙️ Voice'}] as const).map(t => (
-              <button key={t.k} onClick={() => setRightTab(t.k)}
-                className="flex-1 py-3 text-[11px] font-bold transition-all"
-                style={rightTab === t.k
-                  ? { color: CLR.primary, borderBottom: `2px solid ${CLR.primary}`, background: CLR.sageBg }
-                  : { color: CLR.muted }}>
-                {t.l}
-              </button>
-            ))}
+          <div className="px-5 py-4 shrink-0" style={{ borderBottom: `1px solid ${CLR.border}` }}>
+             <h3 className="text-sm font-black text-[#1F2933] uppercase flex items-center gap-2">
+               🧠 AI Insights
+             </h3>
           </div>
 
-          {/* ── INSIGHTS ── */}
-          {rightTab === 'insights' && (
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {!selectedReport
                 ? <p className="text-xs text-center mt-10" style={{ color: CLR.muted }}>Select a report to view AI insights.</p>
                 : (
@@ -613,114 +577,27 @@ export default function DoctorDashboard() {
                   </>
                 )}
             </div>
-          )}
-
-          {/* ── CHAT ── */}
-          {rightTab === 'chat' && (
-            <div className="flex-1 flex flex-col overflow-hidden">
-              {!selectedReport
-                ? <div className="flex-1 flex items-center justify-center text-xs text-center px-6" style={{ color: CLR.muted }}>Select a report first to chat with AI.</div>
-                : (
-                  <>
-                    {chatMessages.length === 0 && (
-                      <div className="px-4 py-4 space-y-2" style={{ borderBottom: `1px solid ${CLR.border}` }}>
-                        <p className="text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: CLR.muted }}>Quick Questions</p>
-                        {["Summarize this patient's health", 'Highlight the key risks', 'Explain abnormal values'].map(q => (
-                          <button key={q} onClick={() => sendChat(q)}
-                            className="w-full text-left text-[11px] font-semibold px-3 py-2.5 rounded-2xl border transition-all active:scale-95"
-                            style={{ background: CLR.sageBg, color: CLR.primary, borderColor: `${CLR.secondary}50` }}
-                            onMouseOver={e => e.currentTarget.style.background = `${CLR.secondary}30`}
-                            onMouseOut={e => e.currentTarget.style.background = CLR.sageBg}>
-                            {q}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
-                      {chatMessages.map((m, i) => (
-                        <div key={i} className={`flex ${m.role === 'doctor' ? 'justify-end' : 'justify-start'}`}>
-                          <div className="max-w-[90%] px-3 py-2.5 rounded-2xl text-xs leading-relaxed"
-                            style={m.role === 'doctor'
-                              ? { background: CLR.primary, color: '#fff', borderBottomRightRadius: 4 }
-                              : { background: CLR.bg, color: CLR.dark, border: `1px solid ${CLR.border}`, borderBottomLeftRadius: 4 }}>
-                            {m.text}
-                          </div>
-                        </div>
-                      ))}
-                      {chatLoading && (
-                        <div className="flex justify-start">
-                          <div className="px-4 py-3 rounded-2xl flex gap-1.5 items-center" style={{ background: CLR.bg, border: `1px solid ${CLR.border}` }}>
-                            {[0,150,300].map(d => <span key={d} style={{ animationDelay: `${d}ms` }} className="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce inline-block" />)}
-                          </div>
-                        </div>
-                      )}
-                      <div ref={chatEndRef} />
-                    </div>
-                    <div className="px-4 py-3 flex gap-2 shrink-0" style={{ borderTop: `1px solid ${CLR.border}` }}>
-                      <input type="text" placeholder="Ask AI about this patient…"
-                        value={chatInput} onChange={e => setChatInput(e.target.value)}
-                        onKeyDown={e => e.key === 'Enter' && sendChat()}
-                        className="flex-1 px-3 py-2.5 rounded-2xl text-xs outline-none transition-all"
-                        style={{ background: CLR.bg, border: `1px solid ${CLR.border}`, color: CLR.dark }}
-                        onFocus={e => e.target.style.borderColor = CLR.primary}
-                        onBlur={e => e.target.style.borderColor = CLR.border} />
-                      <button onClick={() => sendChat()} disabled={chatLoading || !chatInput.trim()}
-                        className="w-9 h-9 rounded-2xl flex items-center justify-center disabled:opacity-50 transition-all active:scale-95 shrink-0"
-                        style={{ background: CLR.primary, color: '#fff' }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
-                      </button>
-                    </div>
-                  </>
-                )}
-            </div>
-          )}
-
-          {/* ── VOICE ── */}
-          {rightTab === 'voice' && (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-5">
-              {!selectedReport
-                ? <p className="text-xs" style={{ color: CLR.muted }}>Select a report first.</p>
-                : (
-                  <>
-                    <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg"
-                      style={{ background: `linear-gradient(135deg, ${CLR.dark} 0%, ${CLR.primary} 100%)` }}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-                        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/>
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm font-black" style={{ color: CLR.dark }}>🎙️ Voice Summary</p>
-                      <p className="text-xs mt-1 font-mono" style={{ color: CLR.muted }}>{selectedReport.reportName || selectedReport.testType}</p>
-                    </div>
-                    {!audioUrl ? (
-                      <button onClick={loadVoice} disabled={voiceLoading}
-                        className="flex items-center gap-2 text-white text-xs font-black px-6 py-3 rounded-2xl transition-all disabled:opacity-60 shadow-md active:scale-95 uppercase tracking-widest"
-                        style={{ background: CLR.primary }}>
-                        {voiceLoading
-                          ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>Generating…</>
-                          : <><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>Generate & Play</>}
-                      </button>
-                    ) : (
-                      <div className="w-full space-y-3">
-                        <audio src={audioUrl} controls autoPlay className="w-full rounded-2xl" />
-                        <button onClick={loadVoice} disabled={voiceLoading}
-                          className="text-[11px] font-semibold hover:underline" style={{ color: CLR.primary }}>
-                          Regenerate
-                        </button>
-                      </div>
-                    )}
-                    <div className="w-full rounded-2xl border p-3 text-left" style={{ background: CLR.sageBg, borderColor: `${CLR.secondary}50` }}>
-                      <p className="text-[9px] font-black uppercase tracking-widest mb-1" style={{ color: CLR.muted }}>Language</p>
-                      <p className="text-xs font-semibold" style={{ color: CLR.dark }}>🇬🇧 English (default)</p>
-                      <p className="text-[10px] mt-0.5" style={{ color: CLR.mutedLight }}>More languages in patient's report page</p>
-                    </div>
-                  </>
-                )}
-            </div>
-          )}
         </div>
       </div>
+
+      {/* ────── FLOATING BUTTONS ────── */}
+      <div className="fixed bottom-[90px] right-6 z-50 flex flex-col gap-3">
+        {selectedReport && (
+            <VoiceSummaryButton 
+                text={selectedReport.ai?.summary || "Report summarized."}
+                reportId={selectedReport._id}
+                isIcon={true}
+            />
+        )}
+      </div>
+
+      {selectedPt && dashData && (
+        <DoctorPatientChat
+          patientId={selectedPt._id}
+          patientName={selectedPt.name}
+          reportCount={dashData.reports?.length ?? 0}
+        />
+      )}
     </div>
   );
 }

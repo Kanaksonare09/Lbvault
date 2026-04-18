@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { doctorService } from '@/services/doctorService';
+import DoctorPatientChat from '@/components/doctor/DoctorPatientChat';
+import VoiceSummaryButton from '@/components/patient/VoiceSummaryButton';
 
 // ── Tiny SVG Line Chart ──────────────────────────────────────────────────────
 function MiniLineChart({ values }: { values: number[] }) {
@@ -148,12 +150,21 @@ export default function PatientDashboard() {
 
       {/* ── Top breadcrumb strip ── */}
       <div className="bg-white border-b border-gray-100 px-10 py-3">
-        <div className="flex items-center gap-2 text-[12px] text-gray-400">
-          <Link href="/dashboard/doctor" className="hover:text-[#2B4BC4] transition-colors">Dashboard</Link>
-          <span>/</span>
-          <Link href="/dashboard/doctor/patients" className="hover:text-[#2B4BC4] transition-colors">Biomarker Analysis</Link>
-          <span>/</span>
-          <span className="font-semibold text-[#B8860B]">{patient.name}</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-[12px] text-gray-400">
+            <Link href="/dashboard/doctor" className="hover:text-[#2B4BC4] transition-colors">Dashboard</Link>
+            <span>/</span>
+            <Link href="/dashboard/doctor/patients" className="hover:text-[#2B4BC4] transition-colors">Biomarker Analysis</Link>
+            <span>/</span>
+            <span className="font-semibold text-[#B8860B]">{patient.name}</span>
+          </div>
+          <div className="flex items-center gap-4 bg-white/50 backdrop-blur-md px-4 py-2 rounded-2xl border border-gray-100/50 shadow-sm">
+            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Trajectory AI</span>
+            <VoiceSummaryButton 
+              patientId={patientId}
+              label="Overall Analysis"
+            />
+          </div>
         </div>
       </div>
 
@@ -171,6 +182,12 @@ export default function PatientDashboard() {
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
+            {selectedReportId && (
+              <VoiceSummaryButton 
+                reportId={selectedReportId}
+                label="Report Summary"
+              />
+            )}
             <button className="flex items-center gap-2.5 bg-white border border-gray-200 text-gray-700 font-semibold text-sm px-5 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
@@ -477,6 +494,13 @@ export default function PatientDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Doctor Clinical AI Chat — floating over the full dashboard */}
+      <DoctorPatientChat
+        patientId={patientId}
+        patientName={patient.name}
+        reportCount={reports.length}
+      />
     </div>
   );
 }

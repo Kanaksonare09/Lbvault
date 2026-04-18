@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { patientService } from '@/services/patientService';
 import { Patient } from '@/types';
 import api from '@/services/api';
+import VoiceSummaryButton from '@/components/patient/VoiceSummaryButton';
 
 export default function DoctorPatientsPage() {
   const [patients, setPatients] = useState<Patient[]>([]);
@@ -94,24 +95,39 @@ export default function DoctorPatientsPage() {
             ) : filtered.map((p, idx) => {
               const isActive = selected?._id === p._id;
               return (
-                <button
+                <div
                   key={p._id}
                   onClick={() => openPatient(p)}
-                  className={`w-full text-left px-4 py-3.5 rounded-2xl flex items-center gap-3 transition-all ${
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && openPatient(p)}
+                  className={`w-full text-left px-4 py-3.5 rounded-2xl flex items-center gap-3 transition-all cursor-pointer outline-none ${
                     isActive
-                      ? 'bg-white shadow-[0_2px_12px_rgba(0,0,0,0.1)] border border-gray-100'
+                      ? 'bg-white shadow-[0_2px_12_rgba(0,0,0,0.1)] border border-gray-100'
                       : 'hover:bg-white/60 border border-transparent'
                   }`}
                 >
-                  {/* Avatar circle */}
+                  {/* ... (rest of the content remains the same) */}
                   <div className="w-11 h-11 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center font-bold text-gray-500 text-base shrink-0 overflow-hidden">
                     {p.name?.[0]?.toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-800 text-[13px] truncate">{p.name}</p>
-                    <p className="text-[11px] text-gray-400 mt-0.5">Last visit: {lastVisitLabel(idx)}</p>
+                    <p className="font-black text-gray-900 text-[14px] truncate">{p.name}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#2B4BC4] bg-blue-50 px-2 py-0.5 rounded-md">
+                        {p.lvId || 'LV-99'}
+                      </p>
+                    </div>
                   </div>
-                </button>
+                  {/* QUICK VOICE ACCESS */}
+                  <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <VoiceSummaryButton 
+                      patientId={p._id}
+                      isIcon={true}
+                      label="Analysis"
+                    />
+                  </div>
+                </div>
               );
             })}
           </div>
@@ -283,93 +299,10 @@ export default function DoctorPatientsPage() {
                   View Intelligence Dashboard
                   <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                 </Link>
-              </div>
-              {/* Decorative blob */}
-              <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-[#f0b800]/30 rounded-full blur-xl" />
             </div>
-
-            {/* Real-time Vitals */}
-            <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.07)] border border-gray-100 p-5">
-              <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-4">Real-Time Vitals</p>
-              <div className="grid grid-cols-2 gap-3">
-                {/* Heart Rate */}
-                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-2">Heart Rate</p>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-extrabold text-gray-800">72</span>
-                    <span className="text-[10px] text-gray-400 font-medium">bpm</span>
-                  </div>
-                </div>
-                {/* Blood Pressure */}
-                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-2">Blood Pressure</p>
-                  <div className="flex items-baseline gap-0.5">
-                    <span className="text-xl font-extrabold text-red-500">142/90</span>
-                    <span className="text-[9px] text-gray-400 font-medium ml-0.5">mmHg</span>
-                  </div>
-                </div>
-                {/* SPO2 */}
-                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-2">SPO2</p>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-extrabold text-gray-800">98</span>
-                    <span className="text-[10px] text-gray-400 font-medium">%</span>
-                  </div>
-                </div>
-                {/* Body Temp */}
-                <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-2">Body Temp</p>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-extrabold text-gray-800">98.6</span>
-                    <span className="text-[10px] text-gray-400 font-medium">°F</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Primary Care Team */}
-            <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.07)] border border-gray-100 p-5">
-              <p className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest mb-4">Primary Care Team</p>
-              <div className="space-y-3">
-                {[
-                  { name: 'Dr. Sarah Chen', role: 'Lead Cardiologist', initial: 'S', color: 'bg-blue-100 text-blue-600' },
-                  { name: 'Nurse Kevin Wu', role: 'Case Manager', initial: 'K', color: 'bg-purple-100 text-purple-600' },
-                ].map((member, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${member.color}`}>
-                      {member.initial}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-gray-800 truncate">{member.name}</p>
-                      <p className="text-[11px] text-gray-400">{member.role}</p>
-                    </div>
-                    <button className="w-7 h-7 flex items-center justify-center text-[#2B4BC4] bg-blue-50 rounded-lg hover:bg-blue-100 transition-all shrink-0">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Location Map placeholder */}
-            <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.07)] border border-gray-100 overflow-hidden">
-              <div className="h-28 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="3 11 22 2 13 21 11 13 3 11"/>
-                </svg>
-              </div>
-              <div className="px-4 py-3 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2B4BC4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
-                </svg>
-                <span className="text-[12px] font-semibold text-gray-600">Pacific Heights Residence</span>
-              </div>
-            </div>
-
           </div>
-        )}
+        </div>
+      )}
       </div>
     </div>
   );

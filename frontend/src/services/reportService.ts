@@ -39,10 +39,9 @@ export const reportService = {
             }
         });
     },
-    getVoiceAudio: async (reportId: string, language: string = 'English'): Promise<any> => {
+    getVoiceAudio: async (reportId?: string, language: string = 'English', patientId?: string): Promise<any> => {
         try {
-            const res = await api.post('/voice', { reportId, language });
-            // New API returns: { audioUrl, voiceScript, empatheticSummary, language }
+            const res = await api.post('/reports/generate-voice', { reportId, patientId, language });
             return res.data;
         } catch (err: any) {
             throw err;

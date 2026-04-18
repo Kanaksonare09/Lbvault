@@ -131,18 +131,38 @@ General Rules:
 
 Report text (STRICT DATA SOURCE - DO NOT GUESS): ${safeText}`;
 
-        console.log(`[AI ENGINE] Single-pass analysis starting for ${safeText.length} chars...`);
+        const GROQ_API_KEY = process.env.GROQ_API_KEY;
+        const useGroq = GROQ_API_KEY && !GROQ_API_KEY.includes('your_groq');
 
-        const response = await axios.post('http://127.0.0.1:11434/v1/chat/completions', {
-            model: 'llama3.2', // Keep llama3.2 as primary fast local model
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.1,
-            max_tokens: 2000, // Increased for long summaries
-            response_format: { type: "json_object" }
-        }, {
-            headers: { 'Content-Type': 'application/json' },
-            timeout: 60000 // 60s timeout for complex reports
-        });
+        console.log(`[AI ENGINE] Single-pass analysis starting for ${safeText.length} chars via ${useGroq ? 'Groq ☁️' : 'Ollama 🦙'}...`);
+
+        let response;
+        if (useGroq) {
+            response = await axios.post('https://api.groq.com/openai/v1/chat/completions', {
+                model: 'llama-3.1-8b-instant',
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.1,
+                max_tokens: 2000,
+                response_format: { type: 'json_object' }
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${GROQ_API_KEY}`
+                },
+                timeout: 20000
+            });
+        } else {
+            response = await axios.post('http://127.0.0.1:11434/v1/chat/completions', {
+                model: 'llama3.2',
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.1,
+                max_tokens: 2000,
+                response_format: { type: 'json_object' }
+            }, {
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 60000
+            });
+        }
 
         const rawContent = response.data.choices[0].message.content;
 
