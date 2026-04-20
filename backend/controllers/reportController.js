@@ -77,7 +77,14 @@ exports.uploadReport = async (req, res) => {
 
                 for (const b of aiBiomarkers) {
                     try {
-                        const val = Number(b.value) || 0;
+                        const cleanNum = (val) => {
+                            if (val === null || val === undefined || val === '') return null;
+                            if (typeof val === 'number') return val;
+                            const matches = String(val).match(/[-+]?[0-9]*\.?[0-9]+/);
+                            return matches ? parseFloat(matches[0]) : null;
+                        };
+
+                        const val = cleanNum(b.value) || 0;
                         const raw = (b.severity || 'Normal').toLowerCase();
                         let severity = 'Normal';
                         if (raw.includes('critical') || raw.includes('danger')) severity = 'Critical';
@@ -101,8 +108,8 @@ exports.uploadReport = async (req, res) => {
                             biomarkerName: String(b.name || 'Unknown').toLowerCase(),
                             value: val,
                             unit: String(b.unit || ''),
-                            referenceMin: b.min !== undefined && b.min !== null ? b.min : null,
-                            referenceMax: b.max !== undefined && b.max !== null ? b.max : null,
+                            referenceMin: cleanNum(b.min),
+                            referenceMax: cleanNum(b.max),
                             isAbnormal: severity !== 'Normal',
                             severity,
                             interpretation: b.interpretation || `Value detected as ${trend.toLowerCase()}.`,
