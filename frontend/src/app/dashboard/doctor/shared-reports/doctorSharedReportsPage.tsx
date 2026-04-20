@@ -44,8 +44,8 @@ const ICON_CONFIGS = [
     ),
   },
   {
-    bg: 'bg-blue-100',
-    color: 'text-blue-600',
+    bg: 'bg-[#8FB9A8]/20',
+    color: 'text-[#4F6F6F]',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
@@ -128,7 +128,7 @@ export default function DoctorSharedReportsPage() {
   });
 
   return (
-    <div className="-m-8 bg-[#F4F6FB] min-h-screen pb-16">
+    <div className="-m-8 bg-[#F6F7F5] min-h-screen pb-16">
 
       {/* ── Page Header ── */}
       <div className="flex items-start justify-between px-10 pt-10 pb-7">
@@ -136,7 +136,7 @@ export default function DoctorSharedReportsPage() {
           <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">Reports Management</h1>
           <p className="text-sm text-gray-400 mt-1 font-medium">Centralized diagnostic vault for collaborative clinical review.</p>
         </div>
-        <button className="flex items-center gap-2 bg-[#2B4BC4] hover:bg-[#1E3799] text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-md transition-all">
+        <button className="flex items-center gap-2 bg-[#4F6F6F] hover:bg-[#1F2933] text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-md transition-all">
           <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
           </svg>
@@ -166,7 +166,7 @@ export default function DoctorSharedReportsPage() {
       <div className="px-10 space-y-5">
         {loading ? (
           <div className="flex items-center justify-center py-32">
-            <div className="w-10 h-10 border-4 border-blue-100 border-t-[#2B4BC4] rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-[#8FB9A8]/20 border-t-[#4F6F6F] rounded-full animate-spin" />
           </div>
         ) : filtered.length === 0 ? (
           <div className="bg-white rounded-2xl shadow-md border border-gray-100/80 py-24 text-center">
@@ -220,7 +220,7 @@ export default function DoctorSharedReportsPage() {
                   <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all ${
                     isExpanded
                       ? 'border-gray-300 text-gray-500 bg-gray-50'
-                      : 'border-gray-200 text-gray-400 bg-white hover:border-blue-400 hover:text-blue-500'
+                      : 'border-gray-200 text-gray-400 bg-white hover:border-[#4F6F6F]/50 hover:text-[#4F6F6F]'
                   }`}>
                     {isExpanded
                       ? <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
@@ -268,7 +268,7 @@ export default function DoctorSharedReportsPage() {
                       </div>
 
                       {/* Audio Summary Player */}
-                      <div className="bg-[#F0F4FF] rounded-2xl border border-blue-100/60 p-5">
+                      <div className="bg-[#F6F7F5] rounded-2xl border border-[#8FB9A8]/20 p-5">
                          <VoiceSummaryButton 
                             reportId={report._id}
                             label="Clinical Brief"
@@ -316,7 +316,7 @@ export default function DoctorSharedReportsPage() {
 
                       {/* Action row */}
                       <div className="flex items-center gap-3 mt-4">
-                        <button className="text-[13px] font-semibold text-[#2B4BC4] hover:underline transition-all px-1">
+                        <button className="text-[13px] font-semibold text-[#4F6F6F] hover:underline transition-all px-1">
                           View Historical Trends
                         </button>
                         <a
@@ -331,8 +331,8 @@ export default function DoctorSharedReportsPage() {
 
                       {/* Clinical note */}
                       {report.doctorComment && (
-                        <div className="mt-4 px-4 py-3 bg-blue-50 rounded-xl border border-blue-100">
-                          <p className="text-[10px] font-bold text-blue-600 uppercase tracking-widest mb-1">Clinical Note</p>
+                        <div className="mt-4 px-4 py-3 bg-[#8FB9A8]/10 rounded-xl border border-[#8FB9A8]/20">
+                          <p className="text-[10px] font-bold text-[#4F6F6F] uppercase tracking-widest mb-1">Clinical Note</p>
                           <p className="text-sm text-gray-700 italic">"{report.doctorComment}"</p>
                         </div>
                       )}
@@ -343,12 +343,12 @@ export default function DoctorSharedReportsPage() {
                           value={savingNote === report._id ? '' : noteText}
                           onChange={e => setNoteText(e.target.value)}
                           onKeyDown={e => e.key === 'Enter' && saveNote(report._id)}
-                          className="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-50 transition-all"
+                          className="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-[#4F6F6F]/30 focus:ring-2 focus:ring-[#8FB9A8]/10 transition-all"
                         />
                         <button
                           onClick={() => saveNote(report._id)}
                           disabled={savingNote === report._id}
-                          className="px-5 py-2.5 bg-[#2B4BC4] hover:bg-[#1E3799] text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-50 shadow-sm"
+                          className="px-5 py-2.5 bg-[#4F6F6F] hover:bg-[#1F2933] text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-50 shadow-sm"
                         >
                           {savingNote === report._id ? '…' : 'Save Note'}
                         </button>
@@ -374,13 +374,13 @@ export default function DoctorSharedReportsPage() {
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-base font-bold text-[#2B4BC4] mb-2">Secure Shared Portal</h3>
+              <h3 className="text-base font-bold text-[#4F6F6F] mb-2">Secure Shared Portal</h3>
               <p className="text-[13px] text-gray-500 leading-relaxed mb-5">
-                These reports are end-to-end encrypted and shared only within the Sanctuary clinical network. Any modification to data is logged and attributed to the medical professional in charge.
+                These reports are end-to-end encrypted and shared only within the HealthScan clinical network. Any modification to data is logged and attributed to the medical professional in charge.
               </p>
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-2">
-                  {['bg-blue-300', 'bg-purple-300', 'bg-green-300'].map((c, i) => (
+                  {['bg-[#8FB9A8]', 'bg-purple-300', 'bg-green-300'].map((c, i) => (
                     <div key={i} className={`w-8 h-8 rounded-full ${c} border-2 border-white shadow-sm`} />
                   ))}
                   <div className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white shadow-sm flex items-center justify-center text-[10px] font-bold text-gray-500">+12</div>

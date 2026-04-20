@@ -106,7 +106,7 @@ def _extract_with_tesseract(images):
             enhancer = ImageEnhance.Contrast(img_gray)
             img_enhanced = enhancer.enhance(2.0)
             img_sharp = img_enhanced.filter(ImageFilter.SHARPEN)
-            text = pytesseract.image_to_string(img_sharp, config='--psm 6 --oem 3')
+            text = pytesseract.image_to_string(img_sharp, config='--psm 4 --oem 3')
             text_blocks.append(text)
         combined = "\n\n".join(text_blocks).strip()
         logger.info(f"[Strategy 3 - Tesseract] Extracted {len(combined)} chars.")
@@ -137,7 +137,7 @@ def process_file_in_memory(file_stream, filename, enable_preprocessing=True):
     # --- Strategy 1: Try native PDF text extraction first (fastest, most accurate for digital PDFs) ---
     if is_pdf:
         extracted_text = _extract_native_pdf_text(file_bytes)
-        if len(extracted_text) > 100:  # Only use if we got substantial text
+        if len(extracted_text) > 500:  # Only use if we got substantial text, preventing small digital headers from hijacking scanned image pages
             logger.info(f"Strategy 1 succeeded with {len(extracted_text)} chars. Skipping image OCR.")
             return extracted_text
 

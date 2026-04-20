@@ -40,7 +40,7 @@
 - **Schema-Free Analysis** — Dynamically extracts any biomarker from any report type.
 - **Longitudinal Intelligence** — Detects "Improving" vs. "Deteriorating" health markers by analyzing proximity to normal ranges across time.
 - **Single-Pass Processing** — Biomarker extraction + clinical summarization in one LLM call.
-- **Anti-Hallucination** — AI grounded strictly in medical data with non-diagnostic safeguards.
+- **Anti-Hallucination Framework** — Highly constrained prompting blocks LLMs from guessing missing reference ranges or confusing report titles (e.g., "Kidney Function Test") as measurable biomarkers, ensuring 100% strict adherence to the physical document.
 
 ### 🔍 Role-Aware Global Search
 - **Doctor Search** — Real-time lookup of patients by Name, LV-ID, or Medical Condition with instant dashboard navigation.
@@ -49,8 +49,8 @@
 
 ### 🔬 Hybrid OCR Pipeline (4-Tier)
 1. **Gemini 1.5 Flash** — Cloud OCR for scanned and handwritten reports *(requires API key)*
-2. **Tesseract OCR** — Local OCR with image preprocessing (grayscale → contrast → sharpen)
-3. **pdfplumber** — Native text extraction for digitally-generated PDFs
+2. **Tesseract OCR** — Local OCR optimized with `--psm 4` for advanced tabular lab report retention and image preprocessing (grayscale → contrast → sharpen)
+3. **pdfplumber** — Native text extraction for digitally-generated PDFs, featuring a dynamic >500 character smart limit to detect and bypass empty scanned layers
 4. **pdf-parse** — Node.js fallback for simple text PDFs
 
 ### ❤️ Patient-Centric Voice Summary

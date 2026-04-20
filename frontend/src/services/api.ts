@@ -13,7 +13,7 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
     const token =
         typeof window !== 'undefined'
-            ? localStorage.getItem('token')
+            ? sessionStorage.getItem('token')
             : null;
 
     if (token) {

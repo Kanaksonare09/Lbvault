@@ -123,7 +123,7 @@ export default function AdminDashboardPage() {
                             <div className="p-8 flex-1">
                                 <div className="flex justify-between items-start mb-6">
                                     <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                                        user.role === 'doctor' ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'
+                                        user.role === 'doctor' ? 'bg-[#8FB9A8]/20 text-[#4F6F6F]' : 'bg-purple-50 text-purple-600'
                                     }`}>
                                         {user.role} Account
                                     </div>

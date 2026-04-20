@@ -8,9 +8,9 @@ export default function LandingPage() {
       <nav className="container mx-auto px-6 py-6 flex justify-between items-center bg-[#F6F7F5]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center space-x-3">
           <div className="w-12 h-12 bg-[#4F6F6F] rounded-2xl flex items-center justify-center shadow-lg border border-white/20">
-            <span className="text-white font-bold text-2xl italic">L</span>
+            <span className="text-white font-bold text-2xl italic">H</span>
           </div>
-          <span className="text-3xl font-bold text-[#1F2933] tracking-tight">LabVault</span>
+          <span className="text-3xl font-bold text-[#1F2933] tracking-tight">HealthScan</span>
         </div>
         <div className="hidden lg:flex space-x-10 text-[#4F6F6F] font-bold">
           <a href="#features" className="hover:text-[#8FB9A8] transition-colors">Platform</a>
@@ -22,7 +22,7 @@ export default function LandingPage() {
             Login
           </Link>
           <Link href="/signup" className="btn-primary px-8">
-            Join LabVault
+            Join HealthScan
           </Link>
         </div>
       </nav>
@@ -38,7 +38,7 @@ export default function LandingPage() {
             <span className="text-[#4F6F6F]">Report Management</span>
           </h1>
           <p className="text-xl text-[#6B7280] max-w-xl leading-relaxed font-medium">
-            LabVault connects laboratories, doctors, and patients through a secure digital system, enabling instant access, seamless sharing, and AI-driven health insights.
+            HealthScan connects laboratories, doctors, and patients through a secure digital system, enabling instant access, seamless sharing, and AI-driven health insights.
           </p>
           <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 pt-4">
             <Link href="/signup" className="btn-primary text-xl py-5 px-10 shadow-xl shadow-[#4F6F6F]/20">
@@ -68,7 +68,7 @@ export default function LandingPage() {
             <div className="rounded-2xl overflow-hidden shadow-2xl relative aspect-[4/3]">
               <Image 
                 src="/images/hero-illustration.png" 
-                alt="LabVault Medical Dashboard Illustration" 
+                alt="HealthScan Medical Dashboard Illustration" 
                 fill
                 className="object-cover"
                 priority
@@ -137,7 +137,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <h2 className="text-4xl font-black text-[#1F2933] mb-6 tracking-tight">Built for Every Stakeholder</h2>
-            <p className="text-xl text-[#6B7280] font-medium leading-relaxed">LabVault creates a seamless flow of information across the entire diagnostic journey.</p>
+            <p className="text-xl text-[#6B7280] font-medium leading-relaxed">HealthScan creates a seamless flow of information across the entire diagnostic journey.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {[
@@ -145,35 +145,47 @@ export default function LandingPage() {
                 title: 'Patients',
                 desc: 'Access your full diagnostic history instantly. Securely share reports with specialist teams and track health trends over time.',
                 color: 'bg-[#8FB9A8]',
-                label: 'Personal Health Portal'
+                label: 'Personal Health Portal',
+                image: '/images/patient-journey.png'
               },
               {
                 title: 'Physicians',
                 desc: 'Get instant notifications when lab results are ready. Review histories, visualize data, and manage patient files from a single dashboard.',
                 color: 'bg-[#4F6F6F]',
-                label: 'Clinical Decision Hub'
+                label: 'Clinical Decision Hub',
+                image: '/images/physician-hub.png'
               },
               {
                 title: 'Pathology Labs',
                 desc: 'Automate report distribution. Securely upload digital records, manage patient directories, and monitor laboratory throughput.',
                 color: 'bg-[#1F2933]',
-                label: 'LIMS Integration'
+                label: 'LIMS Integration',
+                image: '/images/lab-integration.png'
               }
             ].map((item, idx) => (
-              <div key={idx} className="p-10 rounded-3xl bg-white shadow-xl shadow-[#4F6F6F]/5 border border-[#E2E8F0] hover:border-[#4F6F6F]/30 transition-all duration-300 flex flex-col h-full">
-                <div className="inline-block px-4 py-1.5 rounded-full bg-[#F6F7F5] text-[#4F6F6F] text-xs font-bold uppercase tracking-wider mb-6 self-start">
-                  {item.label}
+              <div key={idx} className="group rounded-[40px] bg-white shadow-xl shadow-[#4F6F6F]/5 border border-[#E2E8F0] hover:border-[#4F6F6F]/30 transition-all duration-500 overflow-hidden flex flex-col items-stretch">
+                <div className="relative h-60 overflow-hidden">
+                   <Image 
+                      src={item.image} 
+                      alt={item.title} 
+                      fill 
+                      className="object-cover group-hover:scale-110 transition-transform duration-700" 
+                   />
+                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
+                     <div className="inline-block px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-[0.2em]">
+                       {item.label}
+                     </div>
+                   </div>
                 </div>
-                <div className={`w-14 h-14 ${item.color} rounded-2xl mb-8 flex items-center justify-center text-white shadow-lg`}>
-                  <span className="font-bold text-xl">{item.title.charAt(0)}</span>
-                </div>
-                <h3 className="text-2xl font-black text-[#1F2933] mb-4">{item.title}</h3>
-                <p className="text-[#6B7280] leading-relaxed font-medium text-lg mb-8 flex-grow">{item.desc}</p>
-                <div className="pt-6 border-t border-[#F1F5F9]">
-                  <Link href="/signup" className="text-[#4F6F6F] font-bold hover:text-[#8FB9A8] flex items-center space-x-2 transition-colors">
-                    <span>Explore {item.title} Dashboard</span>
-                    <span className="text-lg">→</span>
-                  </Link>
+                <div className="p-10 flex flex-col h-full">
+                  <h3 className="text-3xl font-black text-[#1F2933] mb-4 tracking-tight">{item.title}</h3>
+                  <p className="text-[#6B7280] leading-relaxed font-medium text-lg mb-8 flex-grow">{item.desc}</p>
+                  <div className="pt-6 border-t border-[#F1F5F9]">
+                    <Link href="/signup" className="text-[#4F6F6F] font-black uppercase text-xs tracking-widest hover:text-[#8FB9A8] flex items-center gap-3 transition-colors">
+                      Explore Dashboard
+                      <span className="text-xl">→</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
             ))}
@@ -187,9 +199,9 @@ export default function LandingPage() {
           <div className="flex flex-col md:flex-row justify-between items-center gap-12 mb-12">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-[#4F6F6F] rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
-                <span className="text-white font-bold text-2xl italic">L</span>
+                <span className="text-white font-bold text-2xl italic">H</span>
               </div>
-              <span className="text-3xl font-black text-[#1F2933] tracking-tight">LabVault</span>
+              <span className="text-3xl font-black text-[#1F2933] tracking-tight">HealthScan</span>
             </div>
             <div className="flex flex-wrap justify-center gap-x-12 gap-y-4 text-[#4F6F6F] font-bold">
               <a href="#" className="hover:text-[#8FB9A8] transition-colors">Product</a>
@@ -199,7 +211,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-[#F1F5F9] gap-6">
-            <p className="text-[#6B7280] font-medium">&copy; 2026 LabVault Digital Health. Licensed for clinical use.</p>
+            <p className="text-[#6B7280] font-medium">&copy; 2026 HealthScan Digital Health. Licensed for clinical use.</p>
             <div className="flex space-x-8 text-[#6B7280] font-bold text-sm">
               <a href="#" className="hover:text-[#1F2933]">Privacy Policy</a>
               <a href="#" className="hover:text-[#1F2933]">Terms of Service</a>

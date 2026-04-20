@@ -178,7 +178,7 @@ export default function PatientDashboard() {
               <span className="text-[#B8860B]">{patient.name}</span>
             </h1>
             <p className="text-[13px] text-gray-400 mt-2 max-w-xl leading-relaxed">
-              Visualizing historical metabolic data and longitudinal trends generated via Sanctuary V2.0.4 clinical engine.
+              Visualizing historical metabolic data and longitudinal trends generated via HealthScan V2.0.4 clinical engine.
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
@@ -349,7 +349,7 @@ export default function PatientDashboard() {
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-[15px] font-bold text-gray-900 mb-1">Sanctuary AI Correlation Analysis</h3>
+                  <h3 className="text-[15px] font-bold text-gray-900 mb-1">HealthScan AI Correlation Analysis</h3>
                   <p className="text-[13px] text-gray-600 leading-relaxed"
                     dangerouslySetInnerHTML={{
                       __html: aiText
@@ -442,7 +442,7 @@ export default function PatientDashboard() {
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-gray-800">Sanctuary Wearable Node</p>
+                    <p className="text-[13px] font-semibold text-gray-800">HealthScan Wearable Node</p>
                     <p className="text-[10px] text-gray-400">Real-time sync active</p>
                   </div>
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:text-[#B8860B] transition-colors"><polyline points="9 18 15 12 9 6"/></svg>

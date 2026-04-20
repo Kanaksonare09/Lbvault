@@ -44,19 +44,19 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     const isDoctor = user?.role === 'doctor';
 
     return (
-        <aside className="w-[230px] bg-[#1E3799] text-white flex flex-col h-full relative z-20 shadow-2xl shadow-blue-900/30 shrink-0">
+        <aside className="w-[230px] bg-[#2D3A3A] text-white flex flex-col h-full relative z-20 shadow-2xl shadow-emerald-950/30 shrink-0">
             {/* Brand */}
             <div className="px-6 pt-6 pb-8">
                 <Link href={`/dashboard/${user?.role}`}>
                     <h2 className="text-lg font-extrabold tracking-tight text-white leading-snug">
-                        Sanctuary Health
+                        HealthScan
                     </h2>
-                    <p className="text-[10px] text-blue-300 mt-0.5 tracking-widest">Premium Suite</p>
+                    <p className="text-[9px] text-[#8FB9A8] mt-0.5 tracking-wider">From Lab Reports to Life Insights</p>
                 </Link>
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 px-3 space-y-0.5">
+            <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto custom-scrollbar">
                 {currentRoleItems.map((item) => {
                     const isExact = pathname === item.path;
                     const isActive = isExact || (item.path !== '#' && item.path !== '/dashboard/doctor' && pathname.startsWith(item.path + '/'));
@@ -65,8 +65,8 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                             key={item.name}
                             href={item.path}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-sm font-semibold relative ${isActive
-                                    ? 'bg-[#2B4BC4] text-white font-bold'
-                                    : 'text-blue-200/70 hover:bg-white/5 hover:text-white'
+                                    ? 'bg-[#4F6F6F] text-white font-bold'
+                                    : 'text-[#F6F7F5]/60 hover:bg-white/5 hover:text-white'
                                 }`}
                         >
                             <span className="shrink-0">{item.icon}</span>
@@ -77,17 +77,10 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             </nav>
 
             {/* Bottom CTA + Logout */}
-            <div className="px-4 pb-6 space-y-2 mt-4">
-                {isDoctor && (
-                    <button className="w-full bg-[#F5C842] text-[#1a1a2e] py-3.5 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#f0c030] transition-all shadow-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
-                        Book New Patient
-                    </button>
-                )}
-
+            <div className="px-4 pb-6 mt-auto">
                 <button
                     onClick={logout}
-                    className="flex items-center w-full gap-3 px-4 py-3 rounded-xl text-blue-200/60 hover:bg-white/5 hover:text-white transition-all text-sm font-semibold"
+                    className="flex items-center w-full gap-3 px-4 py-3 rounded-xl text-[#F6F7F5]/60 hover:bg-white/5 hover:text-white transition-all text-sm font-semibold"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="9" y1="12" y2="12" /></svg>
                     Logout

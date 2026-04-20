@@ -15,7 +15,7 @@ export default function PatientReportsPage() {
     useEffect(() => {
         const fetchReports = async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = sessionStorage.getItem('token');
                 const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
                 const res = await axios.get(`${apiUrl}/api/patient/reports/my-reports`, {
                     headers: { Authorization: `Bearer ${token}` }

@@ -11,7 +11,7 @@ export default function SignupPage() {
         name: '',
         email: '',
         password: '',
-        role: 'patient',
+        role: '',
         age: '',
         gender: 'Male',
         medicalLicenseNumber: '',
@@ -111,9 +111,9 @@ export default function SignupPage() {
                 <div className="relative z-10">
                     <Link href="/" className="inline-flex items-center space-x-3 text-white">
                         <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/30">
-                            <span className="text-white font-bold text-2xl italic">L</span>
+                            <span className="text-white font-bold text-2xl italic">H</span>
                         </div>
-                        <span className="text-3xl font-bold tracking-tight">LabVault</span>
+                        <span className="text-3xl font-bold tracking-tight">HealthScan</span>
                     </Link>
                 </div>
 
@@ -128,14 +128,16 @@ export default function SignupPage() {
                 </div>
 
                 {/* Illustration with specified artifact image */}
-                <div className="absolute top-0 right-0 w-full h-full opacity-40 mix-blend-soft-light">
+                <div className="absolute inset-0 opacity-15 mix-blend-soft-light pointer-events-none">
                     <Image
-                        src="/illustration.png"
-                        alt="Medical Illustration"
+                        src="/images/auth-illustration.png"
+                        alt="HealthScan Authentication Illustration"
                         fill
                         className="object-cover scale-110 -rotate-3"
                     />
                 </div>
+                {/* Vignette for text contrast */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#4F6F6F]/40 to-black/30 pointer-events-none" />
             </div>
 
             {/* Right Section: Form */}
@@ -143,13 +145,13 @@ export default function SignupPage() {
                 <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
                     <div className="mb-8 lg:hidden text-center">
                         <Link href="/" className="inline-flex items-center space-x-2 text-[#4F6F6F]">
-                            <div className="w-10 h-10 bg-[#4F6F6F] rounded-xl flex items-center justify-center text-white font-bold">L</div>
-                            <span className="text-2xl font-bold">LabVault</span>
+                            <div className="w-10 h-10 bg-[#4F6F6F] rounded-xl flex items-center justify-center text-white font-bold">H</div>
+                            <span className="text-2xl font-bold">HealthScan</span>
                         </Link>
                     </div>
 
                     <div className="mb-8">
-                        <h2 className="text-4xl font-bold text-[#1F2933] mb-3">Join LabVault.</h2>
+                        <h2 className="text-4xl font-bold text-[#1F2933] mb-3">Join HealthScan.</h2>
                         <p className="text-[#6B7280] text-lg">Start managing your digital health today.</p>
                     </div>
 
@@ -245,6 +247,7 @@ export default function SignupPage() {
                                 value={formData.role}
                                 onChange={handleChange}
                             >
+                                <option value="" disabled hidden></option>
                                 <option value="patient">Patient</option>
                                 <option value="doctor">Doctor</option>
                                 <option value="pathology">Pathology Administrator</option>

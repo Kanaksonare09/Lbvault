@@ -46,7 +46,7 @@ export default function PatientReportViewerPage() {
         if (pollRef.current) return; // already polling
         pollRef.current = setInterval(async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = sessionStorage.getItem('token');
                 const res = await fetch(`${apiBase}/api/reports/${id}/status`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -135,14 +135,15 @@ export default function PatientReportViewerPage() {
     const biomarkerRows = rawBiomarkers.map((b: any) => {
         const numVal = Number(b.value);
         let status = 'unknown';
-        if (!isNaN(numVal) && b.referenceMin !== undefined && b.referenceMax !== undefined) {
+        const hasRange = b.referenceMin !== undefined && b.referenceMin !== null && b.referenceMax !== undefined && b.referenceMax !== null;
+        if (!isNaN(numVal) && hasRange) {
             status = b.isAbnormal ? (numVal < b.referenceMin ? 'low' : 'high') : 'normal';
         }
         return {
             key: b.biomarkerName,
             val: b.value,
             unit: b.unit,
-            norm: { min: b.referenceMin, max: b.referenceMax, unit: b.unit },
+            norm: hasRange ? { min: b.referenceMin, max: b.referenceMax, unit: b.unit } : null,
             status
         };
     });
@@ -151,7 +152,9 @@ export default function PatientReportViewerPage() {
         label: b.biomarkerName.toLowerCase(),
         value: Number(b.value),
         unit: b.unit,
-        ranges: { min: b.referenceMin, max: b.referenceMax }
+        ranges: b.referenceMin !== undefined && b.referenceMin !== null && b.referenceMax !== undefined && b.referenceMax !== null
+            ? { min: b.referenceMin, max: b.referenceMax }
+            : undefined
     }));
 
     const TABS = [

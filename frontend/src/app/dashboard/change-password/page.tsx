@@ -28,7 +28,7 @@ export default function ChangePasswordPage() {
         setError('');
 
         try {
-            const token = localStorage.getItem('token');
+            const token = sessionStorage.getItem('token');
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
             const res = await fetch(`${apiUrl}/api/auth/change-password`, {
                 method: 'POST',
@@ -43,7 +43,7 @@ export default function ChangePasswordPage() {
                 // Refresh user state (locally clear the flag)
                 if (user) {
                     const newUser = { ...user, mustChangePassword: false };
-                    localStorage.setItem('user', JSON.stringify(newUser));
+                    sessionStorage.setItem('user', JSON.stringify(newUser));
                     // Redirect based on role
                     const rolePath = `/dashboard/${user.role}`;
                     router.push(rolePath);

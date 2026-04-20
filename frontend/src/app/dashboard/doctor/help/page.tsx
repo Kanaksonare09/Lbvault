@@ -17,16 +17,16 @@ export default function HelpPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-white rounded-[32px] p-8 border border-[#E2E8F0] shadow-sm space-y-4 hover:border-[#2B59FF]/30 transition-all">
-          <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2B59FF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M8 7h6"/><path d="M8 11h8"/></svg>
+        <div className="bg-white rounded-[32px] p-8 border border-[#E2E8F0] shadow-sm space-y-4 hover:border-[#4F6F6F]/30 transition-all">
+          <div className="w-12 h-12 bg-[#8FB9A8]/10 rounded-2xl flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M8 7h6"/><path d="M8 11h8"/></svg>
           </div>
           <h3 className="text-xl font-black text-[#1F2933]">User Documentation</h3>
           <p className="text-sm text-[#6B7280] leading-relaxed">Detailed guides on clinical workflows, AI interpretation, and patient management.</p>
-          <button className="text-[11px] font-black uppercase tracking-widest text-[#2B59FF] flex items-center gap-2">Read Guide <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+          <button className="text-[11px] font-black uppercase tracking-widest text-[#4F6F6F] flex items-center gap-2">Read Guide <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
         </div>
 
-        <div className="bg-white rounded-[32px] p-8 border border-[#E2E8F0] shadow-sm space-y-4 hover:border-[#2B59FF]/30 transition-all">
+        <div className="bg-white rounded-[32px] p-8 border border-[#E2E8F0] shadow-sm space-y-4 hover:border-[#4F6F6F]/30 transition-all">
           <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
           </div>

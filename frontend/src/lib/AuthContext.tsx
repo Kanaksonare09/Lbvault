@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const router = useRouter();
 
     const verifySession = async (silent = false) => {
-        const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+        const token = typeof window !== 'undefined' ? sessionStorage.getItem('token') : null;
         
         if (!token) {
             console.log('[AUTH] No session token found');
@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (!res) {
                 console.warn('[AUTH] Using fallback cached user session.');
-                const cachedUser = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+                const cachedUser = typeof window !== 'undefined' ? sessionStorage.getItem('user') : null;
                 if (cachedUser) {
                     try {
                         const parsed = JSON.parse(cachedUser);
@@ -77,11 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const normalizedUser = { ...userData, id, role };
                 setUser(normalizedUser);
                 // Sync to localStorage
-                localStorage.setItem('user', JSON.stringify(normalizedUser));
+                sessionStorage.setItem('user', JSON.stringify(normalizedUser));
             } else {
                 console.warn('[AUTH] Session verification failed, status:', res.status);
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                sessionStorage.removeItem('token');
+                sessionStorage.removeItem('user');
                 setUser(null);
             }
         } catch (err) {
@@ -115,16 +115,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         const normalizedUser = { ...userData, id, role };
 
-        localStorage.setItem('user', JSON.stringify(normalizedUser));
-        localStorage.setItem('token', token);
+        sessionStorage.setItem('user', JSON.stringify(normalizedUser));
+        sessionStorage.setItem('token', token);
         setUser(normalizedUser);
 
         router.replace(getDashboardRoute(role, userData.mustChangePassword));
     };
 
     const logout = () => {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
+        sessionStorage.removeItem('user');
+        sessionStorage.removeItem('token');
         setUser(null);
         router.replace('/login');
     };

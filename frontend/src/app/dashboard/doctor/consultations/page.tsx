@@ -3,7 +3,7 @@
 import React from 'react';
 
 const CLR = {
-  primary: '#2B59FF',
+  primary: '#4F6F6F',
   sage: '#4F6F6F',
   bg: '#F6F7F5',
   card: '#FFFFFF',
@@ -33,7 +33,7 @@ export default function ConsultationsPage() {
           <div className="bg-white rounded-[32px] border border-[#E2E8F0] shadow-sm overflow-hidden">
             <div className="px-8 py-6 border-b border-[#F6F7F5] flex justify-between items-center">
               <h3 className="text-sm font-black text-[#4F6F6F] uppercase tracking-widest">Today's Schedule</h3>
-              <span className="text-xs font-bold text-[#2B59FF] bg-blue-50 px-3 py-1 rounded-full">October 18, 2026</span>
+              <span className="text-xs font-bold text-[#4F6F6F] bg-[#8FB9A8]/10 px-3 py-1 rounded-full">October 18, 2026</span>
             </div>
             <div className="divide-y divide-[#F6F7F5]">
               {consultations.map((c) => (
@@ -49,7 +49,7 @@ export default function ConsultationsPage() {
                   </div>
                   <div className="flex items-center gap-4">
                     <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${
-                      c.status === 'Urgent' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
+                      c.status === 'Urgent' ? 'bg-red-50 text-red-600' : 'bg-[#8FB9A8]/10 text-[#4F6F6F]'
                     }`}>
                       {c.status}
                     </span>
@@ -71,7 +71,7 @@ export default function ConsultationsPage() {
               <p className="text-5xl font-black text-[#8FB9A8] mb-4">42m</p>
               <p className="text-sm text-gray-400 font-medium">With Robert Smith for Initial Consultation</p>
             </div>
-            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#2B59FF]/20 rounded-full blur-3xl" />
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#8FB9A8]/10 rounded-full blur-3xl" />
           </div>
 
           <div className="bg-white rounded-[32px] border border-[#E2E8F0] p-8 shadow-sm">
@@ -79,11 +79,11 @@ export default function ConsultationsPage() {
             <div className="space-y-4">
               <div className="flex justify-between items-center p-4 bg-[#F6F7F5] rounded-2xl">
                 <span className="text-sm font-bold text-[#1F2933]">Avg. Session</span>
-                <span className="text-sm font-black text-[#2B59FF]">24 min</span>
+                <span className="text-sm font-black text-[#4F6F6F]">24 min</span>
               </div>
               <div className="flex justify-between items-center p-4 bg-[#F6F7F5] rounded-2xl">
                 <span className="text-sm font-bold text-[#1F2933]">Total Hours</span>
-                <span className="text-sm font-black text-[#2B59FF]">6.5 hrs</span>
+                <span className="text-sm font-black text-[#4F6F6F]">6.5 hrs</span>
               </div>
             </div>
           </div>

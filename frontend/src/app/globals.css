@@ -2,23 +2,23 @@
 
 
 :root {
-  --background: #F8FAFC;
-  --primary: #2B59FF;
+  --background: #F1F5F5;
+  --primary: #4F6F6F;
   --primary-foreground: #FFFFFF;
-  --secondary: #FFEAB0;
-  --secondary-foreground: #1F2933;
-  --foreground: #1F2933;
+  --secondary: #8FB9A8;
+  --secondary-foreground: #2D3A3A;
+  --foreground: #2D3A3A;
   --card: #FFFFFF;
-  --card-foreground: #1F2933;
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
+  --card-foreground: #2D3A3A;
+  --muted: #F8FAFA;
+  --muted-foreground: #5C7C7C;
   --accent: #FFEAB0;
   --accent-foreground: #1F2933;
   --border: #E2E8F0;
   --radius: 1.5rem;
   
-  /* Sanctuary Specifics */
-  --sidebar: #1E40AF;
+  /* HealthScan Specifics */
+  --sidebar: #2D3A3A;
   --accent-soft: #FFFBEB;
   --success: #10B981;
   --warning: #F59E0B;
@@ -28,8 +28,9 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
 }
 
 /* Auth Layout Utilities */
@@ -54,17 +55,19 @@ body {
 .floating-label-group input,
 .floating-label-group select {
   width: 100%;
-  padding: 1.25rem 1rem 0.5rem;
+  padding: 1.5rem 1rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
   font-size: 1rem;
+  color: var(--foreground);
   transition: all 0.2s ease;
+  appearance: none;
 }
 
 .floating-label-group label {
   position: absolute;
-  top: 1rem;
+  top: 1.1rem;
   left: 1rem;
   color: var(--muted-foreground);
   font-size: 1rem;
@@ -75,10 +78,12 @@ body {
 .floating-label-group input:focus~label,
 .floating-label-group input:not(:placeholder-shown)~label,
 .floating-label-group select:focus~label,
-.floating-label-group select:not([value=""])~label {
-  top: 0.4rem;
+.floating-label-group select:not(:placeholder-shown)~label,
+.floating-label-group select:valid~label {
+  top: 0.5rem;
   font-size: 0.75rem;
   color: var(--primary);
+  font-weight: 700;
 }
 
 .floating-label-group input:focus {
@@ -180,4 +185,20 @@ body {
 .card-premium:hover {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
   transform: translateY(-2px);
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(143, 185, 168, 0.2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(143, 185, 168, 0.4);
 }

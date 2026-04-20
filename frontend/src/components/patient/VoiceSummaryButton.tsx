@@ -73,7 +73,7 @@ export default function VoiceSummaryButton({ text, lang, reportId, patientId, di
                     : status === 'playing'
                     ? 'bg-rose-500 text-white shadow-rose-500/30'
                     : patientId 
-                    ? 'bg-[#1F2933] text-white hover:bg-[#2B59FF] shadow-lg'
+                    ? 'bg-[#1F2933] text-white hover:bg-[#4F6F6F] shadow-lg'
                     : 'bg-[#F5C842] text-[#1a1000] hover:bg-[#f0c030] shadow-[#F5C842]/30'
                 }`}
                 title={status === 'playing' ? "Stop Audio" : `Play ${displayLabel}`}

@@ -203,6 +203,7 @@ function UploadForm() {
                                     <option value="Blood Glucose">Blood Glucose</option>
                                     <option value="Liver Function Test">Liver Function Test</option>
                                     <option value="Kidney Function Test">Kidney Function Test</option>
+                                    <option value="Urine Test">Urine Test</option>
                                 </select>
                                 <label htmlFor="testType">Test Category</label>
                             </div>

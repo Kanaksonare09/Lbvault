@@ -101,8 +101,8 @@ exports.uploadReport = async (req, res) => {
                             biomarkerName: String(b.name || 'Unknown').toLowerCase(),
                             value: val,
                             unit: String(b.unit || ''),
-                            referenceMin: b.min || 0,
-                            referenceMax: b.max || 0,
+                            referenceMin: b.min !== undefined && b.min !== null ? b.min : null,
+                            referenceMax: b.max !== undefined && b.max !== null ? b.max : null,
                             isAbnormal: severity !== 'Normal',
                             severity,
                             interpretation: b.interpretation || `Value detected as ${trend.toLowerCase()}.`,
@@ -465,20 +465,23 @@ exports.generateVoice = async (req, res) => {
 
         // PATIENT BRANCH (Single Report)
         if (!summaryText && analysis) {
-            summaryText = langCode === 'en' ? analysis.summaryEn : analysis.translations.get(langCode);
+            summaryText = analysis.translations?.get(langCode) || analysis.summaryEn;
         }
         if (!summaryText) return res.status(400).json({ message: 'No summary text available.' });
 
         const cachedUrl = analysis?.audioUrls?.get(langCode);
-        if (cachedUrl) return res.status(200).json({ audioUrl: cachedUrl, cached: true });
+        const cachedScript = analysis?.translations?.get(`script_${langCode}`);
+        if (cachedUrl) return res.status(200).json({ audioUrl: cachedUrl, voiceScript: cachedScript || '', cached: true });
 
         const empatheticText = await rewriteService.rewriteAsEmpathetic(summaryText, langCode);
-        const script = await scriptService.wrapInSpeechMarkers(empatheticText, language);
+        const script = scriptService.buildVoiceScript(empatheticText, language);
         const audioUrl = await ttsService.generateAndStoreAudio(script, langCode);
 
         if (analysis) {
             if (!analysis.audioUrls) analysis.audioUrls = new Map();
+            if (!analysis.translations) analysis.translations = new Map();
             analysis.audioUrls.set(langCode, audioUrl);
+            analysis.translations.set(`script_${langCode}`, script);
             await analysis.save();
         }
         res.status(200).json({ audioUrl, voiceScript: script, language: langCode });

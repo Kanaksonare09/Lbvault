@@ -93,7 +93,7 @@ export default function Header() {
                                 key={tab.name}
                                 href={tab.path}
                                 className={`text-sm font-semibold pb-1 transition-all ${isActive
-                                        ? 'text-[#1E3799] border-b-2 border-[#F5C842]'
+                                        ? 'text-[#4F6F6F] border-b-2 border-[#F5C842]'
                                         : 'text-gray-400 hover:text-gray-600'
                                     }`}
                             >
@@ -127,7 +127,7 @@ export default function Header() {
                         }}
                         onFocus={() => setShowResults(true)}
                         placeholder={isDoctor ? "Search patients..." : "Search reports..."}
-                        className="w-full bg-[#F6F7F5] border-2 border-transparent focus:border-[#4F6F6F]/20 rounded-2xl py-2.5 pl-12 pr-4 text-sm text-[#1F2933] font-bold outline-none transition-all placeholder:text-gray-400 shadow-sm"
+                        className="w-full bg-[#F1F5F5] border-2 border-transparent focus:border-[#4F6F6F]/20 rounded-2xl py-2.5 pl-12 pr-4 text-sm text-[#2D3A3A] font-bold outline-none transition-all placeholder:text-[#7A9999] shadow-sm"
                     />
                 </div>
 
@@ -148,10 +148,10 @@ export default function Header() {
                                             setShowResults(false);
                                             setQuery('');
                                         }}
-                                        className="w-full px-5 py-4 text-left hover:bg-[#F6F7F5] border-b border-[#E2E8F0] last:border-0 flex items-center justify-between group transition-all"
+                                        className="w-full px-5 py-4 text-left hover:bg-[#F1F5F5] border-b border-[#E2E8F0] last:border-0 flex items-center justify-between group transition-all"
                                     >
                                         <div>
-                                            <p className="font-black text-[#1F2933] group-hover:text-[#4F6F6F] transition-colors">{item.title}</p>
+                                            <p className="font-black text-[#2D3A3A] group-hover:text-[#4F6F6F] transition-colors">{item.title}</p>
                                             <div className="flex items-center gap-2 mt-0.5">
                                                 <span className="text-[10px] font-black uppercase bg-[#8FB9A8]/10 text-[#4F6F6F] px-1.5 py-0.5 rounded">
                                                     {item.subtitle}
@@ -167,8 +167,8 @@ export default function Header() {
                                 <div className="w-12 h-12 bg-[#F6F7F5] rounded-2xl flex items-center justify-center mx-auto mb-3">
                                     <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                                 </div>
-                                <p className="text-sm font-black text-[#1F2933]">No {isDoctor ? 'patients' : 'reports'} found</p>
-                                <p className="text-[10px] text-gray-400 mt-1">Try a different search term</p>
+                                <p className="text-sm font-black text-[#2D3A3A]">No {isDoctor ? 'patients' : 'reports'} found</p>
+                                <p className="text-[10px] text-[#7A9999] mt-1">Try a different search term</p>
                             </div>
                         )}
                     </div>
@@ -195,7 +195,7 @@ export default function Header() {
                         </p>
                         <p className="text-xs text-gray-400 capitalize">{user?.role === 'doctor' ? 'Clinical Provider' : user?.role}</p>
                     </div>
-                    <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden group-hover:ring-2 group-hover:ring-blue-300 transition-all">
+                    <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden group-hover:ring-2 group-hover:ring-[#8FB9A8] transition-all">
                         <span className="text-sm font-bold text-gray-500">{user?.name?.charAt(0)}</span>
                     </div>
                 </Link>

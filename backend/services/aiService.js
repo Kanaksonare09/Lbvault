@@ -99,37 +99,48 @@ DO NOT mix random English words. All explanations, all advice, all headings must
         const langCode = String(language).toLowerCase().substring(0, 2);
         const langRule = langInstructions[langCode] || langInstructions['en'];
 
-        const prompt = `You are a Universal Medical Intelligence Engine.
-Your task is to analyze the following medical report OCR text and perform TWO tasks in one pass:
-1. Extract ALL measurable parameters/biomarkers as a JSON array.
-2. Generate a patient-friendly summary with emojis and actionable steps.
+        const prompt = `You are an empathetic Health Guide and Medical Interpreter.
+Your task is to analyze the following medical report OCR text and explain it to a NON-MEDICAL person in a warm, encouraging, and clear tone.
+
+Perform TWO tasks in one pass:
+1. Extract EVERY SINGLE measurable parameter/biomarker found in the text into the JSON array. Do not miss any!
+CRITICAL RULE 1: Extract ALL valid parameters (e.g., Creatinine, Urea, Sodium, Potassium, Hemoglobin, etc.) that have a measured result in the text.
+CRITICAL RULE 2: ABSOLUTELY DO NOT treat the Title or Category of the report (e.g., "Kidney Function Test", "Liver Panel", "CBC", "Thyroid Profile") as a biomarker itself. A biomarker must be a specific test item with a distinct measured value. 
+CRITICAL RULE 3: DO NOT generate, make up, guess, or infer any parameters that are not explicitly present in the text.
+2. Generate a highly patient-friendly summary. Imagine you are talking to a concerned person at home:
+   - Use simple words (e.g., instead of "Hyperlipidemia", use "Higher levels of fat or cholesterol in your blood").
+   - Explain WHY a certain marker matters (e.g., "This test helps us see how well your liver is cleaning your system").
+   - Use a tone that is optimistic yet cautious, providing clear next steps.
 
 Output strictly a valid JSON object with this exact structure:
 {
   "biomarkers": [
     {
-      "name": "string",
-      "value": number,
+      "name": "Friendly test name (e.g., Blood Sugar)",
+      "clinical_name": "Exact clinical name EXACTLY AS IT APPEARS in text (e.g., HbA1c)",
+      "value": number (The actual test result value exactly from the text),
       "unit": "string",
-      "min": number,
-      "max": number,
+      "min": number (Extract the reference/normal range MINIMUM exactly as shown in the text. If the text does not supply a reference range, use null. DO NOT guess or hallucinate.),
+      "max": number (Extract the reference/normal range MAXIMUM exactly as shown in the text. If the text does not supply a reference range, use null. DO NOT guess or hallucinate.),
       "severity": "Normal|Mild|Moderate|Critical",
-      "interpretation": "string",
+      "interpretation": "A very simple 1-sentence explanation of what this result means for the user's body.",
       "confidence": number
     }
   ],
-  "summary": "string (formatted with **bold** for headers and emojis, exactly 3-4 paragraphs with an Actionable Steps section at the end)"
+  "summary": "string (A warm, 3-4 paragraph message. Start with a greeting. Breakdown the most important results first using simple analogies. End with a clear 'Your Next Steps' section with bullet points using emojis.)"
 }
 
 ${langRule}
 
 General Rules:
-- DO NOT hallucinate common tests (like Hemoglobin or Blood) if the OCR text belongs to a different test (like Liver, Urine, or Radiology).
-- IF THE OCR TEXT IS UNREADABLE or missing core markers, set parameters to empty and include "No clear medical data detected in this scan" in the summary.
-- If reference ranges (min/max) are missing, use your internal medical knowledge for severity/interpretation.
+- STRICT RULE ON BIOMARKERS: Only include a biomarker if it appears in the Report Text. Do NOT make "Kidney Function Test" a biomarker.
+- STRICT RULE ON REFERENCE RANGES: Extract the reference ranges/normal ranges from the text itself. DO NOT use your internal knowledge to fill in reference ranges. If it's missing in the text, use null for min and max.
+- AVOID complex medical jargon. If you must use a medical term, explain it immediately in brackets.
+- USE analogies (e.g., "Think of your kidneys as your body's filter system").
+- IF THE OCR TEXT IS UNREADABLE, include "We couldn't quite read the details of this scan clearly. Could you please upload a clearer photo?"
 - Output ONLY the JSON object.
 
-Report text (STRICT DATA SOURCE - DO NOT GUESS): ${safeText}`;
+Report text (STRICT DATA SOURCE): ${safeText}`;
 
         const GROQ_API_KEY = process.env.GROQ_API_KEY;
         const useGroq = GROQ_API_KEY && !GROQ_API_KEY.includes('your_groq');

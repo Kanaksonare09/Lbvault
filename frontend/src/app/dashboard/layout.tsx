@@ -58,7 +58,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
 
     return (
-        <div className="flex h-screen bg-[#F5F7FA] overflow-hidden">
+        <div className="flex h-screen bg-[#F1F5F5] overflow-hidden">
             <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
             <div className="flex-1 flex flex-col h-full overflow-hidden">
