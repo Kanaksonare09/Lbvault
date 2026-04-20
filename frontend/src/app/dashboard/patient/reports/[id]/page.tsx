@@ -138,6 +138,12 @@ export default function PatientReportViewerPage() {
         const hasRange = b.referenceMin !== undefined && b.referenceMin !== null && b.referenceMax !== undefined && b.referenceMax !== null;
         if (!isNaN(numVal) && hasRange) {
             status = b.isAbnormal ? (numVal < b.referenceMin ? 'low' : 'high') : 'normal';
+        } else if (b.isAbnormal) {
+            // Fallback to AI severity if range is missing
+            const sev = (b.severity || '').toLowerCase();
+            status = sev === 'critical' || sev === 'moderate' || sev === 'mild' ? 'high' : 'unknown';
+        } else if (b.isAbnormal === false) {
+            status = 'normal';
         }
         return {
             key: b.biomarkerName,

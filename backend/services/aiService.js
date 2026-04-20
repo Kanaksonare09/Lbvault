@@ -38,7 +38,9 @@ exports.extractBiomarkersFromDocument = async (filePath) => {
                 console.log('[OCR PIPELINE] Falling back to pdf-parse for native PDF text extraction...');
                 const dataBuffer = fs.readFileSync(filePath);
                 try {
-                    const pdfData = await pdfParse(dataBuffer);
+                    // Handle standard pdf-parse function call
+                    const pdf = require('pdf-parse');
+                    const pdfData = await pdf(dataBuffer);
                     if (pdfData && pdfData.text) extractedText = pdfData.text;
                 } catch (pdfErr) {
                     console.error('[OCR PIPELINE ERROR] pdf-parse failed:', pdfErr.message);
@@ -46,14 +48,19 @@ exports.extractBiomarkersFromDocument = async (filePath) => {
             }
         }
 
-        console.log(`[OCR PIPELINE] Extracted ${extractedText.length} characters. Routing to Unified AI Engine...`);
-
+        console.log(`[OCR PIPELINE] Final Extracted Text Length: ${extractedText.length}`);
+        
         // Force 'en' fallback if result is poor
         const result = await exports.analyzeReportUniversal(extractedText, 'en');
 
+        console.log(`[AI EXTRACTION] Extracted ${result.biomarkers?.length || 0} biomarkers.`);
+        if (result.biomarkers && result.biomarkers.length > 0) {
+            console.log(`[AI EXTRACTION] List: ${result.biomarkers.map(b => b.clinical_name || b.name).join(', ')}`);
+        }
+
         return {
             rawOcrText: extractedText,
-            biomarkers: result.biomarkers || [],
+            biomarkers: Array.isArray(result.biomarkers) ? result.biomarkers : [],
             summary: result.summary || 'AI Analysis was unable to generate a summary from this document.'
         };
     } catch (error) {
@@ -108,6 +115,7 @@ CRITICAL RULE 1: Extract ALL valid parameters (e.g., Creatinine, Urea, Sodium, P
 CRITICAL RULE 2: ABSOLUTELY DO NOT treat the Title or Category of the report (e.g., "Kidney Function Test", "Liver Panel", "CBC", "Thyroid Profile") as a biomarker itself. A biomarker must be a specific test item with a distinct measured value. 
 CRITICAL RULE 3: DO NOT generate, make up, guess, or infer any parameters that are not explicitly present in the text.
 2. Generate a highly patient-friendly summary. Imagine you are talking to a concerned person at home:
+   - **HIGHLIGHT ABNORMALITIES**: If a value is outside the reference range, highlight it with ⚠️ and explain it prominently.
    - Use simple words (e.g., instead of "Hyperlipidemia", use "Higher levels of fat or cholesterol in your blood").
    - Explain WHY a certain marker matters (e.g., "This test helps us see how well your liver is cleaning your system").
    - Use a tone that is optimistic yet cautious, providing clear next steps.
@@ -118,22 +126,21 @@ Output strictly a valid JSON object with this exact structure:
     {
       "name": "Friendly test name (e.g., Blood Sugar)",
       "clinical_name": "Exact clinical name EXACTLY AS IT APPEARS in text (e.g., HbA1c)",
-      "value": number (The actual test result value exactly from the text),
+      "value": number (The actual test result value),
       "unit": "string",
-      "min": number (Extract the reference/normal range MINIMUM exactly as shown in the text. If the text does not supply a reference range, use null. DO NOT guess or hallucinate.),
-      "max": number (Extract the reference/normal range MAXIMUM exactly as shown in the text. If the text does not supply a reference range, use null. DO NOT guess or hallucinate.),
-      "severity": "Normal|Mild|Moderate|Critical",
-      "interpretation": "A very simple 1-sentence explanation of what this result means for the user's body.",
+      "min": number|null (MIN reference value),
+      "max": number|null (MAX reference value),
+      "severity": "Normal|Mild|Moderate|Critical", (Calculate this strictly: if value is outside min/max range, it MUST NOT be "Normal"),
+      "interpretation": "A very simple 1-sentence explanation. Use 'High' or 'Low' explicitly if abnormal.",
       "confidence": number
     }
   ],
-  "summary": "string (A warm, 3-4 paragraph message. Start with a greeting. Breakdown the most important results first using simple analogies. End with a clear 'Your Next Steps' section with bullet points using emojis.)"
+  "summary": "string (A warm, 3-4 paragraph message. Start with a greeting. If there are abnormalities, start with a section called '🚨 Important Abnormalities' and list them. Then use simple analogies for the rest. End with 'Your Next Steps' with emojis.)"
 }
 
 ${langRule}
 
 General Rules:
-- STRICT RULE ON BIOMARKERS: Only include a biomarker if it appears in the Report Text. Do NOT make "Kidney Function Test" a biomarker.
 - STRICT RULE ON REFERENCE RANGES: Extract the reference ranges/normal ranges from the text itself. DO NOT use your internal knowledge to fill in reference ranges. If it's missing in the text, use null for min and max.
 - AVOID complex medical jargon. If you must use a medical term, explain it immediately in brackets.
 - USE analogies (e.g., "Think of your kidneys as your body's filter system").

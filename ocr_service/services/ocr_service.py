@@ -58,6 +58,18 @@ def _extract_native_pdf_text(file_bytes):
         return ""
     except Exception as e:
         logger.warning(f"[Strategy 1 - pdfplumber] Failed: {e}")
+        # Secondary fallback for native text if pdfplumber fails
+        try:
+            import pypdf
+            reader = pypdf.PdfReader(io.BytesIO(file_bytes))
+            text = ""
+            for page in reader.pages:
+                text += page.extract_text() + "\n"
+            if len(text.strip()) > 10:
+                logger.info(f"[Strategy 1 - pypdf Fallback] Extracted {len(text)} chars.")
+                return text.strip()
+        except:
+            pass
         return ""
 
 
@@ -98,6 +110,12 @@ def _extract_with_tesseract(images):
     try:
         import pytesseract
         from PIL import ImageFilter, ImageEnhance
+        
+        # Explicitly set tesseract path for Mac/Homebrew environments
+        tess_path = "/opt/homebrew/bin/tesseract"
+        if os.path.exists(tess_path):
+            pytesseract.pytesseract.tesseract_cmd = tess_path
+            
         logger.info("[Strategy 3 - Tesseract] Using local Tesseract OCR...")
         text_blocks = []
         for i, img in enumerate(images):
@@ -147,7 +165,9 @@ def process_file_in_memory(file_stream, filename, enable_preprocessing=True):
         if is_pdf:
             try:
                 from pdf2image import convert_from_bytes
-                images = convert_from_bytes(file_bytes)
+                # Explicitly add poppler path for Mac Homebrew environments
+                poppler_path = "/opt/homebrew/bin" if os.path.exists("/opt/homebrew/bin/pdftocairo") else None
+                images = convert_from_bytes(file_bytes, poppler_path=poppler_path)
                 logger.info(f"Converted PDF to {len(images)} images for visual OCR.")
             except Exception as pdf_err:
                 logger.warning(f"pdf2image failed: {pdf_err}. Trying Tesseract directly on bytes.")
