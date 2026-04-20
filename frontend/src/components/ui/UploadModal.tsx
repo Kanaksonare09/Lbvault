@@ -69,8 +69,8 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
         {/* Header */}
         <div className="p-8 border-b border-[#E2E8F0] flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-[#4F6F6F]/10 rounded-2xl flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <div className="w-12 h-12 bg-[#FEF3C7] rounded-2xl flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8A84B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
               </svg>
             </div>
@@ -93,7 +93,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
 
           {/* Drop Zone */}
           <div
-            className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${dragActive ? 'border-[#4F6F6F] bg-[#4F6F6F]/5 scale-[1.01]' : file ? 'border-emerald-400 bg-emerald-50/50' : 'border-[#E2E8F0] hover:border-[#4F6F6F]/50 hover:bg-[#F6F7F5]'}`}
+            className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all ${dragActive ? 'border-[#C8A84B] bg-[#FEF3C7]/30 scale-[1.01]' : file ? 'border-[#C8A84B] bg-[#FEF9EC]' : 'border-[#E2E8F0] hover:border-[#C8A84B]/50 hover:bg-[#FEF9EC]/30'}`}
             onDragOver={e => { e.preventDefault(); setDragActive(true); }}
             onDragLeave={() => setDragActive(false)}
             onDrop={handleDrop}
@@ -102,8 +102,8 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
             <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,.png,.jpg,.jpeg" onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
             {file ? (
               <div className="space-y-1">
-                <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <div className="w-12 h-12 bg-[#FEF3C7] rounded-2xl flex items-center justify-center mx-auto mb-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8A84B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
                 <p className="font-black text-[#1F2933]">{file.name}</p>
                 <p className="text-xs text-[#6B7280]">{(file.size / 1024 / 1024).toFixed(2)} MB · Click to change</p>
@@ -111,7 +111,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
             ) : (
               <div className="space-y-2">
                 <div className="w-12 h-12 bg-[#F6F7F5] rounded-2xl flex items-center justify-center mx-auto">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C8A84B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                   </svg>
                 </div>
@@ -151,7 +151,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
                 <span>{progress}%</span>
               </div>
               <div className="h-2.5 w-full bg-[#E2E8F0] rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-[#4F6F6F] to-[#8FB9A8] rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
+                <div className="h-full bg-gradient-to-r from-[#C8A84B] to-[#FCEEA5] rounded-full transition-all duration-300" style={{ width: `${progress}%` }} />
               </div>
             </div>
           )}
@@ -164,7 +164,7 @@ export default function UploadModal({ onClose, onSuccess }: UploadModalProps) {
             <button
               type="submit"
               disabled={uploading || !file}
-              className="flex-1 py-3 rounded-2xl bg-[#4F6F6F] text-white font-black text-sm hover:bg-[#1F2933] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 py-3 rounded-2xl bg-[#C8A84B] text-white font-black text-sm hover:bg-[#92400E] transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {uploading ? (
                 <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /><span>Processing…</span></>

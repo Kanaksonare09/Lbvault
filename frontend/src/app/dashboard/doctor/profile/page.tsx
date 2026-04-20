@@ -1,234 +1,310 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { doctorService, DoctorProfile } from '@/services/doctorService';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import api from '@/services/api';
 
+/* ─── SPECIALTIES ────────────────────────────────────────────── */
+const SPECIALTIES = [
+    'General Medicine', 'Cardiology', 'Dermatology', 'Endocrinology',
+    'Gastroenterology', 'Hematology', 'Nephrology', 'Neurology',
+    'Oncology', 'Ophthalmology', 'Orthopedics', 'Pediatrics',
+    'Psychiatry', 'Pulmonology', 'Radiology', 'Rheumatology',
+    'Surgery (General)', 'Urology', 'Obstetrics & Gynecology', 'Other',
+];
+
+/* ─── BANNER HELPERS ──────────────────────────────────────────── */
+function SuccessBanner({ message, onDismiss }: { message: string; onDismiss: () => void }) {
+    return (
+        <div className="flex items-center gap-3 p-4 bg-[#FEF9EC] border border-[#FDE68A] rounded-2xl animate-in fade-in duration-300">
+            <div className="w-7 h-7 bg-[#C8A84B] rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+            </div>
+            <p className="text-sm font-bold text-[#92400E] flex-1">{message}</p>
+            <button onClick={onDismiss} className="text-[#C8A84B] hover:text-[#92400E] transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+            </button>
+        </div>
+    );
+}
+
+function ErrorBanner({ message }: { message: string }) {
+    return (
+        <div className="flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 rounded-2xl">
+            <div className="w-7 h-7 bg-rose-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+            </div>
+            <p className="text-sm font-bold text-rose-700">{message}</p>
+        </div>
+    );
+}
+
+/* ─── FIELD WRAPPER ──────────────────────────────────────────── */
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+    return (
+        <div>
+            <label className="block text-[10.5px] font-black uppercase tracking-[0.12em] text-[#94A3B8] mb-2">{label}</label>
+            {children}
+        </div>
+    );
+}
+
+const INPUT = "w-full px-4 py-3 rounded-xl border border-[#E2E8F0] text-[13.5px] font-medium text-[#0F172A] outline-none focus:border-[#C8A84B] focus:ring-2 focus:ring-[#C8A84B]/10 transition-all bg-white placeholder:text-[#CBD5E0]";
+const SELECT = INPUT + " appearance-none cursor-pointer";
+
+/* ─── PAGE ───────────────────────────────────────────────────── */
 export default function DoctorProfilePage() {
     const { user, refreshUser } = useAuth();
-    const [profile, setProfile] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [message, setMessage] = useState({ type: '', text: '' });
 
+    const [form, setForm] = useState({
+        name: '', phone: '', address: '',
+        specialty: '', licenseNumber: '', hospitalName: '',
+        yearsOfExperience: '', consultationFee: '', bio: '',
+    });
+    const [profileLoading, setProfileLoading] = useState(true);
+    const [profileSaving,  setProfileSaving]  = useState(false);
+    const [profileMsg,     setProfileMsg]     = useState('');
+    const [profileErr,     setProfileErr]     = useState('');
+
+    const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    const [pwSaving, setPwSaving] = useState(false);
+    const [pwMsg,    setPwMsg]    = useState('');
+    const [pwErr,    setPwErr]    = useState('');
+    const [showPw, setShowPw] = useState({ current: false, new: false, confirm: false });
+
+    const [tab, setTab] = useState<'profile' | 'security'>('profile');
+
+    /* load */
     useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const data = await doctorService.getProfile();
-                setProfile(data);
-            } catch (err) {
-                console.error('Failed to fetch profile', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProfile();
+        api.get('/auth/me')
+            .then(res => {
+                const u = res.data;
+                const p = u.profile || {};
+                setForm({
+                    name:               u.name || '',
+                    phone:              u.phone || '',
+                    address:            p.address || '',
+                    specialty:          p.specialty || '',
+                    licenseNumber:      p.licenseNumber || '',
+                    hospitalName:       p.hospitalName || '',
+                    yearsOfExperience:  p.yearsOfExperience ? String(p.yearsOfExperience) : '',
+                    consultationFee:    p.consultationFee   ? String(p.consultationFee)   : '',
+                    bio:                p.bio || '',
+                });
+            })
+            .catch(() => {})
+            .finally(() => setProfileLoading(false));
     }, []);
 
-    const handleSave = async (e: React.FormEvent) => {
+    const setF = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+
+    /* save profile */
+    const handleProfileSave = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSaving(true);
-        setMessage({ type: '', text: '' });
+        setProfileSaving(true); setProfileMsg(''); setProfileErr('');
         try {
-            await doctorService.updateProfile(profile);
-            setMessage({ type: 'success', text: 'Profile updated successfully!' });
-            await refreshUser(); // Update global auth state (e.g. name in sidebar)
-        } catch (err) {
-            setMessage({ type: 'error', text: 'Failed to update profile' });
+            await api.put('/auth/profile', form);
+            setProfileMsg('Profile updated successfully! ✅');
+            await refreshUser?.();
+        } catch (err: any) {
+            setProfileErr(err?.response?.data?.message || 'Failed to save profile.');
         } finally {
-            setSaving(false);
+            setProfileSaving(false);
         }
     };
 
-    if (loading) {
+    /* change password */
+    const handlePwSave = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (pwForm.newPassword !== pwForm.confirmPassword) { setPwErr("Passwords don't match."); return; }
+        if (pwForm.newPassword.length < 8) { setPwErr("Password must be at least 8 characters."); return; }
+        setPwSaving(true); setPwMsg(''); setPwErr('');
+        try {
+            await api.put('/auth/change-password', { currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword });
+            setPwMsg('Password changed successfully! 🔒');
+            setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (err: any) {
+            setPwErr(err?.response?.data?.message || 'Failed to change password.');
+        } finally {
+            setPwSaving(false);
+        }
+    };
+
+    /* avatar initials */
+    const initials = (form.name || user?.name || 'D').split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2);
+
+    if (profileLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="w-12 h-12 border-4 border-[#8FB9A8] border-t-[#4F6F6F] rounded-full animate-spin"></div>
+                <div className="w-8 h-8 border-4 border-[#C8A84B]/20 border-t-[#C8A84B] rounded-full animate-spin" />
             </div>
         );
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-6 duration-1000 pb-20">
-            {/* Context Header */}
+        <div className="max-w-2xl mx-auto space-y-6 pb-12">
+
+            {/* ── Header ────────────────────────────────────────────── */}
             <div>
-                <h1 className="text-5xl font-black text-slate-800 tracking-tighter">Account Settings</h1>
-                <p className="text-slate-400 font-bold mt-2 uppercase tracking-[0.2em] text-[10px]">Professional Identity & Credentials</p>
+                <h1 className="text-[28px] font-black text-[#0F172A] tracking-tight leading-none mb-1">My Profile</h1>
+                <p className="text-[13px] text-[#64748B] font-medium">Manage your professional details and account security.</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-                {/* Left Drawer: Identity Card */}
-                <div className="lg:col-span-4 space-y-8">
-                    <div className="bg-white rounded-[50px] p-10 shadow-sm border border-slate-50 text-center relative overflow-hidden group">
-                        <div className="relative z-10">
-                            <div className="relative inline-block mb-10">
-                                <div className="w-40 h-40 rounded-[50px] bg-[#8FB9A8]/20 flex items-center justify-center text-[#4F6F6F] text-5xl font-black shadow-inner group-hover:scale-105 transition-transform duration-500">
-                                    {profile?.name?.split(' ').map((n: any) => n[0]).join('')}
-                                </div>
-                                <button className="absolute -bottom-3 -right-3 w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-[#4F6F6F] hover:bg-[#4F6F6F] hover:text-white transition-all border border-[#8FB9A8]/10">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                                </button>
-                            </div>
-                            <h2 className="text-3xl font-black text-slate-800 tracking-tight">{profile?.name}</h2>
-                            <p className="text-sm font-bold text-[#4F6F6F] mt-2 uppercase tracking-widest">{profile?.specialty || 'General Practitioner'}</p>
-                            
-                            <div className="mt-12 space-y-3">
-                                 <button className="w-full h-16 flex items-center justify-center px-6 rounded-3xl bg-[#4F6F6F] text-white font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-slate-900/20 hover:scale-[1.02] active:scale-95">
-                                    General Details
-                                 </button>
-                                 <button className="w-full h-16 flex items-center justify-center px-6 rounded-3xl text-slate-400 font-bold text-xs uppercase tracking-[0.2em] hover:bg-slate-50 transition-all group">
-                                    Clinical History
-                                 </button>
-                                 <button className="w-full h-16 flex items-center justify-center px-6 rounded-3xl text-slate-400 font-bold text-xs uppercase tracking-[0.2em] hover:bg-slate-50 transition-all group">
-                                    Security & Auth
-                                 </button>
-                            </div>
-                        </div>
-                        {/* Decorative background element */}
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#8FB9A8]/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:scale-150 transition-transform duration-1000" />
-                    </div>
-
-                    <div className="bg-[#1F2933] rounded-[40px] p-8 text-white relative overflow-hidden shadow-2xl shadow-slate-900/10">
-                        <div className="relative z-10 flex flex-col gap-4">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8FB9A8]">System Integration</h4>
-                            <p className="text-sm font-medium leading-relaxed">Your professional credentials are <span className="text-amber-300 font-black">Verified & Synchronized</span> with the National Provider Index.</p>
-                            <div className="flex items-center gap-2 mt-2">
-                                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                                <span className="text-[9px] font-black uppercase tracking-widest text-[#8FB9A8]/60">Active Sync: Stable</span>
-                            </div>
-                        </div>
-                         <div className="absolute -bottom-10 -right-10 opacity-10">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L3 7v11l9 5 9-5V7l-9-5zm0 18l-7-3.9V8.9l7 3.9 7-3.9v7.2l-7 3.9z"/></svg>
-                        </div>
-                    </div>
+            {/* ── Avatar Card ──────────────────────────────────────── */}
+            <div className="bg-white rounded-[24px] border border-[#EEE9DE] shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 flex items-center gap-5">
+                <div className="w-20 h-20 rounded-[20px] bg-gradient-to-br from-[#1E3A5F] to-[#2D5A8E] flex items-center justify-center text-white text-[26px] font-black shadow-lg shrink-0">
+                    {initials}
                 </div>
-
-                {/* Main View: Form */}
-                <div className="lg:col-span-8">
-                    <div className="bg-white rounded-[50px] shadow-sm border border-slate-50 overflow-hidden">
-                        <div className="p-10 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
-                            <h2 className="text-2xl font-black text-slate-800 tracking-tight">Professional Dossier</h2>
-                            {profile?.isVerified && (
-                                <div className="flex items-center gap-2 bg-[#8FB9A8]/10 px-4 py-2 rounded-full border border-[#8FB9A8]/20">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                    <span className="text-[9px] font-black text-[#4F6F6F] uppercase tracking-widest">Authorized</span>
-                                </div>
-                            )}
-                        </div>
-                        
-                        <form onSubmit={handleSave} className="p-10 space-y-12">
-                            {message.text && (
-                                <div className={`p-6 rounded-[32px] text-xs font-black flex items-center gap-4 animate-in slide-in-from-top-4 duration-500 shadow-xl shadow-opacity-5 ${
-                                    message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-rose-50 text-rose-600 border border-rose-100 shadow-rose-900/5'
-                                }`}>
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${message.type === 'success' ? 'bg-green-500 text-white' : 'bg-rose-500 text-white'}`}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                    </div>
-                                    {message.text}
-                                </div>
-                            )}
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
-                                {/* Name Input */}
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Full Identity</label>
-                                    <input 
-                                        type="text" 
-                                        value={profile?.name || ''}
-                                        onChange={(e) => setProfile({...profile, name: e.target.value})}
-                                        className="w-full px-8 py-5 h-16 rounded-3xl bg-slate-50 border-none focus:bg-white focus:ring-4 focus:ring-[#4F6F6F]/5 outline-none transition-all font-bold text-slate-800 text-sm shadow-sm"
-                                        placeholder="Dr. John Doe"
-                                    />
-                                </div>
-
-                                {/* Phone Input */}
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Direct Contact</label>
-                                    <input 
-                                        type="text" 
-                                        value={profile?.phone || ''}
-                                        onChange={(e) => setProfile({...profile, phone: e.target.value})}
-                                        className="w-full px-8 py-5 h-16 rounded-3xl bg-slate-50 border-none focus:bg-white focus:ring-4 focus:ring-[#4F6F6F]/5 outline-none transition-all font-bold text-slate-800 text-sm shadow-sm"
-                                        placeholder="+91 00000 00000"
-                                    />
-                                </div>
-
-                                {/* Specialty */}
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Clinical Specialty</label>
-                                    <input 
-                                        type="text" 
-                                        value={profile?.specialty || ''}
-                                        onChange={(e) => setProfile({...profile, specialty: e.target.value})}
-                                        className="w-full px-8 py-5 h-16 rounded-3xl bg-slate-50 border-none focus:bg-white focus:ring-4 focus:ring-[#4F6F6F]/5 outline-none transition-all font-bold text-slate-800 text-sm shadow-sm"
-                                        placeholder="Cardiology / Internal Medicine"
-                                    />
-                                </div>
-
-                                {/* Degree */}
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Medical Credentials</label>
-                                    <input 
-                                        type="text" 
-                                        value={profile?.degree || ''}
-                                        onChange={(e) => setProfile({...profile, degree: e.target.value})}
-                                        className="w-full px-8 py-5 h-16 rounded-3xl bg-slate-50 border-none focus:bg-white focus:ring-4 focus:ring-[#4F6F6F]/5 outline-none transition-all font-bold text-slate-800 text-sm shadow-sm"
-                                        placeholder="MBBS, MD (Physiology)"
-                                    />
-                                </div>
-
-                                {/* Hospital */}
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Primary Affiliation</label>
-                                    <input 
-                                        type="text" 
-                                        value={profile?.hospital || ''}
-                                        onChange={(e) => setProfile({...profile, hospital: e.target.value})}
-                                        className="w-full px-8 py-5 h-16 rounded-3xl bg-slate-50 border-none focus:bg-white focus:ring-4 focus:ring-[#4F6F6F]/5 outline-none transition-all font-bold text-slate-800 text-sm shadow-sm"
-                                        placeholder="HealthScan Clinical Center"
-                                    />
-                                </div>
-
-                                {/* Registration Number */}
-                                <div className="space-y-4">
-                                    <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Registration Number (Locked)</label>
-                                    <div className="w-full px-8 h-16 rounded-3xl bg-[#8FB9A8]/5 flex items-center shadow-inner border border-[#4F6F6F]/10">
-                                        <span className="text-sm font-black text-[#4F6F6F] opacity-60 tracking-wider font-mono uppercase">{profile?.registrationNumber || 'LXV-992-04-IN'}</span>
-                                        <svg className="ml-auto text-[#4F6F6F]/20" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Address */}
-                            <div className="space-y-4 pt-4">
-                                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-4">Clinical Practice Address</label>
-                                <textarea 
-                                    rows={3}
-                                    value={profile?.address || ''}
-                                    onChange={(e) => setProfile({...profile, address: e.target.value})}
-                                    className="w-full px-8 py-6 rounded-[32px] bg-slate-50 border-none focus:bg-white focus:ring-4 focus:ring-[#4F6F6F]/5 outline-none transition-all font-bold text-slate-800 text-sm shadow-sm resize-none"
-                                    placeholder="Full clinic/hospital coordinates..."
-                                />
-                            </div>
-
-                            <div className="flex justify-end pt-8">
-                                <button 
-                                    type="submit" 
-                                    disabled={saving}
-                                    className="h-20 px-16 bg-[#4F6F6F] text-white rounded-[28px] font-black text-xs uppercase tracking-[0.2em] shadow-2xl shadow-slate-900/30 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
-                                >
-                                    {saving ? (
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-4 h-4 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                            Synchronizing...
-                                        </div>
-                                    ) : 'Apply Portfolio Updates'}
-                                </button>
-                            </div>
-                        </form>
+                <div className="flex-1 min-w-0">
+                    <h2 className="text-[18px] font-black text-[#0F172A] leading-tight">{form.name || 'Doctor'}</h2>
+                    <p className="text-[13px] text-[#64748B] font-medium mt-0.5">{form.specialty || 'Specialist'}</p>
+                    {form.hospitalName && <p className="text-[11px] text-[#A0AEC0] mt-1">🏥 {form.hospitalName}</p>}
+                    <div className="flex items-center gap-2 mt-2">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-[#1E3A5F]/8 rounded-full text-[10px] font-black text-[#1E3A5F] tracking-wide uppercase">
+                            Doctor
+                        </span>
+                        {user?.isVerified && (
+                            <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-[#D1FAE5] rounded-full text-[10px] font-black text-[#065F46] tracking-wide uppercase border border-[#A7F3D0]">
+                                ✓ Verified
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>
+
+            {/* ── Tabs ─────────────────────────────────────────────── */}
+            <div className="flex gap-2 bg-[#F8F6F0] p-1.5 rounded-2xl">
+                {(['profile', 'security'] as const).map(t => (
+                    <button
+                        key={t}
+                        onClick={() => setTab(t)}
+                        className={`flex-1 py-2.5 rounded-xl text-[13px] font-black transition-all capitalize ${
+                            tab === t
+                                ? 'bg-white text-[#0F172A] shadow-sm'
+                                : 'text-[#94A3B8] hover:text-[#64748B]'
+                        }`}
+                    >
+                        {t === 'profile' ? '👤 Professional Info' : '🔒 Password & Security'}
+                    </button>
+                ))}
+            </div>
+
+            {/* ── PROFILE TAB ──────────────────────────────────────── */}
+            {tab === 'profile' && (
+                <form onSubmit={handleProfileSave} className="space-y-5">
+                    {profileMsg && <SuccessBanner message={profileMsg} onDismiss={() => setProfileMsg('')} />}
+                    {profileErr && <ErrorBanner message={profileErr} />}
+
+                    {/* Personal */}
+                    <div className="bg-white rounded-[24px] border border-[#EEE9DE] shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 space-y-5">
+                        <h3 className="text-[13px] font-black text-[#1E3A5F] uppercase tracking-[0.1em] pb-3 border-b border-[#F1EDE4]">Personal Information</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <Field label="Full Name">
+                                <input className={INPUT} value={form.name} onChange={e => setF('name', e.target.value)} placeholder="Dr. Arjun Mehta" />
+                            </Field>
+                            <Field label="Phone Number">
+                                <input className={INPUT} type="tel" value={form.phone} onChange={e => setF('phone', e.target.value)} placeholder="+91 98765 43210" />
+                            </Field>
+                        </div>
+                        <Field label="Clinic / Hospital Address">
+                            <textarea className={INPUT + " resize-none"} rows={2} value={form.address} onChange={e => setF('address', e.target.value)} placeholder="12 Medical Lane, Mumbai, MH 400001" />
+                        </Field>
+                    </div>
+
+                    {/* Professional */}
+                    <div className="bg-white rounded-[24px] border border-[#EEE9DE] shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 space-y-5">
+                        <h3 className="text-[13px] font-black text-[#1E3A5F] uppercase tracking-[0.1em] pb-3 border-b border-[#F1EDE4]">Professional Details</h3>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <Field label="Medical Specialty">
+                                <select className={SELECT} value={form.specialty} onChange={e => setF('specialty', e.target.value)}>
+                                    <option value="">Select specialty…</option>
+                                    {SPECIALTIES.map(s => <option key={s} value={s}>{s}</option>)}
+                                </select>
+                            </Field>
+                            <Field label="Medical License Number">
+                                <input className={INPUT} value={form.licenseNumber} onChange={e => setF('licenseNumber', e.target.value)} placeholder="MCI-2024-XXXXX" />
+                            </Field>
+                            <Field label="Hospital / Clinic Name">
+                                <input className={INPUT} value={form.hospitalName} onChange={e => setF('hospitalName', e.target.value)} placeholder="Apollo Hospitals, Mumbai" />
+                            </Field>
+                            <Field label="Years of Experience">
+                                <input className={INPUT} type="number" min="0" max="60" value={form.yearsOfExperience} onChange={e => setF('yearsOfExperience', e.target.value)} placeholder="e.g. 12" />
+                            </Field>
+                            <Field label="Consultation Fee (₹)">
+                                <input className={INPUT} type="number" min="0" value={form.consultationFee} onChange={e => setF('consultationFee', e.target.value)} placeholder="e.g. 800" />
+                            </Field>
+                        </div>
+                        <Field label="Professional Bio">
+                            <textarea
+                                className={INPUT + " resize-none"}
+                                rows={3}
+                                value={form.bio}
+                                onChange={e => setF('bio', e.target.value)}
+                                placeholder="Brief description of your expertise, research interests, or clinical focus…"
+                            />
+                        </Field>
+                    </div>
+
+                    {/* Submit */}
+                    <button
+                        type="submit"
+                        disabled={profileSaving}
+                        className="w-full py-3.5 bg-[#1E3A5F] hover:bg-[#152C4A] active:scale-[0.99] disabled:opacity-60 text-white font-black text-[14px] rounded-2xl transition-all shadow-[0_4px_16px_rgba(30,58,95,0.25)] flex items-center justify-center gap-2"
+                    >
+                        {profileSaving ? (
+                            <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving…</>
+                        ) : 'Save Professional Profile'}
+                    </button>
+                </form>
+            )}
+
+            {/* ── SECURITY TAB ─────────────────────────────────────── */}
+            {tab === 'security' && (
+                <form onSubmit={handlePwSave} className="space-y-5">
+                    {pwMsg && <SuccessBanner message={pwMsg} onDismiss={() => setPwMsg('')} />}
+                    {pwErr && <ErrorBanner message={pwErr} />}
+
+                    <div className="bg-white rounded-[24px] border border-[#EEE9DE] shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 space-y-5">
+                        <h3 className="text-[13px] font-black text-[#1E3A5F] uppercase tracking-[0.1em] pb-3 border-b border-[#F1EDE4]">Change Password</h3>
+                        {(['current', 'new', 'confirm'] as const).map(k => (
+                            <Field key={k} label={k === 'current' ? 'Current Password' : k === 'new' ? 'New Password' : 'Confirm New Password'}>
+                                <div className="relative">
+                                    <input
+                                        className={INPUT}
+                                        style={{ paddingRight: 44 }}
+                                        type={showPw[k] ? 'text' : 'password'}
+                                        value={pwForm[k === 'confirm' ? 'confirmPassword' : k === 'new' ? 'newPassword' : 'currentPassword']}
+                                        onChange={e => setPwForm(f => ({ ...f, [k === 'confirm' ? 'confirmPassword' : k === 'new' ? 'newPassword' : 'currentPassword']: e.target.value }))}
+                                        placeholder="••••••••"
+                                        required
+                                    />
+                                    <button type="button" onClick={() => setShowPw(s => ({ ...s, [k]: !s[k] }))}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#475569]">
+                                        {showPw[k]
+                                            ? <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94" /><path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+                                            : <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>}
+                                    </button>
+                                </div>
+                            </Field>
+                        ))}
+                    </div>
+
+                    <div className="bg-[#FEF9EC] border border-[#FDE68A] rounded-2xl p-4 flex gap-3">
+                        <svg className="text-[#C8A84B] mt-0.5 shrink-0" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <p className="text-[12px] font-medium text-[#92400E]">Use a strong password that is at least 8 characters and includes a mix of letters, numbers, and symbols.</p>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={pwSaving}
+                        className="w-full py-3.5 bg-[#1E3A5F] hover:bg-[#152C4A] active:scale-[0.99] disabled:opacity-60 text-white font-black text-[14px] rounded-2xl transition-all shadow-[0_4px_16px_rgba(30,58,95,0.25)] flex items-center justify-center gap-2"
+                    >
+                        {pwSaving ? (
+                            <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Updating…</>
+                        ) : '🔒 Update Password'}
+                    </button>
+                </form>
+            )}
         </div>
     );
 }

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { patientService } from '@/services/patientService';
 import { reportService } from '@/services/reportService';
+import NotificationBell from '@/components/layout/NotificationBell';
 
 export default function Header() {
     const { user } = useAuth();
@@ -16,189 +17,151 @@ export default function Header() {
     const [loading, setLoading] = useState(false);
     const [showResults, setShowResults] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
-
     const isDoctor = user?.role === 'doctor';
+    const isPathology = user?.role === 'pathology';
 
-    const doctorTabs = [
-        { name: 'Dashboard', path: '/dashboard/doctor' },
-        { name: 'Patients', path: '/dashboard/doctor/patients' },
-        { name: 'Reports', path: '/dashboard/doctor/shared-reports' },
-    ];
+    /** Map the current path to a human-readable section name */
+    const sectionLabel = (() => {
+        const seg = pathname.split('/').filter(Boolean);
+        const last = seg[seg.length - 1] || '';
+        const labelMap: Record<string, string> = {
+            dashboard:        'Dashboard',
+            reports:          'Medical Reports',
+            insights:         'Health Insights',
+            analytics:        'Analytics',
+            profile:          'Profile',
+            upload:           'Upload',
+            patients:         'Patients',
+            doctors:          'Doctors',
+            consultations:    'Consultations',
+            'shared-reports': 'Shared Reports',
+            'upload-report':  'Upload Report',
+            help:             'Profile',
+        };
+        // If the last segment is a MongoDB ID, look at the one before it
+        const isId = /^[a-f0-9]{24}$/.test(last);
+        const key = isId ? seg[seg.length - 2] || '' : last;
+        return labelMap[key] || (key.charAt(0).toUpperCase() + key.slice(1).replace(/-/g, ' ')) || 'Dashboard';
+    })();
 
-    // Handle clicks outside search UI
+
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
-            if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-                setShowResults(false);
-            }
+            if (searchRef.current && !searchRef.current.contains(e.target as Node)) setShowResults(false);
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    // Perform search
     useEffect(() => {
-        const performSearch = async () => {
-            if (query.trim().length < 2) {
-                setResults([]);
-                return;
-            }
-
+        const run = async () => {
+            if (query.trim().length < 2) { setResults([]); return; }
             setLoading(true);
             try {
                 if (isDoctor) {
-                    const patients = await patientService.searchPatients(query);
-                    setResults(patients.map(p => ({
-                        id: p._id,
-                        title: p.name,
-                        subtitle: p.lvId,
-                        url: `/dashboard/doctor/patient/${p._id}/dashboard`,
-                        type: 'Patient'
-                    })));
+                    const pts = await patientService.searchPatients(query);
+                    setResults(pts.map(p => ({ id: p._id, title: p.name, subtitle: p.lvId, url: `/dashboard/doctor/patient/${p._id}/dashboard` })));
                 } else {
-                    const reports = await reportService.getPatientReports();
-                    const filtered = reports.filter(r => 
-                        r.reportName.toLowerCase().includes(query.toLowerCase()) ||
-                        r.testType?.toLowerCase().includes(query.toLowerCase())
-                    );
-                    setResults(filtered.map(r => ({
-                        id: r._id,
-                        title: r.reportName,
-                        subtitle: r.testType || 'Report',
-                        url: `/dashboard/patient/reports/${r._id}`,
-                        type: 'Report'
-                    })));
+                    const rpts = await reportService.getPatientReports();
+                    setResults(rpts.filter(r => r.reportName.toLowerCase().includes(query.toLowerCase())).map(r => ({ id: r._id, title: r.reportName, subtitle: r.testType || 'Report', url: `/dashboard/patient/reports/${r._id}` })));
                 }
-            } catch (err) {
-                console.error('Search error:', err);
-            } finally {
-                setLoading(false);
-            }
+            } catch { /* silent */ }
+            finally { setLoading(false); }
         };
-
-        const timeoutId = setTimeout(performSearch, 300);
-        return () => clearTimeout(timeoutId);
+        const t = setTimeout(run, 300);
+        return () => clearTimeout(t);
     }, [query, isDoctor]);
 
     return (
-        <header className="h-[70px] bg-white border-b border-gray-100 px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm">
-            {/* Left: Tab Navigation (Doctor only) */}
-            <div className="flex items-center gap-6">
-                {isDoctor ? (
-                    doctorTabs.map((tab) => {
-                        const isActive = pathname === tab.path ||
-                            (tab.path !== '/dashboard/doctor' && pathname.startsWith(tab.path));
-                        return (
-                            <Link
-                                key={tab.name}
-                                href={tab.path}
-                                className={`text-sm font-semibold pb-1 transition-all ${isActive
-                                        ? 'text-[#4F6F6F] border-b-2 border-[#F5C842]'
-                                        : 'text-gray-400 hover:text-gray-600'
-                                    }`}
-                            >
-                                {tab.name}
-                            </Link>
-                        );
-                    })
-                ) : (
-                    <span className="text-sm font-bold text-gray-700 uppercase tracking-wider">Dashboard</span>
-                )}
+        <header className="h-[64px] bg-white border-b border-gray-100 flex items-center px-7 shrink-0 sticky top-0 z-40">
+
+            {/* Left: section label — flex-1 so it balances with right */}
+            <div className="flex items-center gap-2 h-full flex-1">
+                {/* Tiny logo mark */}
+                <div className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg,#F6D365 0%,#C8A84B 100%)' }}>
+                    <svg width="10" height="10" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24">
+                        <path d="M12 2v20M2 12h20" />
+                    </svg>
+                </div>
+                <span className="text-[15px] font-black text-gray-900 tracking-tight shrink-0">{sectionLabel}</span>
             </div>
 
-            {/* Center: Search */}
-            <div className="flex-1 max-w-md mx-8 relative" ref={searchRef}>
-                <div className="relative">
-                    <svg className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${loading ? 'text-[#4F6F6F]' : 'text-gray-400'}`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        {loading ? (
-                             <path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83">
-                                <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-                             </path>
-                        ) : (
-                            <><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></>
-                        )}
+            {/* Center: Search bar — absolutely centered */}
+            <div className="absolute left-1/2 -translate-x-1/2" ref={searchRef}>
+                <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 gap-2 w-[300px]">
+                    <svg width="14" height="14" className="text-gray-400 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
                     </svg>
                     <input
                         type="text"
                         value={query}
-                        onChange={(e) => {
-                            setQuery(e.target.value);
-                            setShowResults(true);
-                        }}
+                        onChange={e => { setQuery(e.target.value); setShowResults(true); }}
                         onFocus={() => setShowResults(true)}
-                        placeholder={isDoctor ? "Search patients..." : "Search reports..."}
-                        className="w-full bg-[#F1F5F5] border-2 border-transparent focus:border-[#4F6F6F]/20 rounded-2xl py-2.5 pl-12 pr-4 text-sm text-[#2D3A3A] font-bold outline-none transition-all placeholder:text-[#7A9999] shadow-sm"
+                        placeholder={
+                            isPathology
+                                ? 'Search patient ID, doctor or report...'
+                                : isDoctor
+                                    ? 'Search reports, patients, or tests...'
+                                    : 'Search medical data...'
+                        }
+                        className="bg-transparent text-[13px] text-gray-700 font-medium outline-none w-full placeholder:text-gray-400"
                     />
                 </div>
-
-                {/* Search Results Dropdown */}
-                {showResults && (query.trim().length >= 2) && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E2E8F0] rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                {showResults && query.trim().length >= 2 && (
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-[300px] bg-white border border-gray-100 rounded-2xl shadow-xl overflow-hidden z-50">
                         {results.length > 0 ? (
-                            <div className="max-h-[400px] overflow-y-auto">
-                                <div className="px-4 py-2 bg-gray-50 border-b border-gray-100 flex justify-between items-center text-[10px] uppercase font-black tracking-widest text-gray-400">
-                                    <span>{results.length} Found</span>
-                                    <span>{results[0].type}s</span>
-                                </div>
-                                {results.map((item) => (
-                                    <button
-                                        key={item.id}
-                                        onClick={() => {
-                                            router.push(item.url);
-                                            setShowResults(false);
-                                            setQuery('');
-                                        }}
-                                        className="w-full px-5 py-4 text-left hover:bg-[#F1F5F5] border-b border-[#E2E8F0] last:border-0 flex items-center justify-between group transition-all"
-                                    >
-                                        <div>
-                                            <p className="font-black text-[#2D3A3A] group-hover:text-[#4F6F6F] transition-colors">{item.title}</p>
-                                            <div className="flex items-center gap-2 mt-0.5">
-                                                <span className="text-[10px] font-black uppercase bg-[#8FB9A8]/10 text-[#4F6F6F] px-1.5 py-0.5 rounded">
-                                                    {item.subtitle}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <svg className="w-5 h-5 text-[#8FB9A8] opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                            <div className="max-h-[280px] overflow-y-auto py-1">
+                                {results.map(item => (
+                                    <button key={item.id} onClick={() => { router.push(item.url); setShowResults(false); setQuery(''); }}
+                                        className="w-full px-4 py-3 text-left hover:bg-gray-50 flex flex-col">
+                                        <span className="text-[13px] font-bold text-gray-800">{item.title}</span>
+                                        <span className="text-[11px] text-gray-400">{item.subtitle}</span>
                                     </button>
                                 ))}
                             </div>
                         ) : (
-                            <div className="px-8 py-10 text-center">
-                                <div className="w-12 h-12 bg-[#F6F7F5] rounded-2xl flex items-center justify-center mx-auto mb-3">
-                                    <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                </div>
-                                <p className="text-sm font-black text-[#2D3A3A]">No {isDoctor ? 'patients' : 'reports'} found</p>
-                                <p className="text-[10px] text-[#7A9999] mt-1">Try a different search term</p>
-                            </div>
+                            <div className="p-4 text-center text-[12px] text-gray-400">No results found</div>
                         )}
                     </div>
                 )}
             </div>
 
-            {/* Right: Icons + Avatar */}
-            <div className="flex items-center gap-3">
-                {/* Notification Bell */}
-                <button className="relative w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
-                </button>
+            {/* Right: Icons + Profile — flex-1 justify-end */}
+            <div className="flex items-center gap-4 flex-1 justify-end">
 
-                {/* Settings */}
-                <button className="w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-all">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
-                </button>
+                {/* Pathology live status label */}
+                {isPathology && (
+                    <div className="text-right">
+                        <p className="text-[12px] font-bold text-gray-800 leading-tight">Lab Dashboard</p>
+                        <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#C8A84B] animate-pulse" />
+                            <p className="text-[9.5px] text-[#C8A84B] font-bold tracking-widest uppercase">All Systems Active</p>
+                        </div>
+                    </div>
+                )}
 
-                {/* Avatar */}
-                <Link href={`/dashboard/${user?.role}/profile`} className="flex items-center gap-3 cursor-pointer group">
-                    <div className="text-right hidden sm:block">
-                        <p className="text-sm font-bold text-gray-700 leading-tight">
-                            {isDoctor && 'Dr. '}{user?.name}
-                        </p>
-                        <p className="text-xs text-gray-400 capitalize">{user?.role === 'doctor' ? 'Clinical Provider' : user?.role}</p>
-                    </div>
-                    <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden group-hover:ring-2 group-hover:ring-[#8FB9A8] transition-all">
-                        <span className="text-sm font-bold text-gray-500">{user?.name?.charAt(0)}</span>
-                    </div>
-                </Link>
+                {/* Bell — dynamic, polls backend */}
+                <NotificationBell />
+
+
+
+                {/* Doctor: Name + Specialty + Avatar */}
+                {isDoctor ? (
+                    <Link href="/dashboard/doctor/help" className="flex items-center gap-3 cursor-pointer group">
+                        <div className="text-right">
+                            <p className="text-[13px] font-bold text-gray-800 leading-tight">Dr. {user?.name}</p>
+                            <p className="text-[11px] text-gray-400 font-medium">{(user as any)?.specialty || 'Clinical Provider'}</p>
+                        </div>
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center shrink-0 ring-2 ring-amber-100">
+                            <span className="text-[14px] font-black text-amber-900">{user?.name?.charAt(0)}</span>
+                        </div>
+                    </Link>
+                ) : (
+                    /* Patient: dark circle avatar */
+                    <Link href="/dashboard/patient/profile" className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center text-white hover:ring-2 hover:ring-gray-300 transition-all shrink-0">
+                        <svg width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                    </Link>
+                )}
             </div>
         </header>
     );

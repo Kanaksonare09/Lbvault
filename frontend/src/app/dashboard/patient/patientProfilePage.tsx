@@ -15,12 +15,12 @@ const LANGUAGES = [
 
 function SuccessBanner({ message, onDismiss }: { message: string; onDismiss: () => void }) {
     return (
-        <div className="flex items-center gap-3 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl animate-in fade-in duration-300">
-            <div className="w-7 h-7 bg-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
+        <div className="flex items-center gap-3 p-4 bg-[#FEF9EC] border border-[#FDE68A] rounded-2xl animate-in fade-in duration-300">
+            <div className="w-7 h-7 bg-[#C8A84B] rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
             </div>
-            <p className="text-sm font-bold text-emerald-700 flex-1">{message}</p>
-            <button onClick={onDismiss} className="text-emerald-400 hover:text-emerald-600 transition-colors">
+            <p className="text-sm font-bold text-[#92400E] flex-1">{message}</p>
+            <button onClick={onDismiss} className="text-[#C8A84B] hover:text-[#92400E] transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
             </button>
         </div>
@@ -137,11 +137,11 @@ export default function PatientProfilePage() {
         </div>
     );
 
-    const inputCls = "w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-sm font-medium text-[#1F2933] outline-none focus:border-[#4F6F6F] focus:ring-2 focus:ring-[#4F6F6F]/10 transition-all placeholder-[#94A3B8]";
+    const inputCls = "w-full px-4 py-2.5 bg-[#F8FAFC] border border-[#E2E8F0] rounded-xl text-sm font-medium text-[#1F2933] outline-none focus:border-[#C8A84B] focus:ring-2 focus:ring-[#C8A84B]/10 transition-all placeholder-[#94A3B8]";
 
     if (profileLoading) return (
         <div className="flex items-center justify-center h-64">
-            <div className="w-10 h-10 border-4 border-[#8FB9A8] border-t-[#4F6F6F] rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin" />
         </div>
     );
 
@@ -150,7 +150,7 @@ export default function PatientProfilePage() {
             {/* Header */}
             <div className="flex items-center gap-4">
                 <Link href="/dashboard/patient"
-                    className="p-3 bg-white border border-[#E2E8F0] rounded-2xl text-[#4F6F6F] hover:bg-[#F6F7F5] transition-all shadow-sm">
+                    className="p-3 bg-white border border-[#E2E8F0] rounded-2xl text-gray-500 hover:bg-[#FEF9EC] hover:text-[#C8A84B] transition-all shadow-sm">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
                 </Link>
                 <div>
@@ -163,13 +163,13 @@ export default function PatientProfilePage() {
                 {/* Left: Avatar + Quick Info */}
                 <div className="lg:col-span-1 space-y-4">
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-[#E2E8F0] text-center">
-                        <div className="w-24 h-24 bg-gradient-to-br from-[#4F6F6F] to-[#8FB9A8] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <div className="w-24 h-24 bg-gradient-to-br from-[#C8A84B] to-[#FCEEA5] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                             <span className="text-3xl font-black text-white">
                                 {form.name ? getInitials(form.name) : 'LV'}
                             </span>
                         </div>
                         <h2 className="text-lg font-black text-[#1F2933]">{form.name || user?.name}</h2>
-                        <p className="text-xs font-bold text-[#4F6F6F] mt-1">{user?.email}</p>
+                        <p className="text-xs font-bold text-[#C8A84B] mt-1">{user?.email}</p>
                         <div className="mt-4 flex flex-col gap-2">
                             {form.bloodGroup && (
                                 <div className="flex items-center justify-between px-3 py-2 bg-rose-50 rounded-xl">
@@ -193,7 +193,7 @@ export default function PatientProfilePage() {
                             { key: 'security', icon: '🔒', label: 'Change Password' },
                         ].map(t => (
                             <button key={t.key} onClick={() => setTab(t.key as any)}
-                                className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-black transition-all text-left ${tab === t.key ? 'bg-[#4F6F6F] text-white' : 'text-[#6B7280] hover:bg-[#F6F7F5]'
+                                className={`flex items-center gap-2.5 px-4 py-3 rounded-xl text-sm font-black transition-all text-left ${tab === t.key ? 'bg-[#C8A84B] text-white' : 'text-[#6B7280] hover:bg-[#FEF9EC]'
                                     }`}>
                                 <span>{t.icon}</span>
                                 <span>{t.label}</span>
@@ -257,7 +257,7 @@ export default function PatientProfilePage() {
                             </div>
 
                             <div className="pt-2 border-t border-[#F1F5F9]">
-                                <h4 className="text-sm font-black text-[#4F6F6F] mb-4">Emergency Contact</h4>
+                                <h4 className="text-sm font-black text-[#C8A84B] mb-4">Emergency Contact</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                     <Field label="Contact Name">
                                         <input className={inputCls} value={form.emergencyContactName}
@@ -273,7 +273,7 @@ export default function PatientProfilePage() {
                             </div>
 
                             <button type="submit" id="save-profile-btn" disabled={profileSaving}
-                                className="w-full py-3 bg-[#4F6F6F] text-white font-black rounded-2xl hover:bg-[#1F2933] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                className="w-full py-3 bg-[#C8A84B] text-white font-black rounded-2xl hover:bg-[#92400E] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                                 {profileSaving ? (
                                     <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Saving...</>
                                 ) : '💾 Save Profile'}
@@ -306,7 +306,7 @@ export default function PatientProfilePage() {
                                             required
                                         />
                                         <button type="button" onClick={field.toggle}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#4F6F6F] transition-colors p-1">
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#C8A84B] transition-colors p-1">
                                             {field.show ? (
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
                                             ) : (
@@ -318,7 +318,7 @@ export default function PatientProfilePage() {
                             ))}
 
                             <button type="submit" id="change-password-btn" disabled={pwSaving}
-                                className="w-full py-3 bg-[#4F6F6F] text-white font-black rounded-2xl hover:bg-[#1F2933] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                                className="w-full py-3 bg-[#C8A84B] text-white font-black rounded-2xl hover:bg-[#92400E] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                                 {pwSaving ? (
                                     <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Changing...</>
                                 ) : '🔒 Update Password'}

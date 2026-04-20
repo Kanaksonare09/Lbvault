@@ -79,7 +79,7 @@ export default function AdminDashboardPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="w-12 h-12 border-4 border-[#8FB9A8] border-t-[#4F6F6F] rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin"></div>
             </div>
         );
     }

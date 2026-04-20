@@ -798,3 +798,35 @@ exports.getPatientDashboardData = async (req, res) => {
         res.status(500).json({ message: 'Server Error', error: error.message });
     }
 };
+
+exports.shareReport = async (req, res) => {
+    try {
+        const { reportId, email, note } = req.body;
+        const patient = await User.findById(req.user.id).select('name email _id');
+        if (!patient) return res.status(404).json({ message: 'Patient not found' });
+
+        // Verify the report belongs to the patient
+        const report = await Report.findOne({ _id: reportId, patientId: req.user.id }).select('reportName _id');
+        if (!report) return res.status(404).json({ message: 'Report not found or not yours' });
+
+        // Find the doctor by email in our system
+        const doctor = await User.findOne({ email, role: 'doctor' }).select('_id name');
+
+        if (doctor) {
+            await createNotification({
+                recipient: doctor._id,
+                actor: patient._id,
+                type: 'access_granted',
+                message: `${patient.name} has shared their report "${report.reportName}" with you.${note ? ' Note: ' + note : ''} View it in your dashboard.`,
+                link: `/dashboard/doctor/patient/${patient._id}/dashboard`,
+            });
+            return res.status(200).json({ success: true, message: `Report shared with Dr. ${doctor.name}` });
+        }
+
+        // Doctor not found in system — return success so frontend uses clipboard fallback
+        return res.status(200).json({ success: false, message: 'Doctor not found in system. Use the link to share manually.' });
+    } catch (error) {
+        console.error('Share Report Error:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};

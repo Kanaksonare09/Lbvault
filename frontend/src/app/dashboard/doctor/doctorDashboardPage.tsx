@@ -13,16 +13,16 @@ import VoiceSummaryButton from '@/components/patient/VoiceSummaryButton';
 // Login page uses: bg=#F6F7F5, btn=#2B59FF (--primary), text=#1F2933,
 // accent/links=#4F6F6F, subtext=#6B7280, borders=#E2E8F0
 const CLR = {
-  primary:    '#2B59FF',               // vivid blue — same as login "Sign in" button
-  primaryHov: '#1a3ecc',               // hover state
-  sage:       '#4F6F6F',               // sage — used for badge, avatar gradient
-  sageBg:     'rgba(79,111,111,0.08)', // sage tint (highlight rows, tabs)
-  secondary:  '#8FB9A8',               // light sage — secondary accents
-  bg:         '#F6F7F5',               // page background — matches login right panel
+  primary:    '#2B59FF',               // vivid blue
+  primaryHov: '#1a3ecc',
+  sage:       '#C8A84B',               // amber — replaces sage-green
+  sageBg:     'rgba(200,168,75,0.08)', // soft amber tint
+  secondary:  '#FCEEA5',               // light amber
+  bg:         '#F6F7F5',
   card:       '#FFFFFF',
   border:     '#E2E8F0',
-  dark:       '#1F2933',               // headings — matches login "Welcome back."
-  muted:      '#6B7280',               // sub-text — matches login sub-text
+  dark:       '#1F2933',
+  muted:      '#6B7280',
   mutedLight: '#94A3B8',
 };
 
@@ -81,10 +81,10 @@ function computeRisk(r: EnrichedReport | null) {
 
 function RiskBadge({ score }: { score: string }) {
   const m: Record<string, { lbl: string; style: React.CSSProperties }> = {
-    Low:      { lbl: '🟢 Low Risk',    style: { background: '#F0FFF4', color: '#276749', border: '1px solid #C6F6D5' } },
-    Medium:   { lbl: '🟡 Medium Risk', style: { background: '#FFFBEB', color: '#92400E', border: '1px solid #FDE68A' } },
-    High:     { lbl: '🔴 High Risk',   style: { background: '#FFF5F5', color: '#C53030', border: '1px solid #FED7D7' } },
-    Critical: { lbl: '🚨 Critical',    style: { background: '#FFF5F5', color: '#9B1C1C', border: '1px solid #FC8181' } },
+    Low:      { lbl: '✓ Low Risk',    style: { background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE' } },
+    Medium:   { lbl: '⚠ Medium Risk', style: { background: '#FFFBEB', color: '#92400E', border: '1px solid #FDE68A' } },
+    High:     { lbl: '↑ High Risk',   style: { background: '#FFF5F5', color: '#C53030', border: '1px solid #FED7D7' } },
+    Critical: { lbl: '! Critical',    style: { background: '#FFF5F5', color: '#9B1C1C', border: '1px solid #FC8181' } },
   };
   const { lbl, style } = m[score] ?? m.Low;
   return (
@@ -96,7 +96,7 @@ function RiskBadge({ score }: { score: string }) {
 
 function StatusBadge({ b }: { b: Biomarker }) {
   if (b.severity === 'Critical') return <span style={{ background: '#FFF5F5', color: '#9B1C1C', border: '1px solid #FC8181', fontSize: 10, fontWeight: 800, padding: '2px 10px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: '#E53E3E', display: 'inline-block', animation: 'pulse 2s infinite' }}/>Critical</span>;
-  if (!b.isAbnormal)             return <span style={{ background: '#F0FFF4', color: '#276749', border: '1px solid #C6F6D5', fontSize: 10, fontWeight: 800, padding: '2px 10px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: '#38A169', display: 'inline-block' }}/>Normal</span>;
+  if (!b.isAbnormal)             return <span style={{ background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', fontSize: 10, fontWeight: 800, padding: '2px 10px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: '#2563EB', display: 'inline-block' }}/>Normal</span>;
   if (b.value > b.referenceMax)  return <span style={{ background: '#FFF5F5', color: '#C53030', border: '1px solid #FED7D7', fontSize: 10, fontWeight: 800, padding: '2px 10px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: '#FC8181', display: 'inline-block' }}/>High</span>;
   return <span style={{ background: '#FFFBEB', color: '#92400E', border: '1px solid #FDE68A', fontSize: 10, fontWeight: 800, padding: '2px 10px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: '#D69E2E', display: 'inline-block' }}/>Low</span>;
 }
@@ -104,8 +104,8 @@ function StatusBadge({ b }: { b: Biomarker }) {
 function TrendArrow({ b }: { b: Biomarker }) {
   const dir = b.comparison?.trendDirection ?? (b.trend === 'Increasing' ? 'up' : b.trend === 'Decreasing' ? 'down' : 'stable');
   const imp = b.comparison?.improvementStatus ?? 'neutral';
-  if (dir === 'up')   return <span style={{ color: imp === 'improving' ? '#38A169' : '#E53E3E', fontWeight: 800, fontSize: 16 }}>↑</span>;
-  if (dir === 'down') return <span style={{ color: imp === 'improving' ? '#38A169' : '#D69E2E', fontWeight: 800, fontSize: 16 }}>↓</span>;
+  if (dir === 'up')   return <span style={{ color: imp === 'improving' ? '#2563EB' : '#E53E3E', fontWeight: 800, fontSize: 16 }}>↑</span>;
+  if (dir === 'down') return <span style={{ color: imp === 'improving' ? '#2563EB' : '#D69E2E', fontWeight: 800, fontSize: 16 }}>↓</span>;
   return <span style={{ color: CLR.mutedLight, fontWeight: 800, fontSize: 16 }}>→</span>;
 }
 
@@ -184,7 +184,7 @@ export default function DoctorDashboard() {
   const doctorName  = user?.name?.split(' ').pop() ?? 'Doctor';
 
   const Spinner = () => (
-    <div className="w-8 h-8 rounded-full border-4 animate-spin" style={{ borderColor: CLR.sageBg, borderTopColor: CLR.primary }} />
+    <div className="w-8 h-8 rounded-full border-4 animate-spin" style={{ borderColor: '#FCEEA5', borderTopColor: '#C8A84B' }} />
   );
 
   // ─── RENDER ──────────────────────────────────────────────────────────────
@@ -429,7 +429,7 @@ export default function DoctorDashboard() {
                     <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${CLR.border}` }}>
                       <h3 className="text-sm font-black" style={{ color: CLR.dark }}>🧪 Biomarker Analysis</h3>
                       <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-widest">
-                        {[['#38A169','Normal'],['#D69E2E','Low'],['#FC8181','High'],['#E53E3E','Critical']].map(([c,l]) => (
+                        {[['#2563EB','Normal'],['#D69E2E','Low'],['#FC8181','High'],['#E53E3E','Critical']].map(([c,l]) => (
                           <span key={l} className="flex items-center gap-1" style={{ color: c }}>
                             <span style={{ width: 6, height: 6, borderRadius: 99, background: c, display: 'inline-block' }}/>
                             {l}
@@ -490,7 +490,7 @@ export default function DoctorDashboard() {
                       </div>
                     )}
                     {noteSaved && (
-                      <div className="text-[11px] font-bold mb-2 flex items-center gap-1 text-emerald-600">
+                      <div className="text-[11px] font-bold mb-2 flex items-center gap-1" style={{ color: '#C8A84B' }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
                         Note saved successfully
                       </div>
@@ -562,9 +562,9 @@ export default function DoctorDashboard() {
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-3xl p-4 text-center border border-emerald-100" style={{ background: '#F0FFF4' }}>
-                        <p className="text-sm font-bold text-emerald-700">✅ All values normal</p>
-                        <p className="text-xs text-emerald-500 mt-1">No abnormalities detected.</p>
+                      <div className="rounded-3xl p-4 text-center" style={{ background: '#FEF3C7', border: '1px solid #FDE68A' }}>
+                        <p className="text-sm font-bold" style={{ color: '#92400E' }}>✓ All values normal</p>
+                        <p className="text-xs mt-1" style={{ color: '#B45309' }}>No abnormalities detected.</p>
                       </div>
                     )}
 

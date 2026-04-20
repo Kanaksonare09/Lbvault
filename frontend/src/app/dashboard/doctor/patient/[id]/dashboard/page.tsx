@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { doctorService } from '@/services/doctorService';
@@ -91,8 +91,14 @@ export default function PatientDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // ── ALL hooks must be before any early return ──────────────────────────────
+  const [voiceLang, setVoiceLang] = useState<'en' | 'hi'>('en');
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareRef = useRef<HTMLDivElement>(null);
+  const [shareCopied, setShareCopied] = useState(false);
+
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       try {
         const result = await doctorService.getPatientDashboard(patientId);
         setData(result);
@@ -103,9 +109,16 @@ export default function PatientDashboard() {
         setLoading(false);
       }
     };
-    fetch();
+    fetchData();
   }, [patientId]);
 
+  useEffect(() => {
+    const h = (e: MouseEvent) => { if (shareRef.current && !shareRef.current.contains(e.target as Node)) setShareOpen(false); };
+    document.addEventListener('mousedown', h);
+    return () => document.removeEventListener('mousedown', h);
+  }, []);
+
+  // ── Early returns (after all hooks) ───────────────────────────────────────
   if (loading) {
     return (
       <div className="-m-8 min-h-screen bg-white flex items-center justify-center">
@@ -126,24 +139,27 @@ export default function PatientDashboard() {
     );
   }
 
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const shareText = `Patient AI Insights: ${data?.patient?.name || ''}`;
+
   const { patient, reports, trends } = data;
   const selectedReport = reports.find((r: any) => r._id === selectedReportId) || reports[0];
 
-  // Build session timeline from reports
-  const sessions = reports.slice(0, 5).map((r: any, i: number) => ({
+  // DYNAMIC: Build session timeline from real reports
+  const sessions = reports.slice(0, 6).map((r: any) => ({
+    _id: r._id,
     date: new Date(r.uploadDate || r.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase(),
-    label: i === 0 ? 'Follow-up' : i === 1 ? 'AI Anomaly' : i === 2 ? 'Post-Op 1' : i === 3 ? 'Routine Check' : 'Longitudi...',
-    active: i !== 1,
-    special: i === 1,
-  })).reverse();
+    label: r.testType || r.reportName || 'Report',
+    hasAbnormal: (r.abnormalities?.length ?? 0) > 0,
+  }));
 
-  // Build biomarker cards from trends (top 2)
+  // DYNAMIC: ALL biomarker trends (not limited to 2)
   const trendEntries = Object.entries(
     trends.reduce((acc: any, t: any) => { acc[t.parameter] = t.values.map((v: any) => v.value); return acc; }, {})
-  ).slice(0, 2) as [string, number[]][];
+  ) as [string, number[]][];
 
   // AI correlation text from most recent report
-  const aiText = selectedReport?.ai?.summary || 'Based on the longitudinal data, the patient demonstrates stable progression in key metabolic markers. The AI Engine is analyzing longitudinal changes.';
+  const aiText = selectedReport?.ai?.summary || 'The AI Engine is analyzing longitudinal changes in this patient\'s biomarker data. Full report will be available once processing is complete.';
 
   return (
     <div className="-m-8 bg-[#F8F9FD] min-h-screen">
@@ -158,12 +174,14 @@ export default function PatientDashboard() {
             <span>/</span>
             <span className="font-semibold text-[#B8860B]">{patient.name}</span>
           </div>
-          <div className="flex items-center gap-4 bg-white/50 backdrop-blur-md px-4 py-2 rounded-2xl border border-gray-100/50 shadow-sm">
+          <div className="flex items-center gap-3 bg-white/50 backdrop-blur-md px-4 py-2 rounded-2xl border border-gray-100/50 shadow-sm">
             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Trajectory AI</span>
-            <VoiceSummaryButton 
-              patientId={patientId}
-              label="Overall Analysis"
-            />
+            {/* EN/HI Toggle */}
+            <div className="flex rounded-full border border-gray-200 overflow-hidden text-[9.5px] font-black">
+              <button onClick={() => setVoiceLang('en')} className={`px-2.5 py-1 transition-colors ${voiceLang === 'en' ? 'bg-gray-900 text-white' : 'bg-white text-gray-400 hover:text-gray-700'}`}>EN</button>
+              <button onClick={() => setVoiceLang('hi')} className={`px-2.5 py-1 transition-colors ${voiceLang === 'hi' ? 'bg-gray-900 text-white' : 'bg-white text-gray-400 hover:text-gray-700'}`}>HI</button>
+            </div>
+            <VoiceSummaryButton patientId={patientId} label="Overall Analysis" lang={voiceLang} />
           </div>
         </div>
       </div>
@@ -183,18 +201,48 @@ export default function PatientDashboard() {
           </div>
           <div className="flex items-center gap-3 shrink-0">
             {selectedReportId && (
-              <VoiceSummaryButton 
-                reportId={selectedReportId}
-                label="Report Summary"
-              />
+              <VoiceSummaryButton reportId={selectedReportId} label="Report Summary" lang={voiceLang} />
             )}
-            <button className="flex items-center gap-2.5 bg-white border border-gray-200 text-gray-700 font-semibold text-sm px-5 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-              </svg>
-              Export Analysis
-            </button>
+            {/* Share / Export — WORKING popover */}
+            <div className="relative" ref={shareRef}>
+              <button
+                onClick={() => setShareOpen(o => !o)}
+                className="flex items-center gap-2.5 bg-white border border-gray-200 text-gray-700 font-semibold text-sm px-5 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
+                Export Analysis
+              </button>
+              {shareOpen && (
+                <div className="absolute right-0 top-full mt-2 z-50 w-[190px] bg-white rounded-[18px] shadow-[0_8px_36px_rgba(0,0,0,0.18)] border border-gray-100 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-gray-100">
+                    <p className="text-[9.5px] font-black text-gray-400 uppercase tracking-[0.14em]">Share via</p>
+                    <p className="text-[11.5px] font-bold text-gray-800 truncate mt-0.5">{patient.name} — AI Insights</p>
+                  </div>
+                  <div className="py-1.5">
+                    {[
+                      { id:'wa',  label:'WhatsApp', color:'#25D366', onClick: () => window.open(`https://wa.me/?text=${encodeURIComponent(shareText + '\n' + shareUrl)}`, '_blank') },
+                      { id:'em',  label:'Email',    color:'#EA4335', onClick: () => window.open(`mailto:?subject=${encodeURIComponent(shareText)}&body=${encodeURIComponent(shareUrl)}`, '_blank') },
+                      { id:'tg',  label:'Telegram', color:'#2AABEE', onClick: () => window.open(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`, '_blank') },
+                    ].map(ch => (
+                      <button key={ch.id} onClick={() => { ch.onClick(); setShareOpen(false); }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left">
+                        <span style={{ color: ch.color, fontSize: 14, fontWeight: 700 }}>{ch.label[0]}</span>
+                        <span className="text-[12.5px] font-semibold text-gray-700">{ch.label}</span>
+                      </button>
+                    ))}
+                    <div className="h-px bg-gray-100 mx-3 my-1" />
+                    <button onClick={async () => { await navigator.clipboard.writeText(shareUrl); setShareCopied(true); setTimeout(() => { setShareCopied(false); setShareOpen(false); }, 1800); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left">
+                      <span style={{ color: shareCopied ? '#C8A84B' : '#6B7280' }}>🔗</span>
+                      <span className={`text-[12.5px] font-semibold ${shareCopied ? 'text-[#C8A84B]' : 'text-gray-700'}`}>{shareCopied ? 'Copied!' : 'Copy Link'}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
             <button className="flex items-center gap-2.5 bg-[#F5C842] text-[#1a1000] font-semibold text-sm px-5 py-2.5 rounded-xl shadow-sm hover:bg-[#f0c030] transition-all">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/>
@@ -225,42 +273,33 @@ export default function PatientDashboard() {
                 )}
               </div>
 
-              {/* Timeline scroll */}
+              {/* Timeline scroll — DYNAMIC from real reports */}
               <div className="flex items-start gap-6 overflow-x-auto pb-2 pt-1 px-2">
-                {reports.length === 0 ? (
+                {sessions.length === 0 ? (
                   <p className="text-sm text-gray-400 py-4">No sessions recorded yet.</p>
-                ) : reports.slice(0, 6).map((r: any, i: number) => {
-                  const d = new Date(r.uploadDate || r.createdAt);
-                  const dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
-                  const labels = ['Follow-up', 'Post-Op 1', 'AI Anomaly', 'Routine Check', 'Longitudinal', 'Baseline'];
-                  return (
-                    <button
-                      key={r._id}
-                      onClick={() => setSelectedReportId(r._id)}
-                      className="flex flex-col items-center gap-2 shrink-0 group"
-                    >
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 shadow-sm transition-all ${
-                        selectedReportId === r._id
-                          ? i % 3 === 2
-                            ? 'bg-[#F5C842] border-[#F5C842]'
-                            : 'bg-[#2B4BC4] border-[#2B4BC4]'
-                          : 'bg-white border-gray-200 group-hover:border-blue-300'
-                      }`}>
-                        {i % 3 === 2 ? (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={selectedReportId === r._id ? 'white' : '#F5C842'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
-                        ) : (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={selectedReportId === r._id ? 'white' : '#9CA3AF'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                        )}
-                      </div>
-                      <div className="text-center">
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-gray-700">{dateStr}</p>
-                        <p className={`text-[9px] mt-0.5 ${i % 3 === 2 ? 'text-[#B8860B] font-bold uppercase' : 'text-gray-400'}`}>
-                          {labels[i % labels.length]}
-                        </p>
-                      </div>
-                    </button>
-                  );
-                })}
+                ) : sessions.map((s) => (
+                  <button
+                    key={s._id}
+                    onClick={() => setSelectedReportId(s._id)}
+                    className="flex flex-col items-center gap-2 shrink-0 group"
+                  >
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 shadow-sm transition-all ${
+                      selectedReportId === s._id
+                        ? s.hasAbnormal ? 'bg-[#F5C842] border-[#F5C842]' : 'bg-[#2B4BC4] border-[#2B4BC4]'
+                        : 'bg-white border-gray-200 group-hover:border-blue-300'
+                    }`}>
+                      {s.hasAbnormal ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={selectedReportId === s._id ? 'white' : '#F5C842'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={selectedReportId === s._id ? 'white' : '#9CA3AF'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      )}
+                    </div>
+                    <div className="text-center max-w-[80px]">
+                      <p className="text-[10px] font-bold uppercase tracking-wide text-gray-700">{s.date}</p>
+                      <p className={`text-[9px] mt-0.5 truncate ${s.hasAbnormal ? 'text-[#B8860B] font-bold uppercase' : 'text-gray-400'}`}>{s.label}</p>
+                    </div>
+                  </button>
+                ))}
                 {reports.length > 6 && (
                   <div className="flex flex-col items-center gap-2 shrink-0 opacity-50">
                     <div className="w-10 h-10 rounded-full bg-[#F5C842] border-2 border-[#F5C842] flex items-center justify-center">
@@ -272,7 +311,7 @@ export default function PatientDashboard() {
               </div>
             </div>
 
-            {/* Biomarker Cards (2 columns) */}
+            {/* DYNAMIC: ALL biomarker trend cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {trendEntries.length === 0 ? (
                 <div className="col-span-2 bg-white rounded-2xl border border-dashed border-gray-200 py-12 text-center shadow-sm">
@@ -284,23 +323,22 @@ export default function PatientDashboard() {
                 const prev = values[values.length - 2] ?? latest;
                 const pct = prev !== 0 ? (((latest - prev) / prev) * 100).toFixed(1) : '0.0';
                 const isDown = parseFloat(pct) < 0;
-                const label = idx === 0 ? 'BIOMARKER ALPHA' : 'BIOMARKER BETA';
-                const status = isDown ? 'Stabilizing' : 'Optimal Range';
-                const useBar = idx === 0;
+                const useBar = idx % 2 === 0;
+                const isAbnormal = trends.find((t: any) => t.parameter === name)?.values?.slice(-1)[0]?.isAbnormal;
 
                 return (
                   <div key={name} className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.07)] border border-gray-100 p-5 overflow-hidden">
-                    {/* Header */}
                     <div className="flex items-start justify-between mb-1">
                       <div>
-                        <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{label}</p>
-                        <h3 className="text-lg font-extrabold text-gray-900 leading-tight capitalize">
-                          {name.replace(/_/g, ' ')}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Biomarker Trend</p>
+                          {isAbnormal && <span className="text-[8px] font-black bg-red-50 text-red-600 border border-red-100 px-1.5 py-0.5 rounded-full uppercase tracking-widest">Abnormal</span>}
+                        </div>
+                        <h3 className="text-lg font-extrabold text-gray-900 leading-tight capitalize">{name.replace(/_/g, ' ')}</h3>
                       </div>
                       <div className="text-right">
                         <p className="text-2xl font-extrabold text-gray-800 leading-none">
-                          {latest.toFixed ? latest.toFixed(1) : latest}
+                          {typeof latest === 'number' ? latest.toFixed(1) : latest}
                           <span className="text-sm font-medium text-gray-400 ml-1">{unit}</span>
                         </p>
                         <div className={`flex items-center justify-end gap-1 mt-1 text-[11px] font-bold ${isDown ? 'text-green-600' : 'text-[#B8860B]'}`}>
@@ -309,20 +347,13 @@ export default function PatientDashboard() {
                           ) : (
                             <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>
                           )}
-                          {pct}% {status}
+                          {pct}% {isDown ? 'Stabilizing' : 'Increasing'}
                         </div>
                       </div>
                     </div>
-
-                    {/* Chart */}
                     <div className="mt-4">
-                      {useBar
-                        ? <MiniBarChart values={values.slice(-5)} />
-                        : <MiniLineChart values={values.slice(-10)} />
-                      }
+                      {useBar ? <MiniBarChart values={values.slice(-5)} /> : <MiniLineChart values={values.slice(-10)} />}
                     </div>
-
-                    {/* X label */}
                     <div className="text-right mt-1">
                       <span className="text-[9px] text-gray-400 uppercase tracking-widest font-medium">
                         {new Date(trends.find((t: any) => t.parameter === name)?.values?.slice(-1)[0]?.date || Date.now()).toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}
@@ -331,13 +362,6 @@ export default function PatientDashboard() {
                   </div>
                 );
               })}
-
-              {/* If only 1 trend, add placeholder */}
-              {trendEntries.length === 1 && (
-                <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.07)] border border-gray-100 p-5 flex items-center justify-center">
-                  <p className="text-sm text-gray-300 italic">Additional biomarker data pending</p>
-                </div>
-              )}
             </div>
 
             {/* AI Correlation Analysis */}
@@ -421,34 +445,32 @@ export default function PatientDashboard() {
             {/* Data Verified Sources */}
             <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.07)] border border-gray-100 p-5">
               <h3 className="text-[13px] font-extrabold text-gray-800 uppercase tracking-wider mb-4">Data Verified Sources</h3>
+              {/* DYNAMIC sources */}
               <div className="space-y-3">
-                {/* Source 1 */}
+                {/* Source 1 — always show report ref */}
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-blue-50 transition-all cursor-pointer group">
                   <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2B4BC4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-gray-800">Quest Diagnostics Hub</p>
-                    <p className="text-[10px] text-gray-400">
-                      Ref ID: {selectedReport?._id ? String(selectedReport._id).slice(-6).toUpperCase() : '3812-AQ'}
-                    </p>
+                    <p className="text-[13px] font-semibold text-gray-800">{selectedReport?.pathologyId?.name || 'Clinical Lab'}</p>
+                    <p className="text-[10px] text-gray-400">Ref ID: {selectedReport?._id ? String(selectedReport._id).slice(-6).toUpperCase() : '—'}</p>
                   </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:text-[#2B4BC4] transition-colors"><polyline points="9 18 15 12 9 6"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                 </div>
 
-                {/* Source 2 */}
+                {/* Source 2 — HealthScan AI pipeline */}
                 <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-yellow-50 transition-all cursor-pointer group">
                   <div className="w-9 h-9 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold text-gray-800">HealthScan Wearable Node</p>
-                    <p className="text-[10px] text-gray-400">Real-time sync active</p>
+                    <p className="text-[13px] font-semibold text-gray-800">HealthScan AI Engine</p>
+                    <p className="text-[10px] text-gray-400">{reports?.length ? `${reports.length} reports analyzed` : 'Real-time sync active'}</p>
                   </div>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:text-[#B8860B] transition-colors"><polyline points="9 18 15 12 9 6"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                 </div>
 
-                {/* Dynamic sources from pathology lab if available */}
                 {selectedReport?.pathologyId?.name && (
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-green-50 transition-all cursor-pointer group">
                     <div className="w-9 h-9 bg-green-100 rounded-full flex items-center justify-center shrink-0">

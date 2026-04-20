@@ -22,109 +22,191 @@ export default function PatientsPage() {
     };
 
     useEffect(() => {
-        const delayDebounceFn = setTimeout(() => {
-            fetchPatients(query);
-        }, 300);
-        return () => clearTimeout(delayDebounceFn);
+        const t = setTimeout(() => fetchPatients(query), 300);
+        return () => clearTimeout(t);
     }, [query]);
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700">
+        <div className="space-y-5">
+
+            {/* ── Page Header ─────────────────────────────────── */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-black text-[#1F2933]">Patient Directory</h1>
-                    <p className="text-[#6B7280] mt-1 text-lg font-medium">
+                    <h1
+                        className="font-black text-gray-900"
+                        style={{ fontSize: '1.55rem', letterSpacing: '-0.025em', lineHeight: 1.1 }}
+                    >
+                        Patient Directory
+                    </h1>
+                    <p className="text-[13px] text-gray-400 mt-1 font-medium">
                         Search registered patients and upload their lab reports.
                     </p>
                 </div>
                 <Link
                     href="/dashboard/pathology/upload-report"
-                    className="btn-primary inline-flex items-center gap-2"
+                    className="inline-flex items-center gap-2 text-[12.5px] font-semibold px-4 py-2.5 rounded-lg transition-colors"
+                    style={{ background: '#C8A84B', color: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                        <polyline points="17 8 12 3 7 8" />
+                        <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
                     Upload Report
                 </Link>
             </div>
 
-            <div className="bg-white rounded-[2rem] shadow-sm border border-[#E2E8F0] overflow-hidden">
-                <div className="p-6 border-b border-[#E2E8F0] bg-[#F6F7F5]/50">
-                    <div className="relative w-full max-w-xl">
+            {/* ── Main Card ──────────────────────────────────── */}
+            <div
+                className="bg-white rounded-2xl overflow-hidden"
+                style={{ border: '1px solid #EAEEF2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+            >
+                {/* Search bar */}
+                <div className="px-6 py-4" style={{ borderBottom: '1px solid #F1F4F7' }}>
+                    <div className="relative" style={{ maxWidth: '420px' }}>
+                        <svg
+                            className="absolute left-3 top-1/2 -translate-y-1/2"
+                            width="15" height="15" fill="none" viewBox="0 0 24 24"
+                            stroke="#9CA3AF" strokeWidth="2.5"
+                        >
+                            <circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
+                        </svg>
                         <input
                             type="text"
-                            placeholder="Search patients by name, email, or patient ID..."
+                            placeholder="Search by name, email, or patient ID..."
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
-                            className="w-full pl-12 pr-4 py-3 rounded-2xl border border-[#E2E8F0] focus:ring-4 focus:ring-[#4F6F6F]/10 focus:border-[#4F6F6F] outline-none transition-all font-medium"
+                            className="w-full pl-9 pr-4 py-2.5 text-[13px] font-medium text-gray-700 outline-none rounded-xl placeholder:text-gray-400"
+                            style={{ background: '#F4F6F9', border: '1px solid #E8EDF2' }}
                         />
-                        <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-[#4F6F6F]" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
                     </div>
                 </div>
 
+                {/* Table */}
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead>
-                            <tr className="bg-[#F6F7F5] text-left">
-                                <th className="px-8 py-4 text-xs font-bold text-[#6B7280] uppercase tracking-wider">Patient</th>
-                                <th className="px-8 py-4 text-xs font-bold text-[#6B7280] uppercase tracking-wider">Contact</th>
-                                <th className="px-8 py-4 text-xs font-bold text-[#6B7280] uppercase tracking-wider">Demographics</th>
-                                <th className="px-8 py-4 text-xs font-bold text-[#6B7280] uppercase tracking-wider text-right">Actions</th>
+                            <tr style={{ borderBottom: '1px solid #F1F4F7' }}>
+                                <th className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Patient</th>
+                                <th className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Contact</th>
+                                <th className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Demographics</th>
+                                <th className="px-6 py-3 text-right text-[10px] font-bold text-gray-400 uppercase tracking-widest">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#E2E8F0]">
+                        <tbody>
                             {loading ? (
                                 <tr>
-                                    <td colSpan={4} className="px-8 py-12 text-center">
-                                        <div className="inline-block w-8 h-8 border-4 border-[#8FB9A8] border-t-[#4F6F6F] rounded-full animate-spin"></div>
+                                    <td colSpan={4} className="px-6 py-12 text-center">
+                                        <div
+                                            className="w-8 h-8 border-4 rounded-full animate-spin mx-auto"
+                                            style={{ borderColor: '#E8EDF2', borderTopColor: '#C8A84B' }}
+                                        />
                                     </td>
                                 </tr>
-                            ) : patients.map((patient) => (
-                                <tr key={patient._id} className="hover:bg-[#F6F7F5] transition-colors">
-                                    <td className="px-8 py-5">
-                                        <div className="text-sm font-bold text-[#1F2933]">{patient.name}</div>
-                                        <div className="text-[10px] text-[#8FB9A8] font-black uppercase tracking-wider mt-0.5">
-                                            {patient.patientCustomId || `ID: ${patient._id.slice(-6)}`}
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-5">
-                                        <div className="text-sm text-[#4F6F6F] font-bold">{patient.email}</div>
-                                        <div className="text-[10px] text-[#6B7280] font-medium">{patient.phone || '—'}</div>
-                                    </td>
-                                    <td className="px-8 py-5">
-                                        <div className="flex gap-2 flex-wrap">
-                                            <span className="bg-[#F6F7F5] text-[#4F6F6F] px-2 py-0.5 rounded-lg text-[10px] font-black border border-[#E2E8F0]">
-                                                {patient.age || '?'} Yrs
-                                            </span>
-                                            <span className="bg-[#F6F7F5] text-[#4F6F6F] px-2 py-0.5 rounded-lg text-[10px] font-black border border-[#E2E8F0]">
-                                                {patient.gender || 'Unknown'}
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td className="px-8 py-5 text-right">
-                                        <Link
-                                            href={`/dashboard/pathology/upload-report?patientId=${patient._id}&name=${encodeURIComponent(patient.name)}`}
-                                            className="bg-[#4F6F6F] text-white px-4 py-2 rounded-xl text-xs font-black hover:bg-[#1F2933] transition-all active:scale-95 shadow-sm inline-flex items-center gap-1.5"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
-                                            Upload Report
-                                        </Link>
-                                    </td>
-                                </tr>
-                            ))}
-                            {!loading && patients.length === 0 && (
+                            ) : patients.length === 0 ? (
                                 <tr>
-                                    <td colSpan={4} className="px-8 py-16 text-center">
-                                        <div className="w-16 h-16 bg-[#F6F7F5] rounded-full flex items-center justify-center mx-auto mb-4">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                                    <td colSpan={4} className="px-6 py-16 text-center">
+                                        <div
+                                            className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
+                                            style={{ background: '#F4F6F9' }}
+                                        >
+                                            <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="#9CA3AF" strokeWidth="1.5">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
+                                            </svg>
                                         </div>
-                                        <p className="text-[#1F2933] font-bold">
+                                        <p className="text-[13px] font-semibold text-gray-700">
                                             {query ? 'No patients match your search.' : 'No patients yet.'}
                                         </p>
-                                        <p className="text-[#9CA3AF] text-sm mt-1">
-                                            Patients self-register via the public signup page.
+                                        <p className="text-[12px] text-gray-400 mt-1">
+                                            Patients self-register via the signup page.
                                         </p>
                                     </td>
                                 </tr>
-                            )}
+                            ) : patients.map((patient) => {
+                                const initials = (patient.name || 'P')
+                                    .split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase();
+                                return (
+                                    <tr
+                                        key={patient._id}
+                                        className="hover:bg-gray-50 transition-colors"
+                                        style={{ borderBottom: '1px solid #F1F4F7' }}
+                                    >
+                                        {/* Patient */}
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-white shrink-0"
+                                                    style={{ background: '#4A5568' }}
+                                                >
+                                                    {initials}
+                                                </div>
+                                                <div>
+                                                    <p className="text-[13px] font-semibold text-gray-800">{patient.name}</p>
+                                                    <p className="text-[11px] text-gray-400">
+                                                        {patient.patientCustomId || `ID: ${patient._id.slice(-6)}`}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        {/* Contact */}
+                                        <td className="px-6 py-4">
+                                            <p className="text-[13px] text-gray-700 font-medium">{patient.email}</p>
+                                            <p className="text-[11px] text-gray-400 mt-0.5">{patient.phone || '—'}</p>
+                                        </td>
+                                        {/* Demographics */}
+                                        <td className="px-6 py-4">
+                                            <div className="flex gap-1.5 flex-wrap items-center">
+                                                {patient.age ? (
+                                                    <span
+                                                        className="text-[10px] font-bold px-2 py-0.5 rounded"
+                                                        style={{ background: '#FEF3C7', color: '#92400E' }}
+                                                    >
+                                                        {patient.age} yrs
+                                                    </span>
+                                                ) : null}
+                                                {patient.gender ? (
+                                                    <span
+                                                        className="text-[10px] font-bold px-2 py-0.5 rounded capitalize"
+                                                        style={{ background: '#EFF6FF', color: '#1D4ED8' }}
+                                                    >
+                                                        {patient.gender}
+                                                    </span>
+                                                ) : null}
+                                                {patient.bloodGroup ? (
+                                                    <span
+                                                        className="text-[10px] font-bold px-2 py-0.5 rounded"
+                                                        style={{ background: '#FEE2E2', color: '#991B1B' }}
+                                                    >
+                                                        {patient.bloodGroup}
+                                                    </span>
+                                                ) : null}
+                                                {!patient.age && !patient.gender && !patient.bloodGroup && (
+                                                    <span className="text-[11px] text-gray-400 font-medium italic">Not provided</span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        {/* Actions */}
+                                        <td className="px-6 py-4 text-right">
+                                            <Link
+                                                href={`/dashboard/pathology/upload-report?patientId=${patient._id}&name=${encodeURIComponent(patient.name)}`}
+                                                className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-3 py-1.5 rounded-lg transition-all"
+                                                style={{
+                                                    background: '#FEF3C7',
+                                                    color: '#92400E',
+                                                    border: '1px solid #FDE68A',
+                                                }}
+                                            >
+                                                <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                                    <polyline points="17 8 12 3 7 8" />
+                                                    <line x1="12" y1="3" x2="12" y2="15" />
+                                                </svg>
+                                                Upload Report
+                                            </Link>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

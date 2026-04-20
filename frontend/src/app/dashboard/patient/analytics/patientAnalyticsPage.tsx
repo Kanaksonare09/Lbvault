@@ -10,7 +10,7 @@ import {
 } from 'recharts';
 
 const SEVERITY_CONFIG: Record<string, { bg: string; text: string; dot: string; label: string }> = {
-  Normal:   { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500', label: 'Normal' },
+  Normal:   { bg: 'bg-[#FEF9EC]', text: 'text-[#92400E]', dot: 'bg-[#C8A84B]', label: 'Normal' },
   Mild:     { bg: 'bg-yellow-50',  text: 'text-yellow-700',  dot: 'bg-yellow-400',  label: 'Mild' },
   Moderate: { bg: 'bg-amber-50',   text: 'text-amber-700',   dot: 'bg-amber-500',   label: 'Moderate' },
   Critical: { bg: 'bg-rose-50',    text: 'text-rose-700',    dot: 'bg-rose-500',    label: 'Critical' },
@@ -23,16 +23,16 @@ const TREND_ICON: Record<string, string> = {
 };
 const TREND_COLOR: Record<string, string> = {
   Increasing: 'text-rose-500',
-  Decreasing: 'text-emerald-500',
+  Decreasing: 'text-[#C8A84B]',
   Stable:     'text-[#6B7280]',
 };
 
 const PIE_COLORS: Record<string, string> = {
-  Normal: '#10B981', Mild: '#FBBF24', Moderate: '#F59E0B', Critical: '#EF4444'
+  Normal: '#C8A84B', Mild: '#FBBF24', Moderate: '#F59E0B', Critical: '#EF4444'
 };
 
 const BIOMARKER_COLORS = [
-  '#4F6F6F', '#6366F1', '#10B981', '#F59E0B', '#EC4899', '#8B5CF6', '#14B8A6', '#EF4444'
+  '#C8A84B', '#6366F1', '#2563EB', '#F59E0B', '#EC4899', '#8B5CF6', '#14B8A6', '#EF4444'
 ];
 
 function capitalize(s: string) {
@@ -64,7 +64,7 @@ export default function PatientAnalyticsPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <div className="w-12 h-12 border-4 border-[#8FB9A8] border-t-[#4F6F6F] rounded-full animate-spin" />
+      <div className="w-12 h-12 border-4 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin" />
     </div>
   );
 
@@ -83,7 +83,7 @@ export default function PatientAnalyticsPage() {
         Upload your lab reports to unlock health analytics, biomarker trends, and risk analysis.
       </p>
       <Link href="/dashboard/patient"
-        className="inline-flex items-center gap-2 mt-6 bg-[#4F6F6F] text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#1F2933] transition-all">
+        className="inline-flex items-center gap-2 mt-6 bg-[#C8A84B] text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#92400E] transition-all">
         Upload a Report
       </Link>
     </div>
@@ -116,7 +116,7 @@ export default function PatientAnalyticsPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/patient"
-            className="p-3 bg-white border border-[#E2E8F0] rounded-2xl text-[#4F6F6F] hover:bg-[#F6F7F5] transition-all shadow-sm">
+            className="p-3 bg-white border border-[#E2E8F0] rounded-2xl text-gray-500 hover:bg-[#FEF9EC] hover:text-[#C8A84B] transition-all shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <path d="m15 18-6-6 6-6" />
@@ -300,7 +300,7 @@ export default function PatientAnalyticsPage() {
                           <div className="flex items-center gap-2 w-36">
                             <div className="flex-1 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
                               <div className="h-full rounded-full transition-all duration-700"
-                                style={{ width: `${pct}%`, background: sc.dot.replace('bg-', '') === 'bg-emerald-500' ? '#10B981' : sc.dot === 'bg-rose-500' ? '#EF4444' : '#F59E0B' }} />
+                                style={{ width: `${pct}%`, background: bm.severity === 'Normal' ? '#C8A84B' : bm.severity === 'Critical' ? '#EF4444' : '#F59E0B' }} />
                             </div>
                             <span className="text-[10px] font-bold text-[#94A3B8] whitespace-nowrap">
                               {bm.referenceMin}–{bm.referenceMax}
@@ -339,12 +339,12 @@ export default function PatientAnalyticsPage() {
           <h3 className="text-lg font-black text-[#1F2933] mb-6">Report Upload Timeline</h3>
           <div className="space-y-3">
             {[...reportTimeline].reverse().map((r: any) => (
-              <Link key={r._id} href={`/dashboard/patient/reports/${r._id}`}
-                className="flex items-center justify-between p-4 rounded-2xl border border-[#F1F5F9] hover:border-[#8FB9A8] hover:bg-[#F6F7F5] transition-all group">
+          <Link key={r._id} href={`/dashboard/patient/reports/${r._id}`}
+                className="flex items-center justify-between p-4 rounded-2xl border border-[#F1F5F9] hover:border-[#C8A84B] hover:bg-[#FEF9EC] transition-all group">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-[#4F6F6F]/10 rounded-2xl flex items-center justify-center text-lg flex-shrink-0">📋</div>
+                  <div className="w-10 h-10 bg-[#FEF3C7] rounded-2xl flex items-center justify-center text-lg flex-shrink-0">📋</div>
                   <div>
-                    <p className="font-black text-[#1F2933] text-sm group-hover:text-[#4F6F6F] transition-colors">{r.reportName}</p>
+                    <p className="font-black text-[#1F2933] text-sm group-hover:text-[#C8A84B] transition-colors">{r.reportName}</p>
                     <p className="text-[10px] text-[#6B7280] font-medium mt-0.5">
                       {r.testType} · {new Date(r.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
@@ -358,7 +358,7 @@ export default function PatientAnalyticsPage() {
                     )}
                   </div>
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                    stroke="#4F6F6F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    stroke="#C8A84B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>

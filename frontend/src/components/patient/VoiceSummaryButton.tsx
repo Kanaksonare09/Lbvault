@@ -11,10 +11,11 @@ interface VoiceSummaryButtonProps {
     patientId?: string;
     disabled?: boolean;
     isIcon?: boolean;
+    compact?: boolean;
     label?: string;
 }
 
-export default function VoiceSummaryButton({ text, lang, reportId, patientId, disabled, isIcon = false, label }: VoiceSummaryButtonProps) {
+export default function VoiceSummaryButton({ text, lang, reportId, patientId, disabled, isIcon = false, compact = false, label }: VoiceSummaryButtonProps) {
     const { language, t } = useLanguage();
     const [status, setStatus] = useState<'idle' | 'loading' | 'playing' | 'error'>('idle');
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -61,6 +62,32 @@ export default function VoiceSummaryButton({ text, lang, reportId, patientId, di
     const stop = () => { cleanup(); setStatus('idle'); };
 
     const displayLabel = label || (patientId ? 'Overall Analysis' : 'Report Summary');
+
+    // ── Compact mode: small 32px icon-only button (for card rows) ─────────────
+    if (compact) {
+        return (
+            <button
+                onClick={status === 'playing' ? stop : speak}
+                disabled={disabled || status === 'loading'}
+                className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all outline-none active:scale-95 ${
+                    disabled || status === 'loading'
+                    ? 'border-gray-100 text-gray-300 cursor-not-allowed'
+                    : status === 'playing'
+                    ? 'border-rose-200 bg-rose-50 text-rose-500'
+                    : 'border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50'
+                }`}
+                title={status === 'playing' ? 'Stop Audio' : 'Play Voice Summary'}
+            >
+                {status === 'loading' ? (
+                    <div className="w-3 h-3 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin" />
+                ) : status === 'playing' ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+                ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                )}
+            </button>
+        );
+    }
 
     if (isIcon) {
         return (

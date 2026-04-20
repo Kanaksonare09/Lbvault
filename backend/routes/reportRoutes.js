@@ -7,6 +7,8 @@ const upload = require('../config/multer');
 router.post('/upload', authMiddleware(['pathology', 'patient']), upload.single('report'), reportController.uploadReport);
 router.get('/', authMiddleware(), reportController.getReports);
 router.get('/my-reports', authMiddleware(), reportController.getReports);
+// Share a report with a doctor by email
+router.post('/share', authMiddleware(['patient']), reportController.shareReport);
 // Get report by ID
 router.get('/:id', authMiddleware(), reportController.getReportById);
 

@@ -43,7 +43,7 @@ export default function PathologyProfilePage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="w-12 h-12 border-4 border-[#8FB9A8] border-t-[#4F6F6F] rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -61,15 +61,15 @@ export default function PathologyProfilePage() {
                 <div className="lg:col-span-1 space-y-6">
                     <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-[#E2E8F0] text-center">
                         <div className="relative inline-block mb-6">
-                            <div className="w-32 h-32 rounded-full bg-[#1F2933] flex items-center justify-center text-[#8FB9A8] text-4xl font-black shadow-xl shadow-[#1F2933]/20 border-4 border-[#F6F7F5]">
+                            <div className="w-32 h-32 rounded-full bg-[#1A202C] flex items-center justify-center text-[#FBBF24] text-4xl font-black shadow-xl shadow-[#1A202C]/20 border-4 border-[#F6F7F5]">
                                 {profile?.labName?.split(' ').map((n: any) => n[0]).join('') || 'L'}
                             </div>
-                            <div className="absolute -bottom-1 -right-1 p-2.5 bg-[#4F6F6F] rounded-xl shadow-lg border-2 border-white text-white">
+                            <div className="absolute -bottom-1 -right-1 p-2.5 bg-[#C8A84B] rounded-xl shadow-lg border-2 border-white text-white">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             </div>
                         </div>
                         <h2 className="text-xl font-black text-[#1F2933] break-words">{profile?.labName}</h2>
-                        <p className="text-xs font-black text-[#4F6F6F] uppercase tracking-widest mt-2 bg-[#8FB9A8]/10 px-3 py-1 rounded-full inline-block">
+                        <p className="text-xs font-black text-[#92400E] uppercase tracking-widest mt-2 bg-[#FEF3C7] px-3 py-1 rounded-full inline-block">
                             {profile?.isVerified ? 'Verified Lab' : 'Pending Verification'}
                         </p>
                         
@@ -93,7 +93,7 @@ export default function PathologyProfilePage() {
                         <form onSubmit={handleSave} className="p-8 space-y-8">
                             {message.text && (
                                 <div className={`p-4 rounded-2xl text-sm font-black flex items-center ${
-                                    message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-600 border border-rose-100'
+                                    message.type === 'success' ? 'bg-[#FEF3C7] text-[#92400E] border border-[#FDE68A]' : 'bg-rose-50 text-rose-600 border border-rose-100'
                                 } animate-in slide-in-from-top-2`}>
                                     <svg className="mr-2" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                                     {message.text}
@@ -108,7 +108,7 @@ export default function PathologyProfilePage() {
                                         type="text" 
                                         value={profile?.labName || ''}
                                         onChange={(e) => setProfile({...profile, labName: e.target.value})}
-                                        className="w-full px-5 py-4 rounded-2xl bg-[#F6F7F5] border-transparent focus:bg-white focus:ring-4 focus:ring-[#4F6F6F]/10 focus:border-[#4F6F6F]/30 outline-none transition-all font-bold text-[#1F2933]"
+                                        className="w-full px-5 py-4 rounded-2xl bg-[#F4F6F9] border border-transparent focus:bg-white focus:ring-4 focus:ring-[#C8A84B]/15 focus:border-[#C8A84B]/40 outline-none transition-all font-bold text-gray-800"
                                         placeholder="Global Diagnostics Lab"
                                     />
                                 </div>
@@ -120,7 +120,7 @@ export default function PathologyProfilePage() {
                                         type="text" 
                                         value={profile?.phone || ''}
                                         onChange={(e) => setProfile({...profile, phone: e.target.value})}
-                                        className="w-full px-5 py-4 rounded-2xl bg-[#F6F7F5] border-transparent focus:bg-white focus:ring-4 focus:ring-[#4F6F6F]/10 focus:border-[#4F6F6F]/30 outline-none transition-all font-bold text-[#1F2933]"
+                                        className="w-full px-5 py-4 rounded-2xl bg-[#F4F6F9] border border-transparent focus:bg-white focus:ring-4 focus:ring-[#C8A84B]/15 focus:border-[#C8A84B]/40 outline-none transition-all font-bold text-gray-800"
                                         placeholder="+91 00000 00000"
                                     />
                                 </div>
@@ -132,7 +132,7 @@ export default function PathologyProfilePage() {
                                         type="text" 
                                         value={profile?.licenseNumber || ''}
                                         onChange={(e) => setProfile({...profile, licenseNumber: e.target.value})}
-                                        className="w-full px-5 py-4 rounded-2xl bg-[#F6F7F5] border-transparent focus:bg-white focus:ring-4 focus:ring-[#4F6F6F]/10 focus:border-[#4F6F6F]/30 outline-none transition-all font-bold text-[#1F2933]"
+                                        className="w-full px-5 py-4 rounded-2xl bg-[#F4F6F9] border border-transparent focus:bg-white focus:ring-4 focus:ring-[#C8A84B]/15 focus:border-[#C8A84B]/40 outline-none transition-all font-bold text-gray-800"
                                         placeholder="LAB-123456"
                                     />
                                 </div>
@@ -144,7 +144,7 @@ export default function PathologyProfilePage() {
                                         type="text" 
                                         value={profile?.city || ''}
                                         onChange={(e) => setProfile({...profile, city: e.target.value})}
-                                        className="w-full px-5 py-4 rounded-2xl bg-[#F6F7F5] border-transparent focus:bg-white focus:ring-4 focus:ring-[#4F6F6F]/10 focus:border-[#4F6F6F]/30 outline-none transition-all font-bold text-[#1F2933]"
+                                        className="w-full px-5 py-4 rounded-2xl bg-[#F4F6F9] border border-transparent focus:bg-white focus:ring-4 focus:ring-[#C8A84B]/15 focus:border-[#C8A84B]/40 outline-none transition-all font-bold text-gray-800"
                                         placeholder="Mumbai, Maharashtra"
                                     />
                                 </div>
@@ -157,7 +157,7 @@ export default function PathologyProfilePage() {
                                     rows={3}
                                     value={profile?.address || ''}
                                     onChange={(e) => setProfile({...profile, address: e.target.value})}
-                                    className="w-full px-5 py-4 rounded-2xl bg-[#F6F7F5] border-transparent focus:bg-white focus:ring-4 focus:ring-[#4F6F6F]/10 focus:border-[#4F6F6F]/30 outline-none transition-all font-bold text-[#1F2933] resize-none"
+                                    className="w-full px-5 py-4 rounded-2xl bg-[#F4F6F9] border border-transparent focus:bg-white focus:ring-4 focus:ring-[#C8A84B]/15 focus:border-[#C8A84B]/40 outline-none transition-all font-bold text-gray-800 resize-none"
                                     placeholder="Unit 101, Medical Square..."
                                 />
                             </div>
@@ -166,7 +166,7 @@ export default function PathologyProfilePage() {
                                 <button 
                                     type="submit" 
                                     disabled={saving}
-                                    className="px-12 py-4 rounded-2xl bg-[#1F2933] text-[#8FB9A8] font-black text-xs uppercase tracking-widest shadow-xl shadow-[#1F2933]/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                                    className="px-12 py-4 rounded-2xl bg-[#C8A84B] text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-[#C8A84B]/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
                                 >
                                     {saving ? 'Synchronizing...' : 'Update Facility'}
                                 </button>

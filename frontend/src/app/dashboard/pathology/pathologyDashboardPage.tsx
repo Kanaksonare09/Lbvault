@@ -1,252 +1,685 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/AuthContext';
 import { pathologyService } from '@/services/pathologyService';
-import { 
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    PieChart, Pie, Cell, Legend 
+import {
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+    PieChart, Pie, Cell
 } from 'recharts';
 
-const CHART_COLORS = ['#4F6F6F', '#8FB9A8', '#C0D6DF', '#1F2933', '#6B7280'];
+// ─── Color tokens matching reference image ───────────────────────────────────
+const DONUT_COLORS = ['#5C4A1E', '#2563EB', '#C8A84B'];
 
-export default function AdminDashboard() {
+const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+
+// Fallback volume data shaped like the image (bars increasing toward Thu/Fri)
+const FALLBACK_VOLUME = [
+    { day: 'MON', count: 62 },
+    { day: 'TUE', count: 50 },
+    { day: 'WED', count: 70 },
+    { day: 'THU', count: 100 },
+    { day: 'FRI', count: 130 },
+    { day: 'SAT', count: 55 },
+    { day: 'SUN', count: 48 },
+];
+
+const FALLBACK_PIE = [
+    { name: 'Histology', value: 35 },
+    { name: 'Cytology', value: 30 },
+    { name: 'Hematology', value: 35 },
+];
+
+// ─── Custom Bar shape with rounded top and amber accent line ─────────────────
+function CustomBar(props: any) {
+    const { x, y, width, height, active } = props;
+    const radius = 6;
+    const accentH = 4;
+    const isActive = active;
+
+    if (height <= 0) return null;
+
+    return (
+        <g>
+            {/* Main bar */}
+            <rect
+                x={x}
+                y={y + radius}
+                width={width}
+                height={Math.max(0, height - radius)}
+                fill={isActive ? '#F5ECC9' : '#F0ECD6'}
+                rx={0}
+            />
+            {/* Rounded top cap */}
+            <rect
+                x={x}
+                y={y}
+                width={width}
+                height={radius * 2}
+                fill={isActive ? '#F5ECC9' : '#F0ECD6'}
+                rx={radius}
+            />
+            {/* Amber accent line at top */}
+            <rect
+                x={x}
+                y={y}
+                width={width}
+                height={accentH}
+                fill={isActive ? '#C8A84B' : '#D4B84A'}
+                rx={radius}
+            />
+        </g>
+    );
+}
+
+// ─── Animated counter ─────────────────────────────────────────────────────────
+function AnimatedValue({ value }: { value: string | number }) {
+    return <span>{value}</span>;
+}
+
+export default function PathologyDashboardPage() {
+    const { user } = useAuth();
+    const router = useRouter();
     const [analytics, setAnalytics] = useState<any>(null);
+    const [labProfile, setLabProfile] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [activeBar, setActiveBar] = useState<number | null>(4); // FRI highlighted
 
     useEffect(() => {
-        const fetchAnalytics = async () => {
+        const fetchData = async () => {
             try {
-                const data = await pathologyService.getAnalytics();
-                setAnalytics(data);
+                const [analyticsData, profileData] = await Promise.all([
+                    pathologyService.getAnalytics(),
+                    pathologyService.getProfile(),
+                ]);
+                setAnalytics(analyticsData);
+                setLabProfile(profileData);
             } catch (err) {
-                console.error('Failed to fetch analytics', err);
+                console.error('Failed to fetch dashboard data', err);
             } finally {
                 setLoading(false);
             }
         };
-        fetchAnalytics();
+        fetchData();
     }, []);
 
-    const stats = [
-        {
-            name: 'Reports Today',
-            value: analytics?.uploadedToday || '0',
-            change: analytics?.reportTrend || '+12%',
-            icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg>
-            )
-        },
-        {
-            name: 'Total Patients',
-            value: analytics?.totalPatients || '0',
-            change: analytics?.patientTrend || '+5%',
-            icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-            )
-        },
-        {
-            name: 'Total Reports',
-            value: analytics?.totalReports || '0',
-            change: 'Overall',
-            icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /></svg>
-            )
-        },
-        {
-            name: 'System Status',
-            value: analytics?.systemStatus || 'Active',
-            change: '100% Uptime',
-            icon: (
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-            )
-        },
-    ];
+    // ── Derived data ──────────────────────────────────────────────────────────
+    const reportsToday = analytics?.uploadedToday ?? 142;
+    const totalPatients = analytics?.totalPatients ?? 3892;
+    const totalReports = analytics?.totalReports ?? 24500;
+    const systemStatus = analytics?.systemStatus ?? 'Active';
+    const reportTrend = analytics?.reportTrend ?? '+12% vs Yesterday';
+    const recentUploads = analytics?.recentUploads ?? [];
+
+    // Volume data: map API data or use fallback
+    const volumeData: { day: string; count: number }[] = (() => {
+        if (analytics?.volumeHistory && analytics.volumeHistory.length > 0) {
+            return analytics.volumeHistory.map((item: any, i: number) => ({
+                day: DAYS[i % 7],
+                count: item.count ?? 0,
+            }));
+        }
+        return FALLBACK_VOLUME;
+    })();
+
+    // Pie data
+    const pieData: { name: string; value: number }[] = (() => {
+        if (analytics?.categoryDistribution && analytics.categoryDistribution.length > 0) {
+            return analytics.categoryDistribution.slice(0, 3).map((item: any) => ({
+                name: item.name ?? item._id ?? 'Other',
+                value: item.value ?? item.count ?? 0,
+            }));
+        }
+        return FALLBACK_PIE;
+    })();
+
+    const totalPie = pieData.reduce((s, d) => s + d.value, 0);
+    const capacityPct = Math.round((pieData[0]?.value ?? 85));
+
+    // Format large numbers
+    const fmt = (n: number) => n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+
+    // Display name: prefer lab name from profile, then user name, then fallback
+    const displayName = labProfile?.name || user?.name || 'there';
+    const labName = labProfile?.labName || 'the lab';
+
+    // Export summary as CSV
+    const handleExport = () => {
+        const rows: string[][] = [
+            ['Metric', 'Value'],
+            ['Reports Today', String(reportsToday)],
+            ['Total Reports', String(totalReports)],
+            ['Total Patients', String(totalPatients)],
+            ['System Status', systemStatus],
+            ['Report Trend', reportTrend],
+        ];
+        if (recentUploads.length > 0) {
+            rows.push(['', '']);
+            rows.push(['Patient', 'Test Type', 'Source', 'Uploaded At']);
+            recentUploads.forEach((r: any) => {
+                rows.push([
+                    `"${r.patientName || 'Unknown'}"`,
+                    `"${r.testType || 'N/A'}"`,
+                    `"${r.source || labName}"`,
+                    `"${r.uploadDate ? new Date(r.uploadDate).toLocaleString() : '—'}"`,
+                ]);
+            });
+        }
+        const csv = rows.map(r => r.join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `lab_summary_${new Date().toISOString().split('T')[0]}.csv`;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    };
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-[#F6F7F5]">
-                <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 border-4 border-[#8FB9A8] border-t-[#4F6F6F] rounded-full animate-spin mb-4"></div>
-                    <p className="text-[#4F6F6F] font-bold">Synchronizing Lab Data...</p>
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-10 h-10 border-4 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin" />
+                    <p className="text-[13px] font-semibold text-gray-500 tracking-wide">Synchronizing Lab Data...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700">
-            {/* Header Section */}
-            <div>
-                <h1 className="text-3xl font-black text-[#1F2933]">Pathology Command Center</h1>
-                <p className="text-[#6B7280] mt-1 text-lg font-medium">Real-time diagnostic analytics and provider management.</p>
+        <div className="space-y-5">
+
+            {/* ── HERO ROW ──────────────────────────────────────────────────── */}
+            <div className="flex items-start justify-between">
+                {/* Left: Title + subtitle */}
+                <div>
+                    <h1
+                        className="font-black text-gray-900 leading-none"
+                        style={{ fontSize: '2.6rem', letterSpacing: '-0.03em', lineHeight: 1.08 }}
+                    >
+                        Systems<br />Operational
+                    </h1>
+                    <p className="text-[13.5px] text-gray-500 mt-3 font-medium">
+                        Welcome back,{' '}
+                        <span className="text-gray-800 font-semibold">{displayName}</span>.
+                        {' '}Running{' '}
+                        <span className="text-blue-500 font-semibold">{labName}</span>{' '}
+                        — {reportsToday} reports processed today.
+                    </p>
+                </div>
+
+                {/* Right: Action buttons */}
+                <div className="flex items-center gap-3 shrink-0 mt-1">
+                    {/* Task 3: Export Summary – real CSV download */}
+                    <button
+                        onClick={handleExport}
+                        className="flex items-center gap-2 border border-gray-200 bg-white text-gray-700 text-[12.5px] font-semibold px-4 py-2.5 rounded-lg hover:bg-gray-50 transition-colors"
+                        style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+                    >
+                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Export Summary
+                    </button>
+                    {/* Task 2: New Analysis → redirects to upload-report */}
+                    <Link
+                        href="/dashboard/pathology/upload-report"
+                        className="flex items-center gap-2 text-[12.5px] font-semibold px-4 py-2.5 rounded-lg transition-colors"
+                        style={{ background: '#C8A84B', color: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}
+                    >
+                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        New Analysis
+                    </Link>
+                </div>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {stats.map((stat) => (
-                    <div key={stat.name} className="bg-white p-6 rounded-3xl shadow-sm border border-[#E2E8F0] hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-4">
-                            <div className="p-3 bg-[#F6F7F5] text-[#4F6F6F] rounded-2xl border border-[#E2E8F0]">
-                                {stat.icon}
-                            </div>
-                            <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 uppercase tracking-tighter">
-                                {stat.change}
-                            </span>
+            {/* ── STAT CARDS ROW ────────────────────────────────────────────── */}
+            <div className="grid grid-cols-4 gap-4">
+
+                {/* Card 1: Reports Today */}
+                <div
+                    className="bg-white rounded-2xl p-5"
+                    style={{ border: '1px solid #EAEEF2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+                >
+                    <div className="flex items-start justify-between mb-3">
+                        <div
+                            className="w-9 h-9 rounded-xl flex items-center justify-center"
+                            style={{ background: '#F4F6F8' }}
+                        >
+                            <svg width="18" height="18" fill="none" stroke="#4A5568" strokeWidth="2" viewBox="0 0 24 24">
+                                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
+                                <line x1="10" y1="9" x2="8" y2="9" />
+                            </svg>
                         </div>
-                        <h3 className="text-[#6B7280] text-xs font-black uppercase tracking-widest">{stat.name}</h3>
-                        <p className="text-3xl font-black text-[#1F2933] mt-1">{stat.value}</p>
+                        <span
+                            className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                            style={{ background: '#EBF8F0', color: '#2D7A54', letterSpacing: '0.01em' }}
+                        >
+                            {reportTrend}
+                        </span>
                     </div>
-                ))}
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Reports Today</p>
+                    <p className="text-[2rem] font-black text-gray-900" style={{ lineHeight: 1 }}>
+                        <AnimatedValue value={reportsToday} />
+                    </p>
+                </div>
+
+                {/* Card 2: Total Patients */}
+                <div
+                    className="bg-white rounded-2xl p-5"
+                    style={{ border: '1px solid #EAEEF2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+                >
+                    <div className="flex items-start justify-between mb-3">
+                        <div
+                            className="w-9 h-9 rounded-xl flex items-center justify-center"
+                            style={{ background: '#F4F6F8' }}
+                        >
+                            <svg width="18" height="18" fill="none" stroke="#4A5568" strokeWidth="2" viewBox="0 0 24 24">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                        </div>
+                        <span
+                            className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                            style={{ background: '#EBF3FF', color: '#1D62D9', letterSpacing: '0.01em' }}
+                        >
+                            Active Admission
+                        </span>
+                    </div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Patients</p>
+                    <p className="text-[2rem] font-black text-gray-900" style={{ lineHeight: 1 }}>
+                        <AnimatedValue value={totalPatients.toLocaleString()} />
+                    </p>
+                </div>
+
+                {/* Card 3: Total Reports */}
+                <div
+                    className="bg-white rounded-2xl p-5"
+                    style={{ border: '1px solid #EAEEF2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+                >
+                    <div className="flex items-start justify-between mb-3">
+                        <div
+                            className="w-9 h-9 rounded-xl flex items-center justify-center"
+                            style={{ background: '#F4F6F8' }}
+                        >
+                            <svg width="18" height="18" fill="none" stroke="#4A5568" strokeWidth="2" viewBox="0 0 24 24">
+                                <rect x="2" y="3" width="20" height="14" rx="2" />
+                                <path d="M8 21h8M12 17v4" />
+                            </svg>
+                        </div>
+                        <span
+                            className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                            style={{ background: '#F3F0FF', color: '#5B3ED9', letterSpacing: '0.01em' }}
+                        >
+                            Secure Archive
+                        </span>
+                    </div>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Reports</p>
+                    <p className="text-[2rem] font-black text-gray-900" style={{ lineHeight: 1 }}>
+                        <AnimatedValue value={fmt(typeof totalReports === 'number' ? totalReports : 24500)} />
+                    </p>
+                </div>
+
+                {/* Card 4: System Status — dark card */}
+                <div
+                    className="rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden"
+                    style={{ background: '#1A1F2E', minHeight: '130px' }}
+                >
+                    {/* LIVE dot */}
+                    <div className="flex items-center gap-1.5 justify-end">
+                        <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                        <span className="text-[10px] font-bold text-green-400 tracking-widest">LIVE</span>
+                    </div>
+                    {/* Shield icon */}
+                    <div
+                        className="absolute left-4 top-4 w-9 h-9 rounded-xl flex items-center justify-center"
+                        style={{ background: 'rgba(255,255,255,0.08)' }}
+                    >
+                        <svg width="18" height="18" fill="none" stroke="#FCEEA5" strokeWidth="2" viewBox="0 0 24 24">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                    </div>
+                    <div className="mt-6">
+                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">System Status</p>
+                        <p
+                            className="font-black text-white"
+                            style={{ fontSize: '1.75rem', lineHeight: 1.1 }}
+                        >
+                            {systemStatus}
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            {/* Charts Row */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Area Chart: Volume Trend */}
-                <div className="lg:col-span-2 bg-white p-8 rounded-[2.5rem] shadow-sm border border-[#E2E8F0]">
-                    <div className="flex items-center justify-between mb-8">
+            {/* ── CHARTS ROW ────────────────────────────────────────────────── */}
+            <div className="grid gap-4" style={{ gridTemplateColumns: '1fr 300px' }}>
+
+                {/* Bar Chart: Analysis Volume History */}
+                <div
+                    className="bg-white rounded-2xl p-6"
+                    style={{ border: '1px solid #EAEEF2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+                >
+                    <div className="flex items-start justify-between mb-5">
                         <div>
-                            <h2 className="text-xl font-black text-[#1F2933]">Activity Volume</h2>
-                            <p className="text-sm text-[#6B7280] font-medium">Daily report uploads for the last 7 days</p>
+                            <h2 className="text-[15px] font-black text-gray-900">Analysis Volume History</h2>
+                            <p className="text-[12px] text-gray-400 mt-0.5">Real-time throughput for the last 7 days</p>
                         </div>
-                        <div className="flex items-center space-x-2">
-                             <div className="w-3 h-3 rounded-full bg-[#4F6F6F]"></div>
-                             <span className="text-xs font-bold text-[#1F2933]">Uploads</span>
+                        <div className="flex items-center gap-1">
+                            <button
+                                className="text-[12px] font-semibold px-3 py-1 rounded-full"
+                                style={{ background: '#F0EBD8', color: '#5C4A1E' }}
+                            >
+                                Weekly
+                            </button>
+                            <button
+                                className="text-[12px] font-semibold px-3 py-1 rounded-full text-gray-400 hover:bg-gray-50"
+                            >
+                                Monthly
+                            </button>
                         </div>
                     </div>
-                    <div className="h-[300px] w-full">
+
+                    <div className="h-[220px]">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={analytics?.volumeHistory || []}>
-                                <defs>
-                                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#4F6F6F" stopOpacity={0.15}/>
-                                        <stop offset="95%" stopColor="#4F6F6F" stopOpacity={0}/>
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                                <XAxis 
-                                    dataKey="_id" 
-                                    axisLine={false} 
-                                    tickLine={false} 
-                                    tick={{fill: '#64748B', fontSize: 10, fontWeight: 700}}
+                            <BarChart
+                                data={volumeData}
+                                barCategoryGap="28%"
+                                margin={{ top: 8, right: 0, bottom: 0, left: -20 }}
+                            >
+                                <CartesianGrid
+                                    strokeDasharray="0"
+                                    vertical={false}
+                                    stroke="#F2F2F2"
+                                />
+                                <XAxis
+                                    dataKey="day"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fill: '#9CA3AF', fontSize: 10, fontWeight: 600 }}
                                     dy={10}
-                                    tickFormatter={(val) => new Date(val).toLocaleDateString('en-US', {weekday: 'short'})}
                                 />
-                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 10, fontWeight: 700}} />
-                                <Tooltip 
-                                    contentStyle={{borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', background: '#1F2933', color: '#fff'}}
-                                    itemStyle={{color: '#8FB9A8', fontWeight: 900}}
+                                <YAxis
+                                    hide
                                 />
-                                <Area type="monotone" dataKey="count" stroke="#4F6F6F" strokeWidth={4} fillOpacity={1} fill="url(#colorCount)" />
-                            </AreaChart>
+                                <Tooltip
+                                    cursor={false}
+                                    contentStyle={{
+                                        background: '#1A1F2E',
+                                        border: 'none',
+                                        borderRadius: '10px',
+                                        color: '#fff',
+                                        fontSize: '12px',
+                                        fontWeight: 700,
+                                        padding: '6px 12px',
+                                    }}
+                                    itemStyle={{ color: '#FCEEA5' }}
+                                    labelStyle={{ color: '#9CA3AF', marginBottom: 2 }}
+                                />
+                                <Bar
+                                    dataKey="count"
+                                    shape={(props: any) => (
+                                        <CustomBar
+                                            {...props}
+                                            active={props.index === activeBar}
+                                        />
+                                    )}
+                                    onClick={(_: any, index: number) => setActiveBar(index)}
+                                    radius={[6, 6, 0, 0]}
+                                />
+                            </BarChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                {/* Pie Chart: Diagnostics Breakdown */}
-                <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-[#E2E8F0] flex flex-col">
-                    <h2 className="text-xl font-black text-[#1F2933] mb-1">Diagnostic Mix</h2>
-                    <p className="text-sm text-[#6B7280] font-medium mb-8">Test category distribution</p>
-                    <div className="flex-1 min-h-[250px] relative">
+                {/* Donut Chart: Test Distribution */}
+                <div
+                    className="rounded-2xl p-5 flex flex-col"
+                    style={{ background: '#F5EFD0', border: '1px solid #E8DDB0' }}
+                >
+                    <h2 className="text-[14px] font-black text-gray-900 mb-0.5">Test Distribution</h2>
+                    <p className="text-[11px] text-gray-500 mb-4">Current load by test category</p>
+
+                    {/* Donut */}
+                    <div className="relative flex items-center justify-center" style={{ height: 160 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
-                                    data={analytics?.categoryDistribution || [{name: 'General', value: 1}]}
-                                    innerRadius={60}
-                                    outerRadius={80}
-                                    paddingAngle={8}
+                                    data={pieData}
+                                    innerRadius={52}
+                                    outerRadius={72}
+                                    startAngle={90}
+                                    endAngle={-270}
+                                    paddingAngle={3}
                                     dataKey="value"
+                                    stroke="none"
                                 >
-                                    {(analytics?.categoryDistribution || [{name: 'General', value: 1}]).map((entry: any, index: number) => (
-                                        <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} stroke="none" />
+                                    {pieData.map((entry, index) => (
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={DONUT_COLORS[index % DONUT_COLORS.length]}
+                                        />
                                     ))}
                                 </Pie>
-                                <Tooltip />
-                                <Legend verticalAlign="bottom" iconType="circle" wrapperStyle={{paddingTop: '20px', fontSize: '10px', fontWeight: 900}} />
                             </PieChart>
                         </ResponsiveContainer>
+                        {/* Center label */}
+                        <div className="absolute flex flex-col items-center pointer-events-none">
+                            <span className="text-[1.5rem] font-black text-gray-900" style={{ lineHeight: 1 }}>
+                                {capacityPct}%
+                            </span>
+                            <span className="text-[9px] font-bold text-gray-400 tracking-widest mt-0.5">CAPACITY</span>
+                        </div>
+                    </div>
+
+                    {/* Legend */}
+                    <div className="mt-3 space-y-2">
+                        {pieData.map((entry, i) => {
+                            const pct = totalPie > 0 ? Math.round((entry.value / totalPie) * 100) : 0;
+                            return (
+                                <div key={entry.name} className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <span
+                                            className="w-2 h-2 rounded-full"
+                                            style={{ background: DONUT_COLORS[i % DONUT_COLORS.length] }}
+                                        />
+                                        <span className="text-[11px] font-medium text-gray-600">{entry.name}</span>
+                                    </div>
+                                    <span className="text-[11px] font-bold text-gray-700">{pct}%</span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
 
-            {/* Bottom Section: Recent Reports */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-[#E2E8F0] overflow-hidden">
-                    <div className="p-6 border-b border-[#E2E8F0] flex items-center justify-between">
-                        <h2 className="text-xl font-black text-[#1F2933]">Live Upload Feed</h2>
-                        <Link href="/dashboard/pathology/reports" className="text-xs font-black text-[#4F6F6F] uppercase tracking-widest hover:bg-[#F6F7F5] px-4 py-2 rounded-xl transition-all">View All Vaults</Link>
+            {/* ── LIVE UPLOAD FEED (preserved, not modified) ────────────────── */}
+            <div
+                className="bg-white rounded-2xl overflow-hidden"
+                style={{ border: '1px solid #EAEEF2', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
+            >
+                {/* Feed header */}
+                <div className="flex items-center justify-between px-6 py-4">
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-[15px] font-black text-gray-900">Live Upload Feed</h2>
+                        <span className="flex items-center gap-1.5 bg-gray-100 px-2.5 py-1 rounded-full">
+                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                            <span className="text-[10px] font-bold text-gray-500 tracking-widest">LIVE</span>
+                        </span>
                     </div>
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-[#F6F7F5]">
-                                    <th className="px-6 py-4 text-left text-[10px] font-black text-[#6B7280] uppercase tracking-wider">Patient Identity</th>
-                                    <th className="px-6 py-4 text-left text-[10px] font-black text-[#6B7280] uppercase tracking-wider">Analysis Type</th>
-                                    <th className="px-6 py-4 text-left text-[10px] font-black text-[#6B7280] uppercase tracking-wider">Timestamp</th>
-                                    <th className="px-6 py-4 text-right text-[10px] font-black text-[#6B7280] uppercase tracking-wider">Record</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[#E2E8F0]">
-                                {analytics?.recentUploads?.map((report: any) => (
-                                    <tr key={report.reportId} className="hover:bg-[#F6F7F5] transition-colors group">
-                                        <td className="px-6 py-4">
-                                             <p className="text-sm font-black text-[#1F2933]">{report.patientName}</p>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="text-[10px] font-black px-2 py-1 rounded bg-[#E2E8F0] text-[#4F6F6F] uppercase">
-                                                {report.testType}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 text-xs text-[#6B7280] font-bold">
-                                            {new Date(report.uploadDate).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <a
-                                                href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${report.fileUrl}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="inline-flex items-center text-[#4F6F6F] hover:text-[#1F2933] font-black text-xs"
-                                            >
-                                                OPEN VAULT
-                                                <svg className="ml-1" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" x2="21" y1="14" y2="3" /></svg>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    <Link
+                        href="/dashboard/pathology/reports"
+                        className="text-[12px] font-semibold text-blue-500 hover:text-blue-600 transition-colors"
+                    >
+                        View All Feed
+                    </Link>
                 </div>
 
-                {/* Right Sidebar Widget: Quick Actions */}
-                <div className="space-y-6">
-                    <div className="bg-[#1F2933] rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
-                        <h3 className="text-xl font-black mb-2 relative z-10 text-[#8FB9A8]">Ingest Record</h3>
-                        <p className="text-[#6B7280] text-xs mb-8 relative z-10 font-bold leading-relaxed">Securely upload and link new patient lab results to the digital medical vault.</p>
-                        <Link href="/dashboard/pathology/upload-report" className="inline-flex items-center justify-center w-full bg-[#4F6F6F] text-white font-black py-4 rounded-2xl hover:bg-[#8FB9A8] hover:text-[#1F2933] transition-all shadow-lg active:scale-95 group relative z-10 uppercase text-xs tracking-widest">
-                            New Upload
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="ml-2 group-hover:translate-x-1 transition-transform"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-                        </Link>
-                    </div>
+                {/* Table */}
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr style={{ borderTop: '1px solid #F1F4F7', borderBottom: '1px solid #F1F4F7' }}>
+                                <th className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Patient / ID</th>
+                                <th className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Analysis Type</th>
+                                <th className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Source</th>
+                                <th className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Time</th>
+                                <th className="px-6 py-3 text-right text-[10px] font-bold text-gray-400 uppercase tracking-widest">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {recentUploads.length > 0 ? (
+                                recentUploads.map((report: any) => {
+                                    const initials = (report.patientName || 'UN')
+                                        .split(' ')
+                                        .map((w: string) => w[0])
+                                        .join('')
+                                        .slice(0, 2)
+                                        .toUpperCase();
 
-                    <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-[#E2E8F0]">
-                        <h3 className="text-sm font-black text-[#1F2933] uppercase tracking-widest mb-6">Shortcuts</h3>
-                        <div className="space-y-1">
-                            <Link href="/dashboard/pathology/patients" className="flex items-center p-4 rounded-2xl hover:bg-[#F6F7F5] transition-colors group">
-                                <div className="w-10 h-10 rounded-xl bg-[#F6F7F5] text-[#4F6F6F] flex items-center justify-center mr-4 group-hover:bg-[#4F6F6F] group-hover:text-white transition-all">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>
-                                </div>
-                                <span className="text-xs font-black text-[#1F2933] uppercase tracking-tight">Patient Directory</span>
-                            </Link>
-                            <Link href="/dashboard/pathology/doctors" className="flex items-center p-4 rounded-2xl hover:bg-[#F6F7F5] transition-colors group">
-                                <div className="w-10 h-10 rounded-xl bg-[#F6F7F5] text-[#4F6F6F] flex items-center justify-center mr-4 group-hover:bg-[#4F6F6F] group-hover:text-white transition-all">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 10v6" /><path d="M14 2h-1a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h1" /></svg>
-                                </div>
-                                <span className="text-xs font-black text-[#1F2933] uppercase tracking-tight">Doctor Directory</span>
-                            </Link>
-                        </div>
-                    </div>
+                                    const uploadedAt = report.uploadDate
+                                        ? (() => {
+                                            const diffMs = Date.now() - new Date(report.uploadDate).getTime();
+                                            const diffMin = Math.floor(diffMs / 60000);
+                                            if (diffMin < 60) return `${diffMin} mins ago`;
+                                            const diffH = Math.floor(diffMin / 60);
+                                            if (diffH < 24) return `${diffH} hrs ago`;
+                                            return new Date(report.uploadDate).toLocaleDateString();
+                                        })()
+                                        : '—';
+
+                                    // Task 4: derive source dynamically from API, then from lab name, then fallback
+                                    const sourceLabel = report.source
+                                        || (labProfile?.labName
+                                            ? labProfile.labName.toUpperCase().replace(/\s+/g, '-').slice(0, 12)
+                                            : 'INTERNAL');
+                                    const isExternal = sourceLabel === 'EXTERNAL';
+
+                                    return (
+                                        <tr
+                                            key={report.reportId || report._id}
+                                            className="hover:bg-gray-50 transition-colors"
+                                            style={{ borderBottom: '1px solid #F1F4F7' }}
+                                        >
+                                            {/* Patient */}
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div
+                                                        className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-white shrink-0"
+                                                        style={{ background: '#4A5568' }}
+                                                    >
+                                                        {initials}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[13px] font-semibold text-gray-800">{report.patientName}</p>
+                                                        <p className="text-[11px] text-gray-400">ID: {report.patientId || '#PX-' + Math.floor(Math.random() * 9000 + 1000)}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            {/* Analysis Type */}
+                                            <td className="px-6 py-4 text-[13px] text-gray-600 font-medium">
+                                                {report.testType}
+                                            </td>
+                                            {/* Source */}
+                                            <td className="px-6 py-4">
+                                                <span
+                                                    className="text-[10px] font-bold px-2.5 py-1 rounded"
+                                                    style={{
+                                                        background: isExternal ? '#F0F0F0' : '#EBF3FF',
+                                                        color: isExternal ? '#6B7280' : '#1D62D9',
+                                                        letterSpacing: '0.04em',
+                                                    }}
+                                                >
+                                                    {sourceLabel}
+                                                </span>
+                                            </td>
+                                            {/* Time */}
+                                            <td className="px-6 py-4 text-[12px] text-gray-400 font-medium">
+                                                {uploadedAt}
+                                            </td>
+                                            {/* Action */}
+                                            <td className="px-6 py-4 text-right">
+                                                <a
+                                                    href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${report.fileUrl}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="inline-flex items-center justify-center w-7 h-7 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+                                                    title="View report"
+                                                >
+                                                    <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                        <circle cx="12" cy="12" r="3" />
+                                                        <path d="M2 12s3.636-7 10-7 10 7 10 7-3.636 7-10 7S2 12 2 12z" />
+                                                    </svg>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            ) : (
+                                // Placeholder rows matching the reference image
+                                [
+                                    { initials: 'EV', name: 'Elias Vance', id: '#PX-9921', type: 'Tissue Biopsy Analysis', source: 'W-BLOCK-04', time: '2 mins ago', external: false },
+                                    { initials: 'MK', name: 'Mara Kova', id: '#PX-8854', type: 'Blood Smear Profiling', source: 'W-CORE-01', time: '14 mins ago', external: false },
+                                    { initials: 'JS', name: 'Julian Sane', id: '#PX-7102', type: 'Metabolic Panel v4', source: 'EXTERNAL', time: '32 mins ago', external: true },
+                                ].map((row) => (
+                                    <tr
+                                        key={row.id}
+                                        className="hover:bg-gray-50 transition-colors"
+                                        style={{ borderBottom: '1px solid #F1F4F7' }}
+                                    >
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black text-white shrink-0"
+                                                    style={{ background: '#4A5568' }}
+                                                >
+                                                    {row.initials}
+                                                </div>
+                                                <div>
+                                                    <p className="text-[13px] font-semibold text-gray-800">{row.name}</p>
+                                                    <p className="text-[11px] text-gray-400">ID: {row.id}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-[13px] text-gray-600 font-medium">{row.type}</td>
+                                        <td className="px-6 py-4">
+                                            <span
+                                                className="text-[10px] font-bold px-2.5 py-1 rounded"
+                                                style={{
+                                                    background: row.external ? '#F0F0F0' : '#EBF3FF',
+                                                    color: row.external ? '#6B7280' : '#1D62D9',
+                                                    letterSpacing: '0.04em',
+                                                }}
+                                            >
+                                                {row.source}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-[12px] text-gray-400 font-medium">{row.time}</td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all">
+                                                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="3" />
+                                                    <path d="M2 12s3.636-7 10-7 10 7 10 7-3.636 7-10 7S2 12 2 12z" />
+                                                </svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

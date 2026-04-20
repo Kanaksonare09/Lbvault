@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import api from '@/services/api';
 import { useAuth } from '@/lib/AuthContext';
-import VoiceSummaryButton from '@/components/patient/VoiceSummaryButton';
 
 export default function DoctorOverviewDashboard() {
   const { user } = useAuth();
@@ -21,16 +20,13 @@ export default function DoctorOverviewDashboard() {
           api.get('/doctor/patients'),
           api.get('/doctor/shared-reports')
         ]);
-        
         const patients = patientsRes.data || [];
-        const reports = reportsRes.data || [];
-        
+        const reports  = reportsRes.data  || [];
         setStats({
           totalPatients: patients.length,
-          totalReports: reports.length,
-          urgentCases: reports.filter((r: any) => !r.doctorComment).length
+          totalReports:  reports.length,
+          urgentCases:   reports.filter((r: any) => !r.doctorComment).length,
         });
-        
         setRecentReports(reports.slice(0, 5));
       } catch (err) {
         console.error(err);
@@ -43,8 +39,15 @@ export default function DoctorOverviewDashboard() {
 
   const doctorName = user?.name?.split(' ').pop() ?? 'Doctor';
 
+  const fmt = (d: any) => {
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return '—';
+    return date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  };
+
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
+
       {/* Welcome Header */}
       <div className="flex justify-between items-end">
         <div>
@@ -54,18 +57,19 @@ export default function DoctorOverviewDashboard() {
           <p className="text-[#5C7C7C] font-medium text-lg">Here is your clinical overview for today.</p>
         </div>
         <div className="flex gap-4">
-           <Link href="/dashboard/doctor/patients" className="bg-[#2D3A3A] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:translate-y-[-2px] transition-all">
-             Open Workspace
-           </Link>
+          <Link href="/dashboard/doctor/patients"
+            className="bg-[#2D3A3A] text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:translate-y-[-2px] transition-all">
+            Open Workspace
+          </Link>
         </div>
       </div>
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {[
-          { label: 'Total Patients', val: stats.totalPatients, icon: '👥', color: 'bg-[#8FB9A8]/20 text-[#4F6F6F]' },
-          { label: 'Shared Reports', val: stats.totalReports, icon: '📄', color: 'bg-[#8FB9A8]/10 text-[#4F6F6F]' },
-          { label: 'Action Required', val: stats.urgentCases, icon: '🚨', color: 'bg-rose-50 text-rose-600' },
+          { label: 'Total Patients',  val: stats.totalPatients, icon: '👥', color: 'bg-[#8FB9A8]/20 text-[#4F6F6F]' },
+          { label: 'Shared Reports',  val: stats.totalReports,  icon: '📄', color: 'bg-[#8FB9A8]/10 text-[#4F6F6F]' },
+          { label: 'Action Required', val: stats.urgentCases,   icon: '🚨', color: 'bg-rose-50 text-rose-600' },
         ].map((s, i) => (
           <div key={i} className="bg-white rounded-[40px] p-10 border border-[#E2E8F0] shadow-sm relative overflow-hidden group hover:shadow-xl transition-all">
             <div className="relative z-10 space-y-4">
@@ -77,87 +81,57 @@ export default function DoctorOverviewDashboard() {
                 <p className="text-4xl font-black text-[#2D3A3A]">{s.val}</p>
               </div>
             </div>
-
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Recent Reports List */}
-        <div className="lg:col-span-8 space-y-6">
-          <div className="flex items-center justify-between px-2">
-            <h3 className="text-xs font-black text-[#4F6F6F] uppercase tracking-[0.2em]">Incoming Clinical Data</h3>
-            <Link href="/dashboard/doctor/shared-reports" className="text-xs font-black text-[#4F6F6F] hover:underline uppercase tracking-widest">View All</Link>
-          </div>
-          
-          <div className="bg-white rounded-[40px] border border-[#E2E8F0] shadow-sm overflow-hidden divide-y divide-[#F1F5F5]">
-            {loading ? (
-              [1, 2, 3].map(i => <div key={i} className="p-8 animate-pulse bg-gray-50 m-4 rounded-2xl h-24" />)
-            ) : recentReports.length === 0 ? (
-              <div className="p-20 text-center space-y-4">
-                <p className="text-lg font-bold text-[#2D3A3A]">No recent reports</p>
-                <p className="text-sm text-[#5C7C7C]">When patients share reports, they will appear here.</p>
-              </div>
-            ) : (
-              recentReports.map((r) => (
-                <div 
-                  key={r._id} 
-                  onClick={() => router.push(`/dashboard/doctor/shared-reports`)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && router.push(`/dashboard/doctor/shared-reports`)}
-                  className="flex items-center justify-between p-8 hover:bg-gray-50 transition-all group cursor-pointer outline-none"
-                >
-                  <div className="flex items-center gap-6">
-                    <div className="w-14 h-14 bg-[#F1F5F5] rounded-2xl flex items-center justify-center text-xl group-hover:bg-[#4F6F6F] group-hover:text-white transition-colors duration-300">
-                      📄
-                    </div>
-                    <div>
-                      <h4 className="font-black text-[#2D3A3A] group-hover:text-[#4F6F6F] transition-colors">{r.reportName}</h4>
-                      <p className="text-xs text-[#5C7C7C] font-medium uppercase tracking-widest">
-                        {r.patientId?.name} • {new Date(r.reportDate || r.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 shrink-0">
-                    <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                      !r.doctorComment ? 'bg-rose-50 text-rose-600' : 'bg-[#8FB9A8]/10 text-[#4F6F6F]'
-                    }`}>
-                      {!r.doctorComment ? 'Urgent Review' : 'Reviewed'}
-                    </div>
-                    {/* QUICK VOICE ACCESS */}
-                    <div onClick={(e) => e.stopPropagation()}>
-                       <VoiceSummaryButton 
-                          patientId={r.patientId?._id}
-                          isIcon={true}
-                          label="Trajectory"
-                       />
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+      {/* Recent Reports — full width (Medical Bulletins removed) */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between px-2">
+          <h3 className="text-xs font-black text-[#4F6F6F] uppercase tracking-[0.2em]">Incoming Clinical Data</h3>
+          <Link href="/dashboard/doctor/shared-reports"
+            className="text-xs font-black text-[#4F6F6F] hover:underline uppercase tracking-widest">
+            View All
+          </Link>
         </div>
 
-        {/* System Updates */}
-        <div className="lg:col-span-4 space-y-6">
-          <h3 className="text-xs font-black text-[#4F6F6F] uppercase tracking-[0.2em] px-2">Medical Bulletins</h3>
-          <div className="bg-[#2D3A3A] rounded-[40px] p-8 text-white space-y-8 shadow-2xl relative overflow-hidden">
-            <div className="space-y-4 relative z-10">
-              <div className="pb-6 border-b border-white/10">
-                <p className="text-[10px] font-black text-[#8FB9A8] uppercase tracking-widest mb-1">Update v2.4</p>
-                <h4 className="text-lg font-black leading-tight">Grounded AI Summaries are now active.</h4>
-                <p className="text-xs text-[#7A9999] mt-2 font-medium">Model 4.0 now processes biomarkers with 98% accuracy.</p>
+        <div className="bg-white rounded-[40px] border border-[#E2E8F0] shadow-sm overflow-hidden divide-y divide-[#F1F5F5]">
+          {loading ? (
+            [1, 2, 3].map(i => <div key={i} className="p-8 animate-pulse bg-gray-50 m-4 rounded-2xl h-24" />)
+          ) : recentReports.length === 0 ? (
+            <div className="p-20 text-center space-y-4">
+              <p className="text-lg font-bold text-[#2D3A3A]">No recent reports</p>
+              <p className="text-sm text-[#5C7C7C]">When patients share reports, they will appear here.</p>
+            </div>
+          ) : recentReports.map((r) => (
+            <div
+              key={r._id}
+              onClick={() => router.push('/dashboard/doctor/shared-reports')}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && router.push('/dashboard/doctor/shared-reports')}
+              className="flex items-center justify-between p-8 hover:bg-gray-50 transition-all group cursor-pointer outline-none"
+            >
+              <div className="flex items-center gap-6">
+                <div className="w-14 h-14 bg-[#F1F5F5] rounded-2xl flex items-center justify-center text-xl group-hover:bg-[#4F6F6F] group-hover:text-white transition-colors duration-300">
+                  📄
+                </div>
+                <div>
+                  <h4 className="font-black text-[#2D3A3A] group-hover:text-[#4F6F6F] transition-colors">{r.reportName}</h4>
+                  <p className="text-xs text-[#5C7C7C] font-medium uppercase tracking-widest">
+                    {r.patientId?.name} • {fmt(r.uploadDate || r.createdAt)}
+                  </p>
+                </div>
               </div>
-              <div className="pb-6 border-b border-white/10">
-                <p className="text-[10px] font-black text-[#8FB9A8] uppercase tracking-widest mb-1">System Alert</p>
-                <h4 className="text-lg font-black leading-tight">Patient data encryption synchronized.</h4>
-                <p className="text-xs text-[#7A9999] mt-2 font-medium">End-to-end handshake complete for all active clinical vaults.</p>
+              <div className="flex items-center gap-4 shrink-0">
+                <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                  !r.doctorComment ? 'bg-rose-50 text-rose-600' : 'bg-[#8FB9A8]/10 text-[#4F6F6F]'
+                }`}>
+                  {!r.doctorComment ? 'Urgent Review' : 'Reviewed'}
+                </div>
               </div>
             </div>
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#8FB9A8]/10 rounded-full blur-3xl" />
-          </div>
+          ))}
         </div>
       </div>
     </div>

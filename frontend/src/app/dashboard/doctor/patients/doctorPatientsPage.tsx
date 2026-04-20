@@ -86,7 +86,7 @@ export default function DoctorPatientsPage() {
           <div className="flex-1 overflow-y-auto px-3 pb-6 space-y-1.5">
             {loading ? (
               <div className="flex justify-center py-16">
-                <div className="w-8 h-8 border-4 border-[#8FB9A8]/20 border-t-[#4F6F6F] rounded-full animate-spin" />
+                <div className="w-8 h-8 border-4 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin" />
               </div>
             ) : filtered.length === 0 ? (
               <div className="text-center py-12">
@@ -185,7 +185,7 @@ export default function DoctorPatientsPage() {
 
                 {reportsLoading ? (
                   <div className="flex justify-center py-12">
-                    <div className="w-8 h-8 border-4 border-[#8FB9A8]/20 border-t-[#4F6F6F] rounded-full animate-spin" />
+                    <div className="w-8 h-8 border-4 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin" />
                   </div>
                 ) : patientReports.length === 0 ? (
                   <div className="bg-white rounded-2xl border border-dashed border-gray-200 py-12 text-center shadow-sm">

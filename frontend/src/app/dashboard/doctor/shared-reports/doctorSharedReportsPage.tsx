@@ -1,414 +1,571 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '@/services/api';
-import AudioPlayer from '@/components/ui/AudioPlayer';
+import { useAuth } from '@/lib/AuthContext';
 import VoiceSummaryButton from '@/components/patient/VoiceSummaryButton';
+import Link from 'next/link';
 
-const FILTER_TABS = ['All Reports', 'Hematology', 'Cardiology', 'Neurology', 'Urgent Review'];
+// ─── Filter tabs ──────────────────────────────────────────────────────────────
+const FILTER_TABS = ['All Reports', 'Hematology', 'Biochemistry', 'Radiology', 'Cardiology'];
 
-function getReportStatus(report: any): { label: string; pillClass: string } {
-  // Check if any biomarker has a critical or abnormal status
-  const hasCritical = Object.values(report.extractedData || {}).some(
-    (b: any) => typeof b === 'object' && (b.severity === 'Critical' || b.isAbnormal)
-  );
-
-  if (report.doctorComment) {
-    return {
-      label: 'REVIEWED',
-      pillClass: 'bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-3 py-1 rounded-lg tracking-widest uppercase',
-    };
-  }
-
-  if (hasCritical) {
-    return {
-      label: 'URGENT REVIEW',
-      pillClass: 'bg-red-600 text-white text-[10px] font-bold px-3 py-1 rounded-lg tracking-widest uppercase shadow-sm animate-pulse',
-    };
-  }
-
-  return {
-    label: 'PENDING REVIEW',
-    pillClass: 'bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-3 py-1 rounded-lg tracking-widest uppercase',
-  };
-}
-
+// ─── Per-report icon (square, rounded) ───────────────────────────────────────
 const ICON_CONFIGS = [
-  {
-    bg: 'bg-amber-100',
-    color: 'text-amber-600',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0H5m4 0h6m-6 0v4a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-4m0 0h4"/>
-      </svg>
-    ),
-  },
-  {
-    bg: 'bg-[#8FB9A8]/20',
-    color: 'text-[#4F6F6F]',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-      </svg>
-    ),
-  },
-  {
-    bg: 'bg-slate-200',
-    color: 'text-slate-600',
-    icon: (
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.22 4.22l2.12 2.12m11.32 11.32 2.12 2.12M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
-      </svg>
-    ),
-  },
+    {
+        bg: 'bg-amber-50',
+        color: 'text-amber-500',
+        icon: (
+            <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M12 2C6 2 2 12 2 12s4 10 10 10 10-10 10-10S18 2 12 2z" /><circle cx="12" cy="12" r="3" />
+            </svg>
+        ),
+    },
+    {
+        bg: 'bg-red-50',
+        color: 'text-red-400',
+        icon: (
+            <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+        ),
+    },
+    {
+        bg: 'bg-indigo-50',
+        color: 'text-indigo-400',
+        icon: (
+            <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+            </svg>
+        ),
+    },
 ];
 
-function getBioStatus(key: string, val: any) {
-  // If val is the new object structure from the backend
-  if (val && typeof val === 'object' && val.hasOwnProperty('value')) {
-    if (val.isAbnormal) {
-      const sev = val.severity || 'Abnormal';
-      if (sev === 'Critical') return { label: 'CRITICAL', cls: 'bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-md tracking-[0.1em] shadow-sm' };
-      if (sev === 'Moderate') return { label: 'MODERATE', cls: 'bg-orange-100 text-orange-700 border border-orange-200 text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wider' };
-      if (sev === 'Mild') return { label: 'MILD', cls: 'bg-amber-100 text-amber-700 border border-amber-200 text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wider' };
-      return { label: sev.toUpperCase(), cls: 'text-red-500 text-[11px] font-bold' };
-    }
-    return { label: 'NORMAL', cls: 'bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wider' };
-  }
-
-  // Fallback for legacy data/simple values
-  const v = parseFloat(String(val));
-  if (isNaN(v)) return { label: 'NORMAL', cls: 'text-gray-400 text-sm' };
-  const k = key.toLowerCase();
-  
-  if (k.includes('glucose') && v > 99 && v <= 125) return { label: 'MODERATE', cls: 'bg-orange-100 text-orange-700 border border-orange-200 text-[10px] font-bold px-2.5 py-1 rounded-md' };
-  if (k.includes('glucose') && v > 125) return { label: 'CRITICAL', cls: 'bg-red-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-md' };
-  
-  return { label: 'NORMAL', cls: 'bg-green-50 text-green-700 border border-green-200 text-[10px] font-bold px-2.5 py-1 rounded-md' };
+// ─── Stability status from biomarkers ────────────────────────────────────────
+function getStabilityStatus(report: any): { label: string; isHigh: boolean } {
+    const hasCritical = Object.values(report.extractedData || {}).some(
+        (b: any) => typeof b === 'object' && (b.severity === 'Critical' || b.isAbnormal)
+    );
+    if (hasCritical) return { label: 'High Priority', isHigh: true };
+    return { label: 'Normal Range', isHigh: false };
 }
 
-export default function DoctorSharedReportsPage() {
-  const [reports, setReports] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeFilter, setActiveFilter] = useState('All Reports');
-  const [expanded, setExpanded] = useState<string | null>(null);
-  const [noteText, setNoteText] = useState('');
-  const [savingNote, setSavingNote] = useState<string | null>(null);
+// ─── Category tag pill colour ─────────────────────────────────────────────────
+function getCategoryStyle(testType: string) {
+    const t = (testType || '').toLowerCase();
+    if (t.includes('hemat') || t.includes('blood') || t.includes('cbc')) return 'text-amber-700 bg-amber-50 border border-amber-200';
+    if (t.includes('bio') || t.includes('glucose') || t.includes('lipid')) return 'text-pink-700 bg-pink-50 border border-pink-200';
+    if (t.includes('radio') || t.includes('x-ray') || t.includes('xray') || t.includes('chest')) return 'text-violet-700 bg-violet-50 border border-violet-200';
+    if (t.includes('cardio') || t.includes('heart')) return 'text-blue-700 bg-blue-50 border border-blue-200';
+    return 'text-gray-600 bg-gray-50 border border-gray-200';
+}
 
-  useEffect(() => {
-    api.get('/doctor/shared-reports')
-      .then(res => {
-        const data = res.data || [];
-        setReports(data);
-        if (data.length > 0) setExpanded(data[0]._id);
-      })
-      .catch(() => setReports([]))
-      .finally(() => setLoading(false));
-  }, []);
+function getCategoryLabel(testType: string) {
+    const t = (testType || '').toLowerCase();
+    if (t.includes('hemat') || t.includes('blood') || t.includes('cbc')) return 'Hematology';
+    if (t.includes('bio') || t.includes('glucose') || t.includes('lipid')) return 'Biochemistry';
+    if (t.includes('radio') || t.includes('x-ray') || t.includes('xray') || t.includes('chest')) return 'Radiology';
+    if (t.includes('cardio') || t.includes('heart')) return 'Cardiology';
+    return testType || 'Report';
+}
 
-  const saveNote = async (reportId: string) => {
-    if (!noteText.trim()) return;
-    setSavingNote(reportId);
-    try {
-      await api.post(`/doctor/reports/${reportId}/note`, { note: noteText });
-      setNoteText('');
-      const res = await api.get('/doctor/shared-reports');
-      setReports(res.data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSavingNote(null);
+// ─── Biomarker row status ─────────────────────────────────────────────────────
+function getBioStatus(key: string, val: any) {
+    if (val && typeof val === 'object' && val.hasOwnProperty('value')) {
+        if (val.isAbnormal) {
+            const sev = val.severity || 'Abnormal';
+            if (sev === 'Critical') return { label: 'CRITICAL', cls: 'bg-red-100 text-red-700 border border-red-200 text-[9px] font-black px-2 py-0.5 rounded tracking-widest' };
+            return { label: 'MODERATE', cls: 'bg-orange-50 text-orange-600 border border-orange-200 text-[9px] font-bold px-2 py-0.5 rounded tracking-widest' };
+        }
+        return { label: 'NORMAL', cls: 'bg-green-50 text-green-700 border border-green-200 text-[9px] font-bold px-2 py-0.5 rounded tracking-widest' };
     }
-  };
+    return { label: 'NORMAL', cls: 'bg-green-50 text-green-700 border border-green-200 text-[9px] font-bold px-2 py-0.5 rounded tracking-widest' };
+}
 
-  const filtered = reports.filter(r => {
-    if (activeFilter === 'All Reports') return true;
-    if (activeFilter === 'Urgent Review') return !r.doctorComment;
-    return (r.testType || r.category || '').toLowerCase().includes(activeFilter.toLowerCase());
-  });
+// ─── Share Popover (position: fixed so overflow:hidden can't clip it) ────────
+function SharePopover({ report }: { report: any }) {
+    const [open, setOpen]     = useState(false);
+    const [copied, setCopied] = useState(false);
+    const [pos, setPos]       = useState({ top: 0, right: 0 });
+    const btnRef              = useRef<HTMLButtonElement>(null);
+    const menuRef             = useRef<HTMLDivElement>(null);
 
-  return (
-    <div className="-m-8 bg-[#F6F7F5] min-h-screen pb-16">
+    // Close on outside click
+    useEffect(() => {
+        const h = (e: MouseEvent) => {
+            if (
+                btnRef.current  && !btnRef.current.contains(e.target as Node) &&
+                menuRef.current && !menuRef.current.contains(e.target as Node)
+            ) setOpen(false);
+        };
+        document.addEventListener('mousedown', h);
+        return () => document.removeEventListener('mousedown', h);
+    }, []);
 
-      {/* ── Page Header ── */}
-      <div className="flex items-start justify-between px-10 pt-10 pb-7">
-        <div>
-          <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">Reports Management</h1>
-          <p className="text-sm text-gray-400 mt-1 font-medium">Centralized diagnostic vault for collaborative clinical review.</p>
-        </div>
-        <button className="flex items-center gap-2 bg-[#4F6F6F] hover:bg-[#1F2933] text-white font-semibold text-sm px-5 py-2.5 rounded-xl shadow-md transition-all">
-          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
-          Upload New
-        </button>
-      </div>
+    const handleOpen = () => {
+        if (btnRef.current) {
+            const r = btnRef.current.getBoundingClientRect();
+            // Place menu above the button, aligned to its right edge
+            setPos({ top: r.top - 8, right: window.innerWidth - r.right });
+        }
+        setOpen(o => !o);
+    };
 
-      {/* ── Filter Pills ── */}
-      <div className="flex items-center gap-2.5 px-10 pb-7 flex-wrap">
-        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest mr-1">Filter by:</span>
-        {FILTER_TABS.map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveFilter(tab)}
-            className={`text-[13px] font-semibold px-4 py-1.5 rounded-full border transition-all ${
-              activeFilter === tab
-                ? 'bg-[#F5C842] text-[#1a1000] border-[#F5C842] shadow-sm'
-                : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700 shadow-sm'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+    const reportLink = typeof window !== 'undefined' ? `${window.location.origin}/dashboard/doctor/shared-reports` : '';
+    const reportText = `Medical Report: ${report.reportName || 'Clinical Report'}`;
+    const apiBase    = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const fileUrl    = report.fileUrl ? `${apiBase}${report.fileUrl}` : reportLink;
 
-      {/* ── Report Cards ── */}
-      <div className="px-10 space-y-5">
-        {loading ? (
-          <div className="flex items-center justify-center py-32">
-            <div className="w-10 h-10 border-4 border-[#8FB9A8]/20 border-t-[#4F6F6F] rounded-full animate-spin" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-md border border-gray-100/80 py-24 text-center">
-            <p className="font-bold text-gray-500 text-base">No reports available</p>
-            <p className="text-sm text-gray-400 mt-1">Reports shared by patients will appear here.</p>
-          </div>
-        ) : filtered.map((report, idx) => {
-          const patientName = typeof report.patientId === 'object' ? report.patientId?.name : 'Unknown Patient';
-          const date = new Date(report.uploadDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-          const isExpanded = expanded === report._id;
-          const refNum = `#${(report.testType || 'RPT').substring(0, 3).toUpperCase()}-${String(report._id).slice(-5).toUpperCase()}`;
-          const { label: statusLabel, pillClass } = getReportStatus(report);
-          const iconCfg = ICON_CONFIGS[idx % ICON_CONFIGS.length];
+    const channels = [
+        {
+            id: 'wa',
+            label: 'WhatsApp',
+            color: '#25D366',
+            go: () => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(reportText + '\n' + fileUrl)}`, '_blank'),
+        },
+        {
+            id: 'em',
+            label: 'Email',
+            color: '#EA4335',
+            // Use location.href for mailto — window.open is blocked by popup blockers
+            go: () => { window.location.href = `mailto:?subject=${encodeURIComponent(reportText)}&body=${encodeURIComponent(fileUrl)}`; },
+        },
+        {
+            id: 'tg',
+            label: 'Telegram',
+            color: '#2AABEE',
+            go: () => window.open(`https://t.me/share/url?url=${encodeURIComponent(fileUrl)}&text=${encodeURIComponent(reportText)}`, '_blank'),
+        },
+    ];
 
-          return (
-            <div
-              key={report._id}
-              className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] border border-gray-100/80 overflow-hidden transition-all duration-300"
+    return (
+        <>
+            <button
+                ref={btnRef}
+                onClick={handleOpen}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+                title="Share Report"
             >
-              {/* ── Card Header ── */}
-              <div
-                className="flex items-center gap-5 px-7 py-5 cursor-pointer hover:bg-gray-50/60 transition-colors"
-                onClick={() => setExpanded(isExpanded ? null : report._id)}
-              >
-                {/* Round icon */}
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${iconCfg.bg} ${iconCfg.color}`}>
-                  {iconCfg.icon}
-                </div>
-
-                {/* Name + meta */}
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-900 text-[15px] leading-snug">{report.reportName}</p>
-                  <div className="flex items-center gap-4 mt-1 text-[12px] text-gray-400 font-medium">
-                    <span className="flex items-center gap-1.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                      {patientName}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
-                      {date}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Status + Ref + toggle */}
-                <div className="flex items-center gap-4 shrink-0">
-                  <div className="text-right">
-                    <span className={pillClass}>{statusLabel}</span>
-                    <p className="text-[11px] text-gray-400 mt-1.5 font-medium">Ref: {refNum}</p>
-                  </div>
-                  <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all ${
-                    isExpanded
-                      ? 'border-gray-300 text-gray-500 bg-gray-50'
-                      : 'border-gray-200 text-gray-400 bg-white hover:border-[#4F6F6F]/50 hover:text-[#4F6F6F]'
-                  }`}>
-                    {isExpanded
-                      ? <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
-                      : <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    }
-                  </div>
-                </div>
-              </div>
-
-              {/* ── Expanded Body ── */}
-              {isExpanded && (
-                <div className="border-t border-gray-100 bg-[#F8F9FC] px-7 py-6 animate-in slide-in-from-top-2 duration-200">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-
-                    {/* LEFT — AI Insight + Audio */}
-                    <div className="space-y-4">
-
-                      {/* AI Clinical Insight card — always shown */}
-                      <div className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.07)] border border-gray-100 overflow-hidden">
-                        {/* Dark gradient header */}
-                        <div className="flex items-center gap-2.5 px-5 py-3"
-                          style={{ background: 'linear-gradient(90deg, #2D3748 0%, #4A5568 100%)' }}>
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F5C842" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                          </svg>
-                          <span className="text-[11px] font-bold text-[#F5C842] uppercase tracking-[0.15em]">AI Clinical Insight</span>
-                        </div>
-                        {/* Body */}
-                        <div className="px-5 py-4">
-                          {report.aiSummary ? (
-                            <p
-                              className="text-[13px] text-gray-600 leading-relaxed"
-                              dangerouslySetInnerHTML={{
-                                __html: report.aiSummary
-                                  .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                                  .slice(0, 380) + (report.aiSummary.length > 380 ? '…' : '')
-                              }}
-                            />
-                          ) : (
-                            <p className="text-[13px] text-gray-400 leading-relaxed italic">
-                              Analysis pending. The AI model is processing this report to extract clinical insights and biomarker correlations.
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Audio Summary Player */}
-                      <div className="bg-[#F6F7F5] rounded-2xl border border-[#8FB9A8]/20 p-5">
-                         <VoiceSummaryButton 
-                            reportId={report._id}
-                            label="Clinical Brief"
-                         />
-                         <p className="text-[10px] text-gray-400 mt-2 font-medium">Rachel V2.1 AI Engine generated clinical vocalization.</p>
-                      </div>
-                    </div>
-
-                    {/* RIGHT — Biomarker Table */}
-                    <div>
-                      <div className="bg-white rounded-2xl shadow-[0_2px_12px_rgba(0,0,0,0.07)] border border-gray-100 overflow-hidden">
-                        {/* Table head */}
-                        <div className="grid grid-cols-4 px-5 py-3 border-b border-gray-100">
-                          {['Biomarker', 'Result', 'Reference', 'Status'].map(h => (
-                            <span key={h} className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{h}</span>
-                          ))}
-                        </div>
-                        {/* Rows */}
-                        {report.extractedData && Object.keys(report.extractedData).length > 0 ? (
-                          <div className="divide-y divide-gray-50">
-                            {Object.entries(report.extractedData).slice(0, 10).map(([key, val]: [string, any]) => {
-                              const bs = getBioStatus(key, val);
-                              const isRich = typeof val === 'object' && val !== null;
-                              const displayVal = isRich ? `${val.value} ${val.unit}` : val;
-                              const range = isRich && (val.min !== undefined || val.max !== undefined) 
-                                ? `${val.min ?? '0'} - ${val.max ?? '∞'} ${val.unit}`
-                                : '—';
-
-                              return (
-                                <div key={key} className="grid grid-cols-4 px-5 py-3.5 items-center hover:bg-gray-50/60 transition-colors">
-                                  <span className="text-[13px] text-gray-700 font-medium">{key}</span>
-                                  <span className={`text-[13px] font-bold ${bs.label === 'CRITICAL' || bs.label === 'Abnormal' || bs.label === 'High'  ? 'text-red-500' : 'text-gray-800'}`}>{displayVal}</span>
-                                  <span className="text-[12px] text-gray-400">{range}</span>
-                                  <span className={bs.cls}>{bs.label}</span>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ) : (
-                          <div className="px-5 py-8 text-center">
-                            <p className="text-sm text-gray-400 italic">No structured biomarker data extracted.</p>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Action row */}
-                      <div className="flex items-center gap-3 mt-4">
-                        <button className="text-[13px] font-semibold text-[#4F6F6F] hover:underline transition-all px-1">
-                          View Historical Trends
-                        </button>
-                        <a
-                          href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${report.fileUrl}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="ml-auto flex items-center gap-2 bg-gray-800 hover:bg-gray-900 text-white text-[13px] font-semibold px-5 py-2.5 rounded-xl transition-all shadow-sm"
-                        >
-                          Download Full PDF
-                        </a>
-                      </div>
-
-                      {/* Clinical note */}
-                      {report.doctorComment && (
-                        <div className="mt-4 px-4 py-3 bg-[#8FB9A8]/10 rounded-xl border border-[#8FB9A8]/20">
-                          <p className="text-[10px] font-bold text-[#4F6F6F] uppercase tracking-widest mb-1">Clinical Note</p>
-                          <p className="text-sm text-gray-700 italic">"{report.doctorComment}"</p>
-                        </div>
-                      )}
-                      <div className="flex gap-2 mt-3">
-                        <input
-                          type="text"
-                          placeholder="Add clinical note…"
-                          value={savingNote === report._id ? '' : noteText}
-                          onChange={e => setNoteText(e.target.value)}
-                          onKeyDown={e => e.key === 'Enter' && saveNote(report._id)}
-                          className="flex-1 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-[#4F6F6F]/30 focus:ring-2 focus:ring-[#8FB9A8]/10 transition-all"
-                        />
-                        <button
-                          onClick={() => saveNote(report._id)}
-                          disabled={savingNote === report._id}
-                          className="px-5 py-2.5 bg-[#4F6F6F] hover:bg-[#1F2933] text-white text-sm font-semibold rounded-xl transition-all disabled:opacity-50 shadow-sm"
-                        >
-                          {savingNote === report._id ? '…' : 'Save Note'}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ── Bottom Info Cards ── */}
-      {!loading && filtered.length > 0 && (
-        <div className="px-10 mt-10 grid grid-cols-1 lg:grid-cols-2 gap-5">
-
-          {/* Secure Shared Portal */}
-          <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.07)] border border-gray-100 p-7 flex gap-6 items-start">
-            <div className="w-20 h-20 shrink-0 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#D1D5DB" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><polyline points="9 12 11 14 15 10"/>
-              </svg>
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-base font-bold text-[#4F6F6F] mb-2">Secure Shared Portal</h3>
-              <p className="text-[13px] text-gray-500 leading-relaxed mb-5">
-                These reports are end-to-end encrypted and shared only within the HealthScan clinical network. Any modification to data is logged and attributed to the medical professional in charge.
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="flex -space-x-2">
-                  {['bg-[#8FB9A8]', 'bg-purple-300', 'bg-green-300'].map((c, i) => (
-                    <div key={i} className={`w-8 h-8 rounded-full ${c} border-2 border-white shadow-sm`} />
-                  ))}
-                  <div className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white shadow-sm flex items-center justify-center text-[10px] font-bold text-gray-500">+12</div>
-                </div>
-                <span className="text-[12px] text-gray-400 font-medium">Collaborators with access</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Automated Alert Thresholds */}
-          <div className="bg-[#FFF8D6] rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-yellow-100 p-7">
-            <div className="w-11 h-11 bg-amber-200 rounded-xl flex items-center justify-center mb-4">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>
-              </svg>
-            </div>
-            <h3 className="text-[15px] font-bold text-gray-800 mb-2">Automated Alert Thresholds</h3>
-            <p className="text-[13px] text-gray-500 leading-relaxed mb-6">
-              Configure your notification triggers for abnormal biomarker readings directly from patient profiles.
-            </p>
-            <button className="text-[11px] font-extrabold uppercase tracking-[0.15em] text-gray-700 hover:text-[#1E3799] transition-colors flex items-center gap-2">
-              Configure Alerts
-              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                </svg>
             </button>
-          </div>
 
+            {/* Fixed-position menu — escapes overflow:hidden parent entirely */}
+            {open && (
+                <div
+                    ref={menuRef}
+                    style={{
+                        position: 'fixed',
+                        top:   pos.top,
+                        right: pos.right,
+                        zIndex: 9999,
+                        transform: 'translateY(-100%)',
+                    }}
+                    className="w-[200px] bg-white rounded-2xl shadow-[0_8px_40px_rgba(0,0,0,0.18)] border border-gray-100 overflow-hidden"
+                >
+                    <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="text-[9.5px] font-black text-gray-400 uppercase tracking-[0.14em]">Share via</p>
+                        <p className="text-[11.5px] font-bold text-gray-800 truncate mt-0.5">{report.reportName}</p>
+                    </div>
+                    <div className="py-1.5">
+                        {channels.map(ch => (
+                            <button
+                                key={ch.id}
+                                onClick={() => { ch.go(); setOpen(false); }}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
+                            >
+                                <span className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[11px] font-black shrink-0" style={{ background: ch.color }}>
+                                    {ch.label[0]}
+                                </span>
+                                <span className="text-[12.5px] font-semibold text-gray-700">{ch.label}</span>
+                            </button>
+                        ))}
+                        <div className="h-px bg-gray-100 mx-3 my-1" />
+                        <button
+                            onClick={async () => {
+                                try { await navigator.clipboard.writeText(fileUrl); }
+                                catch { /* fallback */ }
+                                setCopied(true);
+                                setTimeout(() => { setCopied(false); setOpen(false); }, 1800);
+                            }}
+                            className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
+                        >
+                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
+                                copied ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-500'
+                            }`}>
+                                {copied ? '✓' : '🔗'}
+                            </span>
+                            <span className={`text-[12.5px] font-semibold ${copied ? 'text-amber-600' : 'text-gray-700'}`}>
+                                {copied ? 'Copied!' : 'Copy Link'}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+}
+export default function DoctorSharedReportsPage() {
+    const { user } = useAuth();
+    const [reports, setReports] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [activeFilter, setActiveFilter] = useState('All Reports');
+    const [expanded, setExpanded] = useState<string | null>(null);
+    const [noteText, setNoteText] = useState('');
+    const [savingNote, setSavingNote] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const PAGE_SIZE = 3;
+
+    // Safe date formatter — never shows "Invalid Date"
+    const fmt = (d: any) => {
+        const date = new Date(d);
+        if (!d || isNaN(date.getTime())) return '—';
+        return date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' });
+    };
+
+    useEffect(() => {
+        api.get('/doctor/shared-reports')
+            .then(res => setReports(res.data || []))
+            .catch(() => setReports([]))
+            .finally(() => setLoading(false));
+    }, []);
+
+    const saveNote = async (reportId: string) => {
+        if (!noteText.trim()) return;
+        setSavingNote(reportId);
+        try {
+            await api.post(`/doctor/reports/${reportId}/note`, { note: noteText });
+            setNoteText('');
+            const res = await api.get('/doctor/shared-reports');
+            setReports(res.data || []);
+        } catch (err) { console.error(err); }
+        finally { setSavingNote(null); }
+    };
+
+    const filtered = reports.filter(r => {
+        if (activeFilter === 'All Reports') return true;
+        if (activeFilter === 'Urgent Review') return !r.doctorComment;
+        const cat = getCategoryLabel(r.testType || r.category || '');
+        return cat.toLowerCase() === activeFilter.toLowerCase();
+    });
+
+    const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+    const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+    return (
+        <div className="max-w-[860px] mx-auto">
+
+            {/* ── Page Title + Buttons ─────────────────────────────────────────── */}
+            <div className="flex items-start justify-between mb-6">
+                <div>
+                    <h1 className="text-[28px] font-black text-gray-900 tracking-tight leading-tight">Medical Reports</h1>
+                    <p className="text-[13.5px] text-gray-400 font-medium mt-1">Manage and review patient clinical documentation.</p>
+                </div>
+                <div className="flex items-center gap-3 mt-1">
+                    {/* Export All — downloads CSV */}
+                    <button
+                        onClick={() => {
+                            const rows = [['Report Name','Patient','Date','Category','Status'],
+                                ...reports.map(r => [
+                                    r.reportName || '',
+                                    typeof r.patientId === 'object' ? r.patientId?.name : '',
+                                    new Date(r.uploadDate || r.createdAt).toLocaleDateString('en-IN'),
+                                    getCategoryLabel(r.testType || r.category || ''),
+                                    r.doctorComment ? 'Reviewed' : 'Pending',
+                                ])
+                            ];
+                            const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+                            const blob = new Blob([csv], { type: 'text/csv' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url; a.download = 'medical_reports.csv'; a.click();
+                            URL.revokeObjectURL(url);
+                        }}
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-gray-200 bg-white text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                    >
+                        <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        Export All
+                    </button>
+                </div>
+            </div>
+
+            {/* ── Filter Bar ───────────────────────────────────────────────────── */}
+            <div className="flex items-center gap-2.5 mb-5 flex-wrap">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest mr-1">Filter By:</span>
+                {FILTER_TABS.map(tab => (
+                    <button
+                        key={tab}
+                        onClick={() => { setActiveFilter(tab); setCurrentPage(1); }}
+                        className={`text-[12.5px] font-semibold px-4 py-1.5 rounded-full transition-all border ${activeFilter === tab
+                            ? 'bg-[#FCEEA5] text-[#5C4209] border-[#F0D96A] shadow-sm'
+                            : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700'
+                            }`}
+                    >
+                        {tab}
+                    </button>
+                ))}
+                <span className="ml-auto text-[11.5px] text-gray-400 flex items-center gap-1.5 font-medium">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+                    Sorted by: Recent
+                </span>
+            </div>
+
+            {/* ── Report Cards ─────────────────────────────────────────────────── */}
+            {loading ? (
+                <div className="flex justify-center py-24">
+                    <div className="w-9 h-9 border-[3px] border-blue-100 border-t-blue-600 rounded-full animate-spin" />
+                </div>
+            ) : filtered.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-gray-100 py-20 text-center shadow-sm">
+                    <p className="text-[14px] font-bold text-gray-400">No reports found</p>
+                    <p className="text-[12px] text-gray-300 mt-1">Reports shared by patients will appear here.</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {paginated.map((report, idx) => {
+                        const patientName = typeof report.patientId === 'object' ? report.patientId?.name : 'Unknown Patient';
+                        const date = new Date(report.uploadDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        const refNum = `#${getCategoryLabel(report.testType || '').substring(0, 3).toUpperCase()}-${String(report._id).slice(-4).toUpperCase()}`;
+                        const { label: stabilityLabel, isHigh } = getStabilityStatus(report);
+                        const catLabel = getCategoryLabel(report.testType || report.category || '');
+                        const catStyle = getCategoryStyle(report.testType || report.category || '');
+                        const iconCfg = ICON_CONFIGS[idx % ICON_CONFIGS.length];
+                        const isExpanded = expanded === report._id;
+
+                        return (
+                            <div key={report._id} className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.05)] overflow-hidden">
+                                {/* ── Card Row ── */}
+                                <div className="flex items-center px-5 py-4 gap-4">
+
+                                    {/* Icon */}
+                                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${iconCfg.bg} ${iconCfg.color}`}>
+                                        {iconCfg.icon}
+                                    </div>
+
+                                    {/* Report info ─ grows to fill available space */}
+                                    <div className="flex-1 min-w-0 pr-2">
+                                        <h3 className="text-[14px] font-black text-blue-700 truncate leading-tight">
+                                            {report.reportName}
+                                        </h3>
+                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                            <span className={`text-[8.5px] font-black uppercase tracking-widest px-2 py-0.5 rounded ${catStyle}`}>{catLabel}</span>
+                                            <span className="text-[11px] text-gray-400 font-medium">{patientName}</span>
+                                            <span className="text-gray-200">·</span>
+                                            <span className="text-[11px] text-gray-400 font-medium">{fmt(report.uploadDate || report.createdAt)}</span>
+                                            <span className="text-gray-200">·</span>
+                                            <span className="text-[11px] text-gray-400 font-medium">{refNum}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Divider */}
+                                    <div className="w-px h-8 bg-gray-100 shrink-0" />
+
+                                    {/* Stability */}
+                                    <div className="shrink-0">
+                                        <p className="text-[8px] font-black text-gray-300 uppercase tracking-widest mb-1.5">Stability</p>
+                                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
+                                            isHigh ? 'bg-red-50 text-red-600 border border-red-100' : 'bg-green-50 text-green-700 border border-green-100'
+                                        }`}>
+                                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isHigh ? 'bg-red-500' : 'bg-green-500'}`} />
+                                            {stabilityLabel}
+                                        </span>
+                                    </div>
+
+                                    {/* Divider */}
+                                    <div className="w-px h-8 bg-gray-100 shrink-0" />
+
+                                    {/* Voice — compact EN/HI + speaker */}
+                                    <div className="shrink-0">
+                                        <p className="text-[8px] font-black text-gray-300 uppercase tracking-widest mb-1.5">Voice</p>
+                                        <div className="flex items-center gap-1.5">
+                                            <div className="flex rounded-md border border-gray-200 overflow-hidden text-[9px] font-black">
+                                                <button
+                                                    onClick={() => setReports(prev => prev.map(r => r._id === report._id ? { ...r, _voiceLang: 'en' } : r))}
+                                                    className={`px-2 py-1 transition-colors ${
+                                                        (report._voiceLang ?? 'en') === 'en' ? 'bg-gray-800 text-white' : 'bg-white text-gray-400 hover:text-gray-600'
+                                                    }`}
+                                                >EN</button>
+                                                <button
+                                                    onClick={() => setReports(prev => prev.map(r => r._id === report._id ? { ...r, _voiceLang: 'hi' } : r))}
+                                                    className={`px-2 py-1 transition-colors ${
+                                                        (report._voiceLang ?? 'en') === 'hi' ? 'bg-gray-800 text-white' : 'bg-white text-gray-400 hover:text-gray-600'
+                                                    }`}
+                                                >HI</button>
+                                            </div>
+                                            <VoiceSummaryButton
+                                                reportId={report._id}
+                                                lang={report._voiceLang ?? 'en'}
+                                                compact={true}
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Divider */}
+                                    <div className="w-px h-8 bg-gray-100 shrink-0" />
+
+                                    {/* Action icons */}
+                                    <div className="flex items-center gap-2 shrink-0">
+                                        {/* Insights */}
+                                        {(() => {
+                                            const pid = typeof report.patientId === 'object' ? report.patientId?._id : report.patientId;
+                                            return pid ? (
+                                                <Link href={`/dashboard/doctor/patient/${pid}/dashboard`}
+                                                    className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-amber-500 hover:bg-amber-50 transition-colors"
+                                                    title="View Patient Insights">
+                                                    <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                                                </Link>
+                                            ) : null;
+                                        })()}
+                                        {/* Share */}
+                                        <SharePopover report={report} />
+                                        {/* Download */}
+                                        <a
+                                            href={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}${report.fileUrl}`}
+                                            target="_blank" rel="noopener noreferrer"
+                                            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                                            title="Download Report"
+                                        >
+                                            <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                        </a>
+                                        {/* View */}
+                                        <button
+                                            onClick={() => setExpanded(isExpanded ? null : report._id)}
+                                            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-bold px-3.5 py-1.5 rounded-full transition-colors"
+                                        >
+                                            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            {isExpanded ? 'Close' : 'View'}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* ── Expanded Panel ── */}
+                                {isExpanded && (
+                                    <div className="border-t border-gray-100 bg-gray-50 px-6 py-6">
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+                                            {/* AI Insight */}
+                                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                                                <div className="flex items-center gap-2 px-5 py-3 bg-gray-900">
+                                                    <svg width="12" height="12" fill="none" stroke="#FCEEA5" strokeWidth="2.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                                    <span className="text-[10px] font-bold text-[#FCEEA5] uppercase tracking-widest">AI Clinical Insight</span>
+                                                </div>
+                                                <div className="px-5 py-4">
+                                                    {report.aiSummary ? (
+                                                        <p className="text-[12.5px] text-gray-600 leading-relaxed"
+                                                            dangerouslySetInnerHTML={{ __html: report.aiSummary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').slice(0, 400) + (report.aiSummary.length > 400 ? '…' : '') }}
+                                                        />
+                                                    ) : (
+                                                        <p className="text-[12.5px] text-gray-400 italic">Analysis pending — AI model is processing this report.</p>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Biomarker Table */}
+                                            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                                                <div className="grid grid-cols-4 px-5 py-3 border-b border-gray-100">
+                                                    {['Biomarker', 'Result', 'Reference', 'Status'].map(h => (
+                                                        <span key={h} className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{h}</span>
+                                                    ))}
+                                                </div>
+                                                {report.extractedData && Object.keys(report.extractedData).length > 0 ? (
+                                                    <div className="divide-y divide-gray-50">
+                                                        {Object.entries(report.extractedData).slice(0, 8).map(([key, val]: [string, any]) => {
+                                                            const bs = getBioStatus(key, val);
+                                                            const isRich = typeof val === 'object' && val !== null;
+                                                            const displayVal = isRich ? `${val.value} ${val.unit}` : val;
+                                                            const range = isRich && (val.min !== undefined || val.max !== undefined) ? `${val.min ?? '0'}–${val.max ?? '∞'}` : '—';
+                                                            return (
+                                                                <div key={key} className="grid grid-cols-4 px-5 py-3 items-center hover:bg-gray-50 transition-colors">
+                                                                    <span className="text-[12px] text-gray-700 font-medium truncate pr-2">{key}</span>
+                                                                    <span className="text-[12px] font-bold text-gray-900 truncate pr-2">{displayVal}</span>
+                                                                    <span className="text-[11px] text-gray-400 truncate pr-2">{range}</span>
+                                                                    <span className={bs.cls}>{bs.label}</span>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ) : (
+                                                    <div className="px-5 py-8 text-center">
+                                                        <p className="text-[12px] text-gray-400 italic">No structured biomarker data extracted.</p>
+                                                    </div>
+                                                )}
+
+                                                {/* Clinical Note */}
+                                                <div className="px-5 py-4 border-t border-gray-100">
+                                                    {report.doctorComment && (
+                                                        <div className="mb-3 px-3 py-2 bg-amber-50 rounded-xl border border-amber-100">
+                                                            <p className="text-[9px] font-bold text-amber-700 uppercase tracking-widest mb-0.5">Clinical Note</p>
+                                                            <p className="text-[12px] text-gray-700 italic">"{report.doctorComment}"</p>
+                                                        </div>
+                                                    )}
+                                                    <div className="flex gap-2">
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Add clinical note…"
+                                                            value={savingNote === report._id ? '' : noteText}
+                                                            onChange={e => setNoteText(e.target.value)}
+                                                            onKeyDown={e => e.key === 'Enter' && saveNote(report._id)}
+                                                            className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-[12px] outline-none focus:border-blue-300 transition-colors"
+                                                        />
+                                                        <button
+                                                            onClick={() => saveNote(report._id)}
+                                                            disabled={savingNote === report._id}
+                                                            className="px-4 py-2 bg-gray-900 hover:bg-gray-800 text-white text-[12px] font-semibold rounded-xl transition-colors disabled:opacity-50"
+                                                        >
+                                                            {savingNote === report._id ? '…' : 'Save'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* ── Pagination ───────────────────────────────────────────────────── */}
+            {!loading && filtered.length > 0 && (
+                <div className="flex items-center justify-between mt-8">
+                    <p className="text-[12.5px] text-gray-400 font-medium">
+                        Showing {Math.min(paginated.length, PAGE_SIZE)} of {filtered.length} reports
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={currentPage === 1}
+                            className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-all disabled:opacity-40 bg-white"
+                        >
+                            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+                        </button>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                            <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`w-9 h-9 rounded-full text-[13px] font-bold transition-all ${page === currentPage
+                                    ? 'bg-gray-900 text-white shadow-sm'
+                                    : 'border border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-800 bg-white'
+                                    }`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={currentPage === totalPages}
+                            className="w-9 h-9 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:border-gray-300 transition-all disabled:opacity-40 bg-white"
+                        >
+                            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }

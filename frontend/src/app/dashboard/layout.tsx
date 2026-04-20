@@ -47,9 +47,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     if (loading || !user || !isAuthorized) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#F6F7F5]">
-                <div className="flex flex-col items-center">
-                    <div className="w-12 h-12 border-4 border-[#8FB9A8] border-t-[#4F6F6F] rounded-full animate-spin mb-4"></div>
-                    <p className="text-[#4F6F6F] font-bold tracking-tight">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin"></div>
+                    <p className="text-[#92400E] font-bold tracking-tight text-[13px]">
                         {loading ? 'Authenticating...' : !isAuthorized ? 'Securely redirecting...' : 'Loading Dashboard...'}
                     </p>
                 </div>
@@ -58,13 +58,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     }
 
     return (
-        <div className="flex h-screen bg-[#F1F5F5] overflow-hidden">
+        <div className="flex h-screen bg-[#F5F6F8] overflow-hidden">
             <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
             <div className="flex-1 flex flex-col h-full overflow-hidden">
                 <Header />
 
-                <main className="flex-1 overflow-y-auto p-8">
+                <main className="flex-1 overflow-y-auto px-8 py-6">
                     {children}
                 </main>
             </div>

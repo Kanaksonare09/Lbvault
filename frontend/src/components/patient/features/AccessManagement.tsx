@@ -10,22 +10,17 @@ export default function AccessManagement() {
     const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
     const [loading, setLoading] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+    const [showGrantForm, setShowGrantForm] = useState(false);
+
+    useEffect(() => { fetchAccessList(); }, []);
 
     useEffect(() => {
-        fetchAccessList();
-    }, []);
-
-    useEffect(() => {
-        const delayDebounceFn = setTimeout(() => {
-            if (searchQuery.length > 1 && !selectedDoctor) {
-                performSearch();
-            } else if (searchQuery.length <= 1) {
-                setSearchResults([]);
-            }
+        const t = setTimeout(() => {
+            if (searchQuery.length > 1 && !selectedDoctor) performSearch();
+            else if (searchQuery.length <= 1) setSearchResults([]);
         }, 300);
-
-        return () => clearTimeout(delayDebounceFn);
+        return () => clearTimeout(t);
     }, [searchQuery, selectedDoctor]);
 
     const performSearch = async () => {
@@ -33,46 +28,33 @@ export default function AccessManagement() {
             setIsSearching(true);
             const doctors = await patientService.searchDoctors(searchQuery);
             setSearchResults(doctors);
-        } catch (err) {
-            console.error('Search failed', err);
-        } finally {
-            setIsSearching(false);
-        }
+        } catch { /* silent */ }
+        finally { setIsSearching(false); }
     };
 
     const fetchAccessList = async () => {
-        try {
-            const data = await patientService.getAccessList();
-            setAccessList(data);
-        } catch (err) {
-            console.error('Failed to fetch access list', err);
-        }
+        try { const data = await patientService.getAccessList(); setAccessList(data); }
+        catch (err) { console.error('Failed to fetch access list', err); }
     };
 
     const handleGrant = async (e: React.FormEvent) => {
         e.preventDefault();
-
         const docId = selectedDoctor?._id;
-        console.log("doctorId being sent:", docId);
-
-        // Validation: Ensure we have a valid 24-character hex ID
         if (!docId || !/^[0-9a-fA-F]{24}$/.test(docId)) {
-            setMessage({ type: 'error', text: 'Please select a valid doctor from the search results.' });
+            setMessage({ type: 'error', text: 'Please select a valid doctor.' });
             return;
         }
-
         try {
             setLoading(true);
             await patientService.grantAccess(docId);
             setMessage({ type: 'success', text: `Access granted to Dr. ${selectedDoctor.name}!` });
-            setSearchQuery('');
-            setSelectedDoctor(null);
-            fetchAccessList();
-        } catch (err) {
-            setMessage({ type: 'error', text: 'Failed to grant access. This doctor may already have access.' });
+            setSearchQuery(''); setSelectedDoctor(null); fetchAccessList();
+            setTimeout(() => setShowGrantForm(false), 1200);
+        } catch {
+            setMessage({ type: 'error', text: 'Failed to grant access.' });
         } finally {
             setLoading(false);
-            setTimeout(() => setMessage(null), 4000);
+            setTimeout(() => setMessage(null), 3500);
         }
     };
 
@@ -80,140 +62,118 @@ export default function AccessManagement() {
         try {
             setLoading(true);
             await patientService.revokeAccess(docId, reportId);
-            setMessage({ type: 'success', text: 'Access revoked successfully!' });
             fetchAccessList();
-        } catch (err) {
-            setMessage({ type: 'error', text: 'Failed to revoke access.' });
-        } finally {
-            setLoading(false);
-            setTimeout(() => setMessage(null), 3000);
-        }
+        } catch { /* silent */ }
+        finally { setLoading(false); }
     };
 
     return (
-        <div className="bg-white p-8 rounded-[40px] shadow-sm border border-[#E2E8F0] space-y-8">
-            <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-black text-[#1F2933]">Manage Doctor Access</h2>
-                <div className="bg-[#8FB9A8]/10 px-4 py-1 rounded-full border border-[#8FB9A8]/20">
-                    <span className="text-[10px] font-black text-[#4F6F6F] uppercase tracking-widest">Secure Ownership</span>
-                </div>
+        <div className="bg-white rounded-3xl p-5 border border-gray-100 w-full">
+            {/* Header Row */}
+            <div className="flex items-center justify-between mb-4">
+                <span className="text-[13px] font-bold text-gray-800">Provider Access</span>
+                <svg width="16" height="16" fill="none" stroke="#9CA3AF" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
             </div>
 
-            {/* Grant Access Form */}
-            <div className="relative">
-                <form onSubmit={handleGrant} className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1 relative">
-                        <input
-                            type="text"
-                            placeholder="Search Doctor by Name or Email..."
-                            className="w-full px-6 py-3 rounded-2xl border border-[#E2E8F0] bg-[#F6F7F5] outline-none font-bold text-[#1F2933] focus:border-[#8FB9A8] transition-all"
-                            value={selectedDoctor ? `Dr. ${selectedDoctor.name}` : searchQuery}
-                            onChange={(e) => {
-                                if (selectedDoctor) setSelectedDoctor(null);
-                                setSearchQuery(e.target.value);
-                            }}
-                            disabled={loading}
-                        />
-                        {isSearching && (
-                            <div className="absolute right-4 top-3.5">
-                                <div className="w-5 h-5 border-2 border-[#8FB9A8] border-t-transparent rounded-full animate-spin"></div>
-                            </div>
-                        )}
-                    </div>
-                    <button
-                        type="submit"
-                        className="px-8 py-3 bg-[#4F6F6F] text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#1F2933] transition-all active:scale-95 disabled:opacity-50 shadow-md"
-                        disabled={loading || !selectedDoctor}
-                    >
-                        {loading ? 'Processing...' : 'Grant Access'}
-                    </button>
-                </form>
-
-                {/* Search Results Dropdown */}
-                {searchResults.length > 0 && !selectedDoctor && (
-                    <div className="absolute z-10 w-full mt-2 bg-white border border-[#E2E8F0] rounded-3xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                        {searchResults.map((doc, index) => (
-                            <button
-                                key={doc._id || index}
-                                onClick={() => {
-                                    setSelectedDoctor(doc);
-                                    setSearchResults([]);
-                                }}
-                                className="w-full px-6 py-4 text-left hover:bg-[#F6F7F5] border-b border-[#E2E8F0] last:border-0 flex items-center justify-between group transition-all"
-                            >
-                                <div>
-                                    <p className="font-black text-[#1F2933]">Dr. {doc.name}</p>
-                                    <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">{doc.specialty} • {doc.hospitalName}</p>
-                                </div>
-                                <span className="text-[10px] font-black text-[#8FB9A8] opacity-0 group-hover:opacity-100 transition-all uppercase">Select</span>
-                            </button>
-                        ))}
-                    </div>
-                )}
-
-                {/* No Results Fallback */}
-                {searchQuery.length > 2 && searchResults.length === 0 && !selectedDoctor && !isSearching && (
-                    <div className="absolute z-10 w-full mt-2 bg-white border border-[#E2E8F0] rounded-3xl shadow-xl p-8 text-center animate-in fade-in slide-in-from-top-2 duration-200 border-dashed">
-                        <div className="w-12 h-12 bg-[#F6F7F5] rounded-2xl flex items-center justify-center mx-auto mb-4 text-[#94A3B8]">
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                        </div>
-                        <p className="text-[#1F2933] font-black text-sm uppercase tracking-tight">No Approved Doctors Found</p>
-                        <p className="text-[10px] text-[#6B7280] font-medium mt-2 max-w-[200px] mx-auto leading-relaxed">
-                            Ensure the doctor is registered and has been verified by an admin.
-                        </p>
-                    </div>
-                )}
-            </div>
-
+            {/* Feedback */}
             {message && (
-                <div className={`p-4 rounded-2xl text-xs font-bold animate-in zoom-in duration-300 ${message.type === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
-                    <div className="flex items-center gap-2">
-                        {message.type === 'success' ? (
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 m 0 0l4 4L19 7" /></svg>
-                        ) : (
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        )}
-                        {message.text}
-                    </div>
+                <div className={`mb-3 px-3 py-2 rounded-xl text-[11px] font-semibold ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
+                    {message.text}
                 </div>
             )}
 
-            {/* List of Authorsized Doctors */}
-            <div className="space-y-4">
-                <h3 className="text-sm font-black text-[#6B7280] uppercase tracking-widest">Authorized Healthcare Providers</h3>
-
-                {accessList.length === 0 ? (
-                    <div className="bg-[#F6F7F5] p-10 rounded-3xl border border-dashed border-[#E2E8F0] text-center">
-                        <p className="text-[#6B7280] font-bold text-sm">No doctors currently have access.</p>
-                        <p className="text-[10px] text-[#94A3B8] mt-1 italic tracking-tight">You are the sole owner of your medical records.</p>
-                    </div>
-                ) : (
-                    <div className="grid grid-cols-1 gap-4">
-                        {accessList.map((access, index) => (
-                            <div key={access._id || index} className="flex flex-col sm:flex-row sm:items-center justify-between p-6 bg-[#F6F7F5] rounded-3xl border border-[#E2E8F0] group hover:border-[#8FB9A8] transition-all">
-                                <div className="flex items-center gap-4 mb-4 sm:mb-0">
-                                    <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center font-black text-[#4F6F6F] border border-[#E2E8F0] group-hover:bg-[#8FB9A8] group-hover:text-white transition-all shadow-sm">
-                                        {access?.doctorId?.name?.[0] || "?"}
+            {/* Access List */}
+            {!showGrantForm ? (
+                <>
+                    <div className="space-y-3">
+                        {accessList.length === 0 ? (
+                            <p className="text-[12px] text-gray-400 text-center py-2">No providers have access yet.</p>
+                        ) : (
+                            accessList.map((access, i) => (
+                                <div key={access._id || i} className="flex items-center gap-3">
+                                    {/* Avatar */}
+                                    <div className="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center shrink-0 overflow-hidden">
+                                        <span className="text-[12px] font-bold text-gray-600">
+                                            {access?.doctorId?.name?.charAt(0) || '?'}
+                                        </span>
                                     </div>
-                                    <div>
-                                        <p className="font-black text-[#1F2933]">Dr. {access?.doctorId?.name || "Unknown Doctor"}</p>
-                                        <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-widest">
-                                            {access.reportId ? `Report: ${access.reportId.reportName}` : 'Global Access (All Reports)'}
+                                    {/* Info */}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[13px] font-bold text-gray-800 leading-tight truncate">
+                                            Dr. {access?.doctorId?.name || 'Unknown'}
+                                        </p>
+                                        <p className="text-[10px] text-gray-400 leading-tight truncate">
+                                            {access?.doctorId?.specialty || (access.reportId ? 'Report Access' : 'Global Access')}
                                         </p>
                                     </div>
+                                    {/* Revoke */}
+                                    <button
+                                        onClick={() => handleRevoke(access.doctorId._id, access.reportId?._id)}
+                                        disabled={loading}
+                                        className="shrink-0 text-[9px] font-black text-red-500 uppercase tracking-widest hover:text-red-700 transition-colors disabled:opacity-40 border border-red-200 rounded-full px-2.5 py-1 hover:bg-red-50"
+                                    >
+                                        Revoke
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => handleRevoke(access.doctorId._id, access.reportId?._id)}
-                                    className="px-6 py-2 bg-white border border-[#E2E8F0] text-rose-600 rounded-xl font-bold text-[10px] uppercase tracking-widest hover:bg-rose-50 hover:border-rose-200 transition-all active:scale-95 shadow-sm"
-                                    disabled={loading}
-                                >
-                                    Revoke Access
-                                </button>
-                            </div>
-                        ))}
+                            ))
+                        )}
                     </div>
-                )}
-            </div>
+
+                    {/* Grant New Access Link */}
+                    <button
+                        onClick={() => setShowGrantForm(true)}
+                        className="mt-4 w-full text-center text-[12px] font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                    >
+                        + Grant New Access
+                    </button>
+                </>
+            ) : (
+                /* Grant Form */
+                <form onSubmit={handleGrant} className="flex flex-col gap-3">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Search doctor by name..."
+                            value={selectedDoctor ? `Dr. ${selectedDoctor.name}` : searchQuery}
+                            onChange={e => { if (selectedDoctor) setSelectedDoctor(null); setSearchQuery(e.target.value); }}
+                            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-[12px] text-gray-800 outline-none focus:border-blue-300 transition-colors"
+                        />
+                        {isSearching && (
+                            <div className="absolute right-3 top-2.5 w-4 h-4 border-2 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin" />
+                        )}
+                    </div>
+
+                    {/* Dropdown */}
+                    {searchResults.length > 0 && !selectedDoctor && (
+                        <div className="border border-gray-100 rounded-xl overflow-hidden bg-white shadow-lg">
+                            {searchResults.map(doc => (
+                                <button key={doc._id} type="button"
+                                    onClick={() => { setSelectedDoctor(doc); setSearchResults([]); }}
+                                    className="w-full px-3 py-2.5 text-left hover:bg-gray-50 border-b border-gray-50 last:border-0 flex justify-between items-center">
+                                    <div>
+                                        <p className="text-[12px] font-bold text-gray-800">Dr. {doc.name}</p>
+                                        <p className="text-[10px] text-gray-400">{doc.specialty}</p>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-blue-500">Select</span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="flex gap-2">
+                        <button type="button" onClick={() => { setShowGrantForm(false); setSearchQuery(''); setSelectedDoctor(null); }}
+                            className="flex-1 py-2 text-[12px] font-semibold text-gray-500 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" disabled={!selectedDoctor || loading}
+                            className="flex-1 py-2 text-[12px] font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50">
+                            {loading ? 'Granting...' : 'Grant'}
+                        </button>
+                    </div>
+                </form>
+            )}
         </div>
     );
 }

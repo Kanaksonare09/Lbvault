@@ -49,7 +49,7 @@ export default function NotificationBell() {
         <div className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="text-[#6B7280] hover:text-[#4F6F6F] transition-colors relative p-2 rounded-full hover:bg-[#F6F7F5]"
+                className="text-gray-500 hover:text-[#C8A84B] transition-colors relative p-2 rounded-full hover:bg-[#FEF3C7]/60"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" /><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" /></svg>
                 {unreadCount > 0 && (
@@ -66,7 +66,7 @@ export default function NotificationBell() {
                             {unreadCount > 0 && (
                                 <button 
                                     onClick={() => handleMarkRead('all')}
-                                    className="text-[10px] font-black text-[#4F6F6F] border-b border-[#4F6F6F] leading-tight"
+                                    className="text-[10px] font-black text-[#C8A84B] border-b border-[#C8A84B] leading-tight hover:text-[#92400E] transition-colors"
                                 >
                                     Clear All
                                 </button>
@@ -75,7 +75,7 @@ export default function NotificationBell() {
                         <div className="max-h-96 overflow-y-auto">
                             {loading && notifications.length === 0 ? (
                                 <div className="p-8 text-center">
-                                    <div className="w-6 h-6 border-2 border-[#8FB9A8] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                                    <div className="w-6 h-6 border-2 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin mx-auto mb-2"></div>
                                     <p className="text-xs text-[#6B7280]">Fetching updates...</p>
                                 </div>
                             ) : notifications.length > 0 ? (
@@ -83,13 +83,13 @@ export default function NotificationBell() {
                                     <div 
                                         key={notif._id} 
                                         onClick={() => handleMarkRead(notif._id)}
-                                        className={`p-4 border-b border-[#E2E8F0] hover:bg-[#F6F7F5] transition-colors cursor-pointer group relative ${!notif.isRead ? 'bg-[#F6F7F5]/30' : ''}`}
+                                        className={`p-4 border-b border-[#E2E8F0] hover:bg-[#FEF9EC] transition-colors cursor-pointer group relative ${!notif.isRead ? 'bg-[#FEF9EC]/40' : ''}`}
                                     >
                                         {!notif.isRead && (
-                                            <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-1 h-3 bg-[#4F6F6F] rounded-full"></div>
+                                            <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-1 h-3 bg-[#C8A84B] rounded-full"></div>
                                         )}
                                         <Link href={notif.link || '#'} className="block">
-                                            <p className={`text-sm font-bold leading-tight ${!notif.isRead ? 'text-[#1F2933]' : 'text-[#6B7280]'} group-hover:text-[#4F6F6F]`}>
+                                            <p className={`text-sm font-bold leading-tight ${!notif.isRead ? 'text-[#1F2933]' : 'text-[#6B7280]'} group-hover:text-[#92400E]`}>
                                                 {notif.message}
                                             </p>
                                             <p className="text-[10px] text-[#6B7280] mt-1.5 font-bold uppercase tracking-wider">
@@ -108,7 +108,7 @@ export default function NotificationBell() {
                             )}
                         </div>
                         <div className="p-3 text-center border-t border-[#E2E8F0]">
-                            <button className="text-xs font-bold text-[#4F6F6F] hover:underline">View All Notifications</button>
+                            <button className="text-xs font-bold text-[#C8A84B] hover:text-[#92400E] transition-colors hover:underline">View All Notifications</button>
                         </div>
                     </div>
                 </>

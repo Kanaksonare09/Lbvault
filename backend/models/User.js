@@ -13,7 +13,12 @@ const userSchema = new mongoose.Schema({
     isVerified: { type: Boolean, default: false },
     doctorAccess: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     affiliatedLabs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    lastLoginAt: { type: Date }
+    lastLoginAt: { type: Date },
+    // Patient demographics
+    age: { type: Number, default: null },
+    gender: { type: String, enum: ['male', 'female', 'other', null], default: null },
+    dateOfBirth: { type: Date, default: null },
+    bloodGroup: { type: String, default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
