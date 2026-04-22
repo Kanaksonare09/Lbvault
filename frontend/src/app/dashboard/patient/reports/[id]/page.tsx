@@ -199,7 +199,7 @@ export default function PatientReportViewerPage() {
                     </div>
                     <p className="text-[var(--muted-foreground)] text-sm font-bold uppercase tracking-widest flex items-center gap-2 pl-10">
                         <span className="w-2 h-2 bg-[var(--secondary)] rounded-full" />
-                        {pathologyName} · {report.testType || report.category || 'Lab Report'} · {report.reportDate || report.createdAt ? new Date(report.reportDate || report.createdAt).toLocaleDateString() : 'N/A'}
+                        {pathologyName} · {report.testType || report.category || 'Lab Report'} · {(() => { const d = report.reportDate || report.createdAt; return d ? new Date(d).toLocaleDateString() : 'N/A'; })()}
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
