@@ -581,7 +581,7 @@ export default function PatientHealthInsightsPage() {
                                                             ★ Matches your issues
                                                         </span>
                                                     )}
-                                                    {doc.isVerified && (
+                                                    {(doc as any).isVerified && (
                                                         <span className="text-[8px] font-black bg-[#D1FAE5] text-[#065F46] px-1.5 py-0.5 rounded-full border border-[#A7F3D0] whitespace-nowrap">
                                                             ✓ Verified
                                                         </span>

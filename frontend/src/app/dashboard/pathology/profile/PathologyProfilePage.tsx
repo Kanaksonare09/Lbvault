@@ -217,7 +217,7 @@ export default function PathologyProfilePage() {
                             <div>
                                 <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Registered ID</p>
                                 <p className="text-[13px] font-semibold text-gray-600">
-                                    {authUser?.lvId ? `LV-${authUser.lvId}` : 'Not assigned'}
+                                    {(authUser as any)?.lvId ? `LV-${(authUser as any).lvId}` : 'Not assigned'}
                                 </p>
                             </div>
                             <div>

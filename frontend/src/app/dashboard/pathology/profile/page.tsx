@@ -87,7 +87,7 @@ export default function PathologyProfilePage() {
                     <div className="bg-white rounded-[2.5rem] shadow-sm border border-[var(--border)] overflow-hidden">
                         <div className="p-8 border-b border-[var(--border)] bg-[var(--background)]/30 flex items-center justify-between">
                             <h2 className="text-xl font-black text-[var(--foreground)]">Laboratory Information</h2>
-                            <span className="text-[10px] font-black bg-[var(--foreground)] text-white px-3 py-1 rounded-full tracking-widest uppercase">ID: {user?.id?.slice(-6)}</span>
+                            <span className="text-[10px] font-black bg-[var(--foreground)] text-white px-3 py-1 rounded-full tracking-widest uppercase">ID: {(user as any)?.id?.slice(-6)}</span>
                         </div>
                         
                         <form onSubmit={handleSave} className="p-8 space-y-8">
