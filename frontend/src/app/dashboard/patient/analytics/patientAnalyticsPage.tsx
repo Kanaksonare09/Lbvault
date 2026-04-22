@@ -10,9 +10,9 @@ import {
 } from 'recharts';
 
 const SEVERITY_CONFIG: Record<string, { bg: string; text: string; dot: string; label: string }> = {
-  Normal:   { bg: 'bg-[#FEF9EC]', text: 'text-[#92400E]', dot: 'bg-[#C8A84B]', label: 'Normal' },
-  Mild:     { bg: 'bg-yellow-50',  text: 'text-yellow-700',  dot: 'bg-yellow-400',  label: 'Mild' },
-  Moderate: { bg: 'bg-amber-50',   text: 'text-amber-700',   dot: 'bg-amber-500',   label: 'Moderate' },
+  Normal:   { bg: 'bg-[var(--accent-soft)]', text: 'text-[var(--primary)]', dot: 'bg-[var(--primary)]', label: 'Normal' },
+  Mild:     { bg: 'bg-[var(--accent-soft)]',  text: 'text-yellow-700',  dot: 'bg-yellow-400',  label: 'Mild' },
+  Moderate: { bg: 'bg-[var(--accent-soft)]',   text: 'text-[var(--primary)]',   dot: 'bg-[var(--accent-soft)]0',   label: 'Moderate' },
   Critical: { bg: 'bg-rose-50',    text: 'text-rose-700',    dot: 'bg-rose-500',    label: 'Critical' },
 };
 
@@ -23,16 +23,16 @@ const TREND_ICON: Record<string, string> = {
 };
 const TREND_COLOR: Record<string, string> = {
   Increasing: 'text-rose-500',
-  Decreasing: 'text-[#C8A84B]',
-  Stable:     'text-[#6B7280]',
+  Decreasing: 'text-[var(--primary)]',
+  Stable:     'text-[var(--muted-foreground)]',
 };
 
 const PIE_COLORS: Record<string, string> = {
-  Normal: '#C8A84B', Mild: '#FBBF24', Moderate: '#F59E0B', Critical: '#EF4444'
+  Normal: 'var(--primary)', Mild: 'var(--primary)', Moderate: 'var(--primary)', Critical: '#EF4444'
 };
 
 const BIOMARKER_COLORS = [
-  '#C8A84B', '#6366F1', '#2563EB', '#F59E0B', '#EC4899', '#8B5CF6', '#14B8A6', '#EF4444'
+  'var(--primary)', '#6366F1', 'var(--primary)', 'var(--primary)', '#EC4899', '#8B5CF6', '#14B8A6', '#EF4444'
 ];
 
 function capitalize(s: string) {
@@ -64,7 +64,7 @@ export default function PatientAnalyticsPage() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <div className="w-12 h-12 border-4 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin" />
+      <div className="w-12 h-12 border-[var(--primary)] border-[var(--accent)] border-t-[var(--primary)] rounded-full animate-spin" />
     </div>
   );
 
@@ -76,14 +76,14 @@ export default function PatientAnalyticsPage() {
   );
 
   if (!data || data.totalReports === 0) return (
-    <div className="bg-white py-24 rounded-3xl border border-dashed border-[#E2E8F0] text-center">
-      <div className="w-20 h-20 bg-[#F6F7F5] rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">📊</div>
-      <h3 className="text-xl font-black text-[#1F2933]">No Reports Yet</h3>
-      <p className="text-[#6B7280] font-medium mt-2 max-w-sm mx-auto">
+    <div className="bg-white py-24 rounded-3xl border border-dashed border-[var(--border)] text-center">
+      <div className="w-20 h-20 bg-[var(--background)] rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">📊</div>
+      <h3 className="text-xl font-black text-[var(--foreground)]">No Reports Yet</h3>
+      <p className="text-[var(--muted-foreground)] font-medium mt-2 max-w-sm mx-auto">
         Upload your lab reports to unlock health analytics, biomarker trends, and risk analysis.
       </p>
       <Link href="/dashboard/patient"
-        className="inline-flex items-center gap-2 mt-6 bg-[#C8A84B] text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[#92400E] transition-all">
+        className="inline-flex items-center gap-2 mt-6 bg-[var(--primary)] text-white px-8 py-3 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-[var(--primary)] transition-all">
         Upload a Report
       </Link>
     </div>
@@ -116,15 +116,15 @@ export default function PatientAnalyticsPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div className="flex items-center gap-4">
           <Link href="/dashboard/patient"
-            className="p-3 bg-white border border-[#E2E8F0] rounded-2xl text-gray-500 hover:bg-[#FEF9EC] hover:text-[#C8A84B] transition-all shadow-sm">
+            className="p-3 bg-white border border-[var(--border)] rounded-2xl text-gray-500 hover:bg-[var(--accent-soft)] hover:text-[var(--primary)] transition-all shadow-sm">
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <path d="m15 18-6-6 6-6" />
             </svg>
           </Link>
           <div>
-            <h1 className="text-3xl font-black text-[#1F2933] tracking-tight">Health Analytics</h1>
-            <p className="text-[#6B7280] mt-1 font-medium">
+            <h1 className="text-3xl font-black text-[var(--foreground)] tracking-tight">Health Analytics</h1>
+            <p className="text-[var(--muted-foreground)] mt-1 font-medium">
               Real-time biomarker trends and risk analysis from your reports.
             </p>
           </div>
@@ -134,19 +134,19 @@ export default function PatientAnalyticsPage() {
       {/* Summary Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Reports', value: totalReports, icon: '📄', color: 'text-[#1F2933]' },
-          { label: 'Biomarkers Tracked', value: totalBiomarkers, icon: '🔬', color: 'text-[#4F6F6F]' },
+          { label: 'Total Reports', value: totalReports, icon: '📄', color: 'text-[var(--foreground)]' },
+          { label: 'Biomarkers Tracked', value: totalBiomarkers, icon: '🔬', color: 'text-[var(--primary)]' },
           { label: 'Normal Values', value: riskCounts.Normal || 0, icon: '✅', color: 'text-emerald-600' },
           {
             label: 'Needs Attention',
             value: (riskCounts.Mild || 0) + (riskCounts.Moderate || 0) + (riskCounts.Critical || 0),
             icon: riskCounts.Critical > 0 ? '🚨' : '⚠️',
-            color: riskCounts.Critical > 0 ? 'text-rose-600' : 'text-amber-600'
+            color: riskCounts.Critical > 0 ? 'text-rose-600' : 'text-[var(--primary)]'
           },
         ].map(stat => (
-          <div key={stat.label} className="bg-white p-6 rounded-3xl border border-[#E2E8F0] shadow-sm hover:shadow-md transition-shadow">
-            <span className="text-2xl">{stat.icon}</span>
-            <p className="text-[10px] font-black text-[#6B7280] uppercase tracking-widest mt-3">{stat.label}</p>
+          <div key={stat.label} className="bg-white p-6 rounded-3xl border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow">
+            <span className="text-whitexl">{stat.icon}</span>
+            <p className="text-[10px] font-black text-[var(--muted-foreground)] uppercase tracking-widest mt-3">{stat.label}</p>
             <p className={`text-3xl font-black mt-1 ${stat.color}`}>{stat.value}</p>
           </div>
         ))}
@@ -156,11 +156,11 @@ export default function PatientAnalyticsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
         {/* Trend Chart */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-3xl border border-[#E2E8F0] shadow-sm">
+        <div className="lg:col-span-2 bg-white p-8 rounded-3xl border border-[var(--border)] shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6">
             <div>
-              <h3 className="text-lg font-black text-[#1F2933]">Biomarker Trend</h3>
-              <p className="text-xs text-[#6B7280] font-medium mt-0.5">
+              <h3 className="text-lg font-black text-[var(--foreground)]">Biomarker Trend</h3>
+              <p className="text-xs text-[var(--muted-foreground)] font-medium mt-0.5">
                 {trendEntries.length > 0 ? `${trendEntries.length} data points` : 'Select a biomarker below'}
               </p>
             </div>
@@ -169,7 +169,7 @@ export default function PatientAnalyticsPage() {
               {Object.keys(trendMap).map((bm, i) => (
                 <button key={bm} onClick={() => setSelectedBiomarker(bm)}
                   className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
-                    selectedBiomarker === bm ? 'text-white shadow-md' : 'bg-[#F6F7F5] text-[#6B7280] hover:bg-[#E2E8F0]'
+                    selectedBiomarker === bm ? 'text-white shadow-md' : 'bg-[var(--background)] text-[var(--muted-foreground)] hover:bg-[var(--border)]'
                   }`}
                   style={selectedBiomarker === bm ? { background: BIOMARKER_COLORS[i % BIOMARKER_COLORS.length] } : {}}>
                   {capitalize(bm)}
@@ -191,7 +191,7 @@ export default function PatientAnalyticsPage() {
                 <XAxis dataKey="label" tick={{ fontSize: 11, fontWeight: 700, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 11, fontWeight: 700, fill: '#94A3B8' }} axisLine={false} tickLine={false} width={40} />
                 <Tooltip
-                  contentStyle={{ background: '#1F2933', border: 'none', borderRadius: 12, color: 'white', fontSize: 12 }}
+                  contentStyle={{ background: 'var(--foreground)', border: 'none', borderRadius: 12, color: 'white', fontSize: 12 }}
                   formatter={(val: any) => [`${val} ${trendEntries[0]?.unit || ''}`, capitalize(selectedBiomarker)]}
                 />
                 <Area type="monotone" dataKey="value" stroke={trendBiomarkerColor} strokeWidth={2.5}
@@ -200,28 +200,28 @@ export default function PatientAnalyticsPage() {
             </ResponsiveContainer>
           ) : trendEntries.length === 1 ? (
             <div className="flex flex-col items-center justify-center h-48 gap-3">
-              <div className="w-16 h-16 rounded-3xl flex items-center justify-center text-white text-2xl font-black"
+              <div className="w-16 h-16 rounded-3xl flex items-center justify-center text-white text-whitexl font-black"
                 style={{ background: trendBiomarkerColor }}>
                 {trendEntries[0].value}
               </div>
-              <p className="text-sm font-bold text-[#6B7280]">
-                Latest: <span className="text-[#1F2933] font-black">{trendEntries[0].value} {trendEntries[0].unit}</span>
+              <p className="text-sm font-bold text-[var(--muted-foreground)]">
+                Latest: <span className="text-[var(--foreground)] font-black">{trendEntries[0].value} {trendEntries[0].unit}</span>
               </p>
               <p className="text-xs text-[#94A3B8] font-medium">Upload more reports to see a trend</p>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-48 text-center gap-2">
               <div className="text-3xl">📊</div>
-              <p className="font-black text-[#1F2933]">Select a biomarker above</p>
-              <p className="text-xs text-[#6B7280] font-medium">Upload lab reports to start tracking biomarker trends.</p>
+              <p className="font-black text-[var(--foreground)]">Select a biomarker above</p>
+              <p className="text-xs text-[var(--muted-foreground)] font-medium">Upload lab reports to start tracking biomarker trends.</p>
             </div>
           )}
         </div>
 
         {/* Risk Distribution Pie */}
-        <div className="bg-white p-8 rounded-3xl border border-[#E2E8F0] shadow-sm flex flex-col">
-          <h3 className="text-lg font-black text-[#1F2933] mb-1">Risk Distribution</h3>
-          <p className="text-xs text-[#6B7280] font-medium mb-6">Across all biomarker readings</p>
+        <div className="bg-white p-8 rounded-3xl border border-[var(--border)] shadow-sm flex flex-col">
+          <h3 className="text-lg font-black text-[var(--foreground)] mb-1">Risk Distribution</h3>
+          <p className="text-xs text-[var(--muted-foreground)] font-medium mb-6">Across all biomarker readings</p>
 
           {pieData.length > 0 ? (
             <>
@@ -231,7 +231,7 @@ export default function PatientAnalyticsPage() {
                     paddingAngle={3} dataKey="value">
                     {pieData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                   </Pie>
-                  <Tooltip contentStyle={{ background: '#1F2933', border: 'none', borderRadius: 12, color: 'white', fontSize: 12 }} />
+                  <Tooltip contentStyle={{ background: 'var(--foreground)', border: 'none', borderRadius: 12, color: 'white', fontSize: 12 }} />
                 </PieChart>
               </ResponsiveContainer>
               <div className="space-y-2 mt-2">
@@ -239,9 +239,9 @@ export default function PatientAnalyticsPage() {
                   <div key={d.name} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-2.5 h-2.5 rounded-full" style={{ background: d.color }} />
-                      <span className="text-sm font-bold text-[#1F2933]">{d.name}</span>
+                      <span className="text-sm font-bold text-[var(--foreground)]">{d.name}</span>
                     </div>
-                    <span className="text-sm font-black text-[#4F6F6F]">{d.value}</span>
+                    <span className="text-sm font-black text-[var(--primary)]">{d.value}</span>
                   </div>
                 ))}
               </div>
@@ -249,7 +249,7 @@ export default function PatientAnalyticsPage() {
           ) : (
             <div className="flex-1 flex items-center justify-center flex-col gap-3 text-center">
               <div className="text-3xl">🥧</div>
-              <p className="text-sm font-bold text-[#6B7280]">No biomarker data</p>
+              <p className="text-sm font-bold text-[var(--muted-foreground)]">No biomarker data</p>
               <p className="text-xs text-[#94A3B8]">Risk distribution will appear once reports are processed.</p>
             </div>
           )}
@@ -258,25 +258,25 @@ export default function PatientAnalyticsPage() {
 
       {/* Full Biomarker Snapshot Table */}
       {sortedSnapshot.length > 0 && (
-        <div className="bg-white rounded-3xl border border-[#E2E8F0] shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-[#F6F7F5]">
-            <h3 className="text-lg font-black text-[#1F2933]">Latest Biomarker Snapshot</h3>
-            <p className="text-xs text-[#6B7280] font-medium mt-0.5">Most recent value per biomarker across all your reports</p>
+        <div className="bg-white rounded-3xl border border-[var(--border)] shadow-sm overflow-hidden">
+          <div className="p-6 border-b border-[var(--background)]">
+            <h3 className="text-lg font-black text-[var(--foreground)]">Latest Biomarker Snapshot</h3>
+            <p className="text-xs text-[var(--muted-foreground)] font-medium mt-0.5">Most recent value per biomarker across all your reports</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-[#F6F7F5]">
+              <thead className="bg-[var(--background)]">
                 <tr>
                   {['Biomarker', 'Latest Value', 'Unit', 'Reference Range', 'Trend', 'Status', 'Insight'].map(h => (
-                    <th key={h} className="px-5 py-4 text-left text-[10px] font-black text-[#6B7280] uppercase tracking-wider">{h}</th>
+                    <th key={h} className="px-5 py-4 text-left text-[10px] font-black text-[var(--muted-foreground)] uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#F6F7F5]">
+              <tbody className="divide-y divide-[var(--background)]">
                 {sortedSnapshot.map((bm: any, i: number) => {
                   const sc = SEVERITY_CONFIG[bm.severity] || SEVERITY_CONFIG.Normal;
                   const trendIcon = TREND_ICON[bm.trend] || '→';
-                  const trendColor = TREND_COLOR[bm.trend] || 'text-[#6B7280]';
+                  const trendColor = TREND_COLOR[bm.trend] || 'text-[var(--muted-foreground)]';
                   const color = BIOMARKER_COLORS[i % BIOMARKER_COLORS.length];
 
                   // Mini progress bar within reference range
@@ -286,21 +286,21 @@ export default function PatientAnalyticsPage() {
                     : 50;
 
                   return (
-                    <tr key={bm.name} className="hover:bg-[#F6F7F5] transition-colors">
+                    <tr key={bm.name} className="hover:bg-[var(--background)] transition-colors">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: color }} />
-                          <span className="font-black text-[#1F2933] text-sm capitalize">{bm.name}</span>
+                          <span className="font-black text-[var(--foreground)] text-sm capitalize">{bm.name}</span>
                         </div>
                       </td>
-                      <td className="px-5 py-4 font-black text-[#1F2933] text-sm">{bm.value}</td>
-                      <td className="px-5 py-4 text-xs text-[#6B7280] font-medium">{bm.unit || '—'}</td>
+                      <td className="px-5 py-4 font-black text-[var(--foreground)] text-sm">{bm.value}</td>
+                      <td className="px-5 py-4 text-xs text-[var(--muted-foreground)] font-medium">{bm.unit || '—'}</td>
                       <td className="px-5 py-4">
                         {inRange ? (
                           <div className="flex items-center gap-2 w-36">
-                            <div className="flex-1 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
+                            <div className="flex-1 h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
                               <div className="h-full rounded-full transition-all duration-700"
-                                style={{ width: `${pct}%`, background: bm.severity === 'Normal' ? '#C8A84B' : bm.severity === 'Critical' ? '#EF4444' : '#F59E0B' }} />
+                                style={{ width: `${pct}%`, background: bm.severity === 'Normal' ? 'var(--primary)' : bm.severity === 'Critical' ? '#EF4444' : 'var(--primary)' }} />
                             </div>
                             <span className="text-[10px] font-bold text-[#94A3B8] whitespace-nowrap">
                               {bm.referenceMin}–{bm.referenceMax}
@@ -320,7 +320,7 @@ export default function PatientAnalyticsPage() {
                         </span>
                       </td>
                       <td className="px-5 py-4 max-w-xs">
-                        <p className="text-xs text-[#6B7280] leading-relaxed truncate" title={bm.interpretation}>
+                        <p className="text-xs text-[var(--muted-foreground)] leading-relaxed truncate" title={bm.interpretation}>
                           {bm.interpretation || '—'}
                         </p>
                       </td>
@@ -335,30 +335,30 @@ export default function PatientAnalyticsPage() {
 
       {/* Report Timeline */}
       {reportTimeline?.length > 0 && (
-        <div className="bg-white rounded-3xl border border-[#E2E8F0] shadow-sm p-8">
-          <h3 className="text-lg font-black text-[#1F2933] mb-6">Report Upload Timeline</h3>
+        <div className="bg-white rounded-3xl border border-[var(--border)] shadow-sm p-8">
+          <h3 className="text-lg font-black text-[var(--foreground)] mb-6">Report Upload Timeline</h3>
           <div className="space-y-3">
             {[...reportTimeline].reverse().map((r: any) => (
           <Link key={r._id} href={`/dashboard/patient/reports/${r._id}`}
-                className="flex items-center justify-between p-4 rounded-2xl border border-[#F1F5F9] hover:border-[#C8A84B] hover:bg-[#FEF9EC] transition-all group">
+                className="flex items-center justify-between p-4 rounded-2xl border border-[#F1F5F9] hover:border-[var(--primary)] hover:bg-[var(--accent-soft)] transition-all group">
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-[#FEF3C7] rounded-2xl flex items-center justify-center text-lg flex-shrink-0">📋</div>
+                  <div className="w-10 h-10 bg-[var(--accent)] rounded-2xl flex items-center justify-center text-lg flex-shrink-0">📋</div>
                   <div>
-                    <p className="font-black text-[#1F2933] text-sm group-hover:text-[#C8A84B] transition-colors">{r.reportName}</p>
-                    <p className="text-[10px] text-[#6B7280] font-medium mt-0.5">
+                    <p className="font-black text-[var(--foreground)] text-sm group-hover:text-[var(--primary)] transition-colors">{r.reportName}</p>
+                    <p className="text-[10px] text-[var(--muted-foreground)] font-medium mt-0.5">
                       {r.testType} · {new Date(r.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-xs font-black text-[#1F2933]">{r.biomarkerCount} biomarkers</p>
+                    <p className="text-xs font-black text-[var(--foreground)]">{r.biomarkerCount} biomarkers</p>
                     {r.abnormalCount > 0 && (
-                      <p className="text-[10px] font-bold text-amber-600">{r.abnormalCount} abnormal</p>
+                      <p className="text-[10px] font-bold text-[var(--primary)]">{r.abnormalCount} abnormal</p>
                     )}
                   </div>
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                    stroke="#C8A84B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>

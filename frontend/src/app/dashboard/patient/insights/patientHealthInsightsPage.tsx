@@ -13,8 +13,8 @@ function StatusPill({ status }: { status: string }) {
     let cls = 'bg-gray-100 text-gray-600 border-gray-200';
     if (s === 'NORMAL' || s === 'OPTIMAL')      cls = 'bg-[#E8F9F0] text-[#1A7A45] border-[#C6EED9]';
     if (s === 'HIGH (GOOD)')                    cls = 'bg-[#E8F9F0] text-[#1A7A45] border-[#C6EED9]';
-    if (s === 'ATTENTION')                      cls = 'bg-[#FEF3C7] text-[#92400E] border-[#FDE68A]';
-    if (s === 'LOW'  || s === 'HIGH')           cls = 'bg-[#FFE4E6] text-[#9F1239] border-[#FECDD3]';
+    if (s === 'ATTENTION')                      cls = 'bg-[var(--accent)] text-[var(--primary)] border-[var(--border)]';
+    if (s === 'LOW'  || s === 'HIGH')           cls = 'bg-[#FFE4E6] text-[#9F1239] border-[var(--border)]';
     return (
         <span className={`inline-block px-3 py-[5px] rounded-full text-[9.5px] font-black tracking-wider border ${cls}`}>
             {status}
@@ -33,10 +33,10 @@ function ScoreRing({ score = 94 }: { score?: number }) {
         <div className="flex flex-col items-center gap-3">
             <div className="relative w-[128px] h-[128px] flex items-center justify-center">
                 <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 120 120">
-                    <circle cx="60" cy="60" r={r} fill="none" stroke="#FEF3C7" strokeWidth="9" />
+                    <circle cx="60" cy="60" r={r} fill="none" stroke="var(--accent)" strokeWidth="9" />
                     <circle
                         cx="60" cy="60" r={r} fill="none"
-                        stroke="#FBBF24" strokeWidth="9"
+                        stroke="var(--primary)" strokeWidth="9"
                         strokeLinecap="round"
                         strokeDasharray={`${dash} ${circ - dash}`}
                     />
@@ -46,7 +46,7 @@ function ScoreRing({ score = 94 }: { score?: number }) {
                     <p className="text-[9px] font-black text-[#A0AEC0] tracking-[0.15em] uppercase mt-0.5">Score</p>
                 </div>
             </div>
-            <div className="bg-[#FEF3C7] border border-[#FDE68A] text-[#92400E] text-[10.5px] font-black text-center px-4 py-2 rounded-full leading-tight">
+            <div className="bg-[var(--accent)] border border-[var(--border)] text-[var(--primary)] text-[10.5px] font-black text-center px-4 py-2 rounded-full leading-tight">
                 Top 5%<br />of Age Group
             </div>
         </div>
@@ -267,7 +267,7 @@ export default function PatientHealthInsightsPage() {
         return (
             <p className="text-[14px] leading-[1.8] text-[#4A5568]">
                 {text.slice(0, idx)}
-                <span className="text-[#E53E3E] font-semibold underline decoration-[#FDE68A] decoration-2 underline-offset-2">
+                <span className="text-[#E53E3E] font-semibold underline decoration-[var(--border)] decoration-2 underline-offset-2">
                     {text.slice(idx, idx + phrase.length)}
                 </span>
                 {text.slice(idx + phrase.length)}
@@ -282,7 +282,7 @@ export default function PatientHealthInsightsPage() {
     if (pageLoading) {
         return (
             <div className="flex items-center justify-center h-[60vh]">
-                <div className="w-10 h-10 border-4 border-[#FBBF24] border-t-transparent rounded-full animate-spin" />
+                <div className="w-10 h-10 border-[var(--primary)] border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
@@ -291,8 +291,8 @@ export default function PatientHealthInsightsPage() {
     if (reports.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-[60vh] text-center gap-4">
-                <div className="w-16 h-16 bg-[#FEF3C7] rounded-full flex items-center justify-center">
-                    <svg width="28" height="28" fill="none" stroke="#FBBF24" strokeWidth="2" viewBox="0 0 24 24">
+                <div className="w-16 h-16 bg-[var(--accent)] rounded-full flex items-center justify-center">
+                    <svg width="28" height="28" fill="none" stroke="var(--primary)" strokeWidth="2" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                     </svg>
                 </div>
@@ -306,7 +306,7 @@ export default function PatientHealthInsightsPage() {
 
     /* ═══════════════════════════════════════════════════════════════ */
     return (
-        <div className="-mx-8 -my-6 flex h-[calc(100vh-80px)] bg-[#F9F7F4]">
+        <div className="-mx-8 -my-6 flex h-[calc(100vh-80px)] bg-[var(--background)]">
 
             {/* ════ LEFT CONTENT ══════════════════════════════════════════ */}
             <div className="flex-1 overflow-y-auto px-8 py-7">
@@ -322,7 +322,7 @@ export default function PatientHealthInsightsPage() {
                                     className={`shrink-0 px-4 py-2 rounded-full text-[12px] font-bold border transition-all ${
                                         activeId === r._id
                                             ? 'bg-[#1A202C] text-white border-[#1A202C]'
-                                            : 'bg-white text-[#718096] border-[#E2E8F0] hover:border-[#CBD5E0]'
+                                            : 'bg-white text-[#718096] border-[var(--border)] hover:border-[#CBD5E0]'
                                     }`}
                                 >
                                     {r.testType || r.reportName || 'Report'} &bull;{' '}
@@ -333,7 +333,7 @@ export default function PatientHealthInsightsPage() {
                     )}
 
                     {/* ── CARD 1: AI Health Synthesis ──────────────────────── */}
-                    <div className="bg-white rounded-[26px] p-7 shadow-[0_2px_14px_rgba(0,0,0,0.05)] border border-[#EEE8DC]">
+                    <div className="bg-white rounded-[26px] p-7 shadow-[0_2px_14px_rgba(0,0,0,0.05)] border border-[var(--border)]">
 
                         {/* top badge row */}
                         <div className="flex items-center gap-3 mb-5">
@@ -354,7 +354,7 @@ export default function PatientHealthInsightsPage() {
                                     {renderSummary(cleanedSummary)}
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    <button className="bg-[#FBBF24] hover:bg-[#F59E0B] active:scale-95 text-[#1A202C] font-black text-[12.5px] px-6 py-3 rounded-full transition-all shadow-sm">
+                                    <button className="bg-[var(--primary)] hover:bg-[var(--primary)] active:scale-95 text-[#1A202C] font-black text-[12.5px] px-6 py-3 rounded-full transition-all shadow-sm">
                                         View Full Report
                                     </button>
                                     <a
@@ -379,12 +379,12 @@ export default function PatientHealthInsightsPage() {
                     </div>
 
                     {/* ── CARD 2: Biomarker Table ───────────────────────────── */}
-                    <div className="bg-white rounded-[26px] px-7 py-6 shadow-[0_2px_14px_rgba(0,0,0,0.05)] border border-[#EEE8DC]">
+                    <div className="bg-white rounded-[26px] px-7 py-6 shadow-[0_2px_14px_rgba(0,0,0,0.05)] border border-[var(--border)]">
 
                         {/* card header */}
                         <div className="flex items-start justify-between mb-5">
                             <div className="flex items-start gap-3">
-                                <div className="w-[3.5px] h-[40px] bg-[#FBBF24] rounded-full mt-0.5 shrink-0" />
+                                <div className="w-[3.5px] h-[40px] bg-[var(--primary)] rounded-full mt-0.5 shrink-0" />
                                 <h3 className="text-[18px] font-black text-[#1A202C] leading-snug">
                                     Detailed Biomarker<br />Breakdown
                                 </h3>
@@ -437,12 +437,12 @@ export default function PatientHealthInsightsPage() {
             </div>
 
             {/* ════ RIGHT PANEL ════════════════════════════════════════════ */}
-            <div className="w-[310px] shrink-0 bg-[#FDF8E9] border-l border-[#EFE7CC] overflow-y-auto py-6 px-5 flex flex-col gap-5">
+            <div className="w-[310px] shrink-0 bg-[var(--accent-soft)] border-l border-[var(--border)] overflow-y-auto py-6 px-5 flex flex-col gap-5">
 
                 {/* ── KEY OBSERVATIONS (dynamic) ──────────────────────────── */}
                 <div>
                     <div className="flex items-center gap-2 mb-4">
-                        <svg width="17" height="17" fill="none" stroke="#7A3927" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                        <svg width="17" height="17" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                             <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
                             <rect x="8" y="2" width="8" height="4" rx="1"/>
                             <path d="M12 11h4"/><path d="M12 16h4"/>
@@ -454,12 +454,12 @@ export default function PatientHealthInsightsPage() {
                     {observations.length > 0 ? (
                         <div className="space-y-3">
                             {observations.map((obs, i) => (
-                                <div key={i} className="bg-white rounded-[16px] p-4 border border-[#EEE8DC] shadow-[0_1px_5px_rgba(0,0,0,0.04)]">
+                                <div key={i} className="bg-white rounded-[16px] p-4 border border-[var(--border)] shadow-[0_1px_5px_rgba(0,0,0,0.04)]">
                                     <div className="flex items-start gap-3">
                                         {/* icon */}
                                         {obs.type === 'warning' ? (
-                                            <span className="w-[26px] h-[26px] rounded-full bg-[#FEF3C7] border border-[#FDE68A] flex items-center justify-center shrink-0 mt-0.5">
-                                                <svg width="12" height="12" fill="none" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24">
+                                            <span className="w-[26px] h-[26px] rounded-full bg-[var(--accent)] border border-[var(--border)] flex items-center justify-center shrink-0 mt-0.5">
+                                                <svg width="12" height="12" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24">
                                                     <circle cx="12" cy="12" r="10"/>
                                                     <line x1="12" y1="8" x2="12" y2="12"/>
                                                     <line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -483,10 +483,10 @@ export default function PatientHealthInsightsPage() {
                     ) : (
                         /* Fallback static observations when no biomarker data yet */
                         <div className="space-y-3">
-                            <div className="bg-white rounded-[16px] p-4 border border-[#EEE8DC] shadow-[0_1px_5px_rgba(0,0,0,0.04)]">
+                            <div className="bg-white rounded-[16px] p-4 border border-[var(--border)] shadow-[0_1px_5px_rgba(0,0,0,0.04)]">
                                 <div className="flex items-start gap-3">
-                                    <span className="w-[26px] h-[26px] rounded-full bg-[#FEF3C7] border border-[#FDE68A] flex items-center justify-center shrink-0 mt-0.5">
-                                        <svg width="12" height="12" fill="none" stroke="#D97706" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                    <span className="w-[26px] h-[26px] rounded-full bg-[var(--accent)] border border-[var(--border)] flex items-center justify-center shrink-0 mt-0.5">
+                                        <svg width="12" height="12" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                                     </span>
                                     <div>
                                         <h4 className="text-[12px] font-black text-[#1A202C] mb-1 leading-snug">Kidney Filtration Warning</h4>
@@ -494,7 +494,7 @@ export default function PatientHealthInsightsPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="bg-white rounded-[16px] p-4 border border-[#EEE8DC] shadow-[0_1px_5px_rgba(0,0,0,0.04)]">
+                            <div className="bg-white rounded-[16px] p-4 border border-[var(--border)] shadow-[0_1px_5px_rgba(0,0,0,0.04)]">
                                 <div className="flex items-start gap-3">
                                     <span className="w-[26px] h-[26px] rounded-full bg-[#E8F9F0] border border-[#C6EED9] flex items-center justify-center shrink-0 mt-0.5">
                                         <svg width="12" height="12" fill="none" stroke="#16A34A" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
@@ -530,7 +530,7 @@ export default function PatientHealthInsightsPage() {
                                     const tip    = tipKey ? tips[tipKey] : `Review ${b.biomarkerName} with your clinician`;
                                     return (
                                         <div key={i} className="flex items-start gap-2">
-                                            <span className="text-[#FBBF24] text-[11px] mt-0.5 shrink-0">★</span>
+                                            <span className="text-[var(--primary)] text-[11px] mt-0.5 shrink-0">★</span>
                                             <p className="text-[10.5px] text-[#4A5568] font-medium leading-snug">{tip}</p>
                                         </div>
                                     );
@@ -540,11 +540,11 @@ export default function PatientHealthInsightsPage() {
                 </div>
 
                 {/* ── CLINICAL NETWORK (smart doctor matching) ─────────────── */}
-                <div className="bg-white rounded-[20px] p-5 border border-[#EEE8DC] shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+                <div className="bg-white rounded-[20px] p-5 border border-[var(--border)] shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
                     <div className="flex items-center justify-between mb-1">
                         <h3 className="text-[14px] font-black text-[#1A202C]">Clinical Network</h3>
                         {matchedSpecialties.length > 0 && (
-                            <span className="text-[9px] font-black bg-[#FEF3C7] text-[#92400E] px-2 py-0.5 rounded-full border border-[#FDE68A]">
+                            <span className="text-[9px] font-black bg-[var(--accent)] text-[var(--primary)] px-2 py-0.5 rounded-full border border-[var(--border)]">
                                 {matchedSpecialties.length} specialist{matchedSpecialties.length > 1 ? 's' : ''} matched
                             </span>
                         )}
@@ -564,7 +564,7 @@ export default function PatientHealthInsightsPage() {
                                 const isMatch   = !!doc.matchReason;
                                 const sent      = connectMsg[doc._id];
                                 return (
-                                    <div key={doc._id || i} className={`rounded-2xl p-3 border transition-colors ${isMatch ? 'border-[#FDE68A] bg-[#FEFDF9]' : 'border-gray-100 bg-gray-50/60'}`}>
+                                    <div key={doc._id || i} className={`rounded-2xl p-3 border transition-colors ${isMatch ? 'border-[var(--border)] bg-[#FEFDF9]' : 'border-gray-100 bg-gray-50/60'}`}>
                                         <div className="flex items-start gap-3">
                                             {/* Avatar */}
                                             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#DBEAFE] to-[#BFDBFE] flex items-center justify-center text-[#1D4ED8] font-black text-[13px] shrink-0 border border-[#BFDBFE]">
@@ -577,7 +577,7 @@ export default function PatientHealthInsightsPage() {
                                                         {name.startsWith('Dr') ? name : `Dr. ${name}`}
                                                     </span>
                                                     {isMatch && (
-                                                        <span className="text-[8px] font-black bg-[#FEF3C7] text-[#92400E] px-1.5 py-0.5 rounded-full border border-[#FDE68A] whitespace-nowrap">
+                                                        <span className="text-[8px] font-black bg-[var(--accent)] text-[var(--primary)] px-1.5 py-0.5 rounded-full border border-[var(--border)] whitespace-nowrap">
                                                             ★ Matches your issues
                                                         </span>
                                                     )}
@@ -588,7 +588,7 @@ export default function PatientHealthInsightsPage() {
                                                     )}
                                                 </div>
                                                 <p className="text-[10px] text-[#A0AEC0] font-medium">{specialty}{doc.experience ? ` · ${doc.experience}` : ''}</p>
-                                                {isMatch && <p className="text-[9px] text-[#C8A84B] font-bold mt-0.5">⚠ {doc.matchReason}</p>}
+                                                {isMatch && <p className="text-[9px] text-[var(--primary)] font-bold mt-0.5">⚠ {doc.matchReason}</p>}
                                                 {doc.hospital && <p className="text-[9px] text-[#CBD5E0] mt-0.5 truncate">{doc.hospital}</p>}
                                             </div>
                                         </div>
@@ -616,7 +616,7 @@ export default function PatientHealthInsightsPage() {
                                                 className="mt-2.5 w-full bg-[#1A202C] hover:bg-[#2D3748] disabled:opacity-60 text-white font-bold text-[11px] py-2 rounded-xl flex items-center justify-center gap-1.5 transition-colors active:scale-95"
                                             >
                                                 {connectingId === doc._id ? (
-                                                    <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                    <span className="w-3 h-3 border-[var(--primary)] border-white/30 border-t-white rounded-full animate-spin" />
                                                 ) : (
                                                     <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                                                         <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 10.23 19.79 19.79 0 0 1 1.61 1.6 2 2 0 0 1 3.6 0h3a2 2 0 0 1 2 1.72c.128.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 7.91a16 16 0 0 0 6.06 6.06l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.572 2.81.7A2 2 0 0 1 22 16.92z"/>
@@ -643,7 +643,7 @@ export default function PatientHealthInsightsPage() {
                         onClick={async () => {
                             try { await api.post('/patients/request-review', {}); } catch { /* silent */ }
                         }}
-                        className="w-full mt-4 bg-[#FBBF24] hover:bg-[#F59E0B] active:scale-95 text-[#1A202C] font-black text-[12px] py-3 rounded-full flex items-center justify-center gap-2 transition-all shadow-sm"
+                        className="w-full mt-4 bg-[var(--primary)] hover:bg-[var(--primary)] active:scale-95 text-[#1A202C] font-black text-[12px] py-3 rounded-full flex items-center justify-center gap-2 transition-all shadow-sm"
                     >
                         <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>

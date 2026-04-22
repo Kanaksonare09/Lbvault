@@ -82,7 +82,7 @@ export default function DoctorsPage() {
                 <button
                     onClick={() => setIsModalOpen(true)}
                     className="inline-flex items-center gap-2 text-[12.5px] font-semibold px-4 py-2.5 rounded-lg transition-colors"
-                    style={{ background: '#C8A84B', color: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}
+                    style={{ background: 'var(--primary)', color: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}
                 >
                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                         <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -118,7 +118,7 @@ export default function DoctorsPage() {
                     {!loading && (
                         <span
                             className="text-[11px] font-bold px-2.5 py-1 rounded-full ml-auto shrink-0"
-                            style={{ background: '#F4F6F9', color: '#6B7280' }}
+                            style={{ background: '#F4F6F9', color: 'var(--muted-foreground)' }}
                         >
                             {filteredDoctors.length} doctor{filteredDoctors.length !== 1 ? 's' : ''}
                         </span>
@@ -142,7 +142,7 @@ export default function DoctorsPage() {
                                     <td colSpan={4} className="px-6 py-12 text-center">
                                         <div
                                             className="w-8 h-8 border-4 rounded-full animate-spin mx-auto"
-                                            style={{ borderColor: '#E8EDF2', borderTopColor: '#C8A84B' }}
+                                            style={{ borderColor: '#E8EDF2', borderTopColor: 'var(--primary)' }}
                                         />
                                     </td>
                                 </tr>
@@ -308,7 +308,7 @@ export default function DoctorsPage() {
                                     type="button"
                                     onClick={() => setIsModalOpen(false)}
                                     className="flex-1 text-[13px] font-semibold py-2.5 rounded-xl transition-colors"
-                                    style={{ background: '#F4F6F9', color: '#6B7280' }}
+                                    style={{ background: '#F4F6F9', color: 'var(--muted-foreground)' }}
                                 >
                                     Cancel
                                 </button>
@@ -317,7 +317,7 @@ export default function DoctorsPage() {
                                     disabled={regLoading}
                                     className="flex-1 text-[13px] font-semibold py-2.5 rounded-xl transition-all"
                                     style={{
-                                        background: regLoading ? '#E5E7EB' : '#C8A84B',
+                                        background: regLoading ? '#E5E7EB' : 'var(--primary)',
                                         color: regLoading ? '#9CA3AF' : '#fff',
                                         boxShadow: regLoading ? 'none' : '0 2px 8px rgba(200,168,75,0.3)',
                                     }}

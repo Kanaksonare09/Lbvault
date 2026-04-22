@@ -25,40 +25,40 @@ const ReportComparison: React.FC<ReportComparisonProps> = ({ biomarkers }) => {
 
   if (comparableItems.length === 0) {
     return (
-      <div className="p-8 text-center bg-[#F6F7F5] rounded-[30px] border border-dashed border-[#E2E8F0]">
+      <div className="p-8 text-center bg-[var(--background)] rounded-[30px] border border-dashed border-[var(--border)]">
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Base Report: No Prior Historical Data</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-[40px] p-8 border border-[#E2E8F0] shadow-sm">
+    <div className="bg-white rounded-[40px] p-8 border border-[var(--border)] shadow-sm">
       <div className="flex items-center justify-between mb-8">
-         <h3 className="text-[10px] font-black text-[#4F6F6F] uppercase tracking-[0.2em]">Longitudinal Comparison</h3>
-         <span className="text-[9px] font-black text-[#8FB9A8] border border-[#8FB9A8]/20 px-3 py-1 rounded-full uppercase tracking-widest">Vs Previously Recorded</span>
+         <h3 className="text-[10px] font-black text-[var(--primary)] uppercase tracking-[0.2em]">Longitudinal Comparison</h3>
+         <span className="text-[9px] font-black text-[var(--secondary)] border border-[var(--secondary)]/20 px-3 py-1 rounded-full uppercase tracking-widest">Vs Previously Recorded</span>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-[#F6F7F5]">
+            <tr className="border-b border-[var(--background)]">
               <th className="pb-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Parameter</th>
               <th className="pb-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Prev</th>
               <th className="pb-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Curr</th>
               <th className="pb-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Trend</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#F6F7F5]">
+          <tbody className="divide-y divide-[var(--background)]">
             {comparableItems.map((b) => (
-              <tr key={b._id} className="group hover:bg-[#F6F7F5]/50 transition-colors">
+              <tr key={b._id} className="group hover:bg-[var(--background)]/50 transition-colors">
                 <td className="py-4">
-                   <p className="font-black text-xs text-[#1F2933] uppercase tracking-tight">{b.biomarkerName}</p>
+                   <p className="font-black text-xs text-[var(--foreground)] uppercase tracking-tight">{b.biomarkerName}</p>
                 </td>
                 <td className="py-4 text-center">
                    <span className="text-xs font-bold text-gray-400">{b.comparison?.previousValue} {b.unit}</span>
                 </td>
                 <td className="py-4 text-center">
-                   <span className={`text-xs font-black ${b.isAbnormal ? 'text-rose-600' : 'text-[#4F6F6F]'}`}>
+                   <span className={`text-xs font-black ${b.isAbnormal ? 'text-rose-600' : 'text-[var(--primary)]'}`}>
                      {b.value} {b.unit}
                    </span>
                 </td>

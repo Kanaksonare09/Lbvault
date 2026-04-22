@@ -28,7 +28,7 @@ function CommandDashboard() {
           { label: 'Total Reports', val: '4,821', delta: '+8%', c: '#60A5FA' },
           { label: 'Patients', val: '312', delta: '+14%', c: '#34D399' },
           { label: 'Doctors', val: '28', delta: '+3', c: '#A78BFA' },
-          { label: 'Alerts', val: '7', delta: '-2', c: '#FBBF24' },
+          { label: 'Alerts', val: '7', delta: '-2', c: 'var(--primary)' },
         ].map((m) => (
           <div
             key={m.label}
@@ -38,7 +38,7 @@ function CommandDashboard() {
               padding: '9px 10px',
             }}
           >
-            <p style={{ fontSize: 8, color: '#6B7280', marginBottom: 4 }}>{m.label}</p>
+            <p style={{ fontSize: 8, color: 'var(--muted-foreground)', marginBottom: 4 }}>{m.label}</p>
             <p style={{ fontSize: 17, fontWeight: 700, color: '#F9FAFB', lineHeight: 1 }}>{m.val}</p>
             <p style={{ fontSize: 8, color: m.c, marginTop: 3 }}>{m.delta}</p>
           </div>
@@ -59,7 +59,7 @@ function CommandDashboard() {
           }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <p style={{ fontSize: 8, color: '#6B7280' }}>Report Inflow</p>
+            <p style={{ fontSize: 8, color: 'var(--muted-foreground)' }}>Report Inflow</p>
             <div
               style={{
                 display: 'flex',
@@ -79,8 +79,8 @@ function CommandDashboard() {
           <svg viewBox="0 0 240 72" style={{ width: '100%', flexShrink: 0 }} preserveAspectRatio="none">
             <defs>
               <linearGradient id="cmd1" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.32" />
-                <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+                <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.32" />
+                <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
               </linearGradient>
               <linearGradient id="cmd2" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#10B981" stopOpacity="0.22" />
@@ -88,7 +88,7 @@ function CommandDashboard() {
               </linearGradient>
             </defs>
             <path d="M0 58 C30 48 60 28 90 33 C120 38 150 18 180 20 C210 22 228 10 240 7 L240 72 L0 72 Z" fill="url(#cmd1)" />
-            <path d="M0 58 C30 48 60 28 90 33 C120 38 150 18 180 20 C210 22 228 10 240 7" fill="none" stroke="#3B82F6" strokeWidth="1.4" strokeLinecap="round" />
+            <path d="M0 58 C30 48 60 28 90 33 C120 38 150 18 180 20 C210 22 228 10 240 7" fill="none" stroke="var(--primary)" strokeWidth="1.4" strokeLinecap="round" />
             <path d="M0 68 C30 64 60 56 90 54 C120 52 150 42 180 39 C210 36 228 27 240 24 L240 72 L0 72 Z" fill="url(#cmd2)" />
             <path d="M0 68 C30 64 60 56 90 54 C120 52 150 42 180 39 C210 36 228 27 240 24" fill="none" stroke="#10B981" strokeWidth="1.4" strokeLinecap="round" />
           </svg>
@@ -104,14 +104,14 @@ function CommandDashboard() {
             flexShrink: 0,
           }}
         >
-          <p style={{ fontSize: 8, color: '#6B7280', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          <p style={{ fontSize: 8, color: 'var(--muted-foreground)', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Activity
           </p>
           {[
             { name: 'CBC report', time: '2m', c: '#34D399' },
             { name: 'X-Ray upload', time: '6m', c: '#60A5FA' },
             { name: 'HbA1c alert', time: '14m', c: '#FC7F7F' },
-            { name: 'Lipid panel', time: '22m', c: '#FBBF24' },
+            { name: 'Lipid panel', time: '22m', c: 'var(--primary)' },
             { name: 'Thyroid test', time: '38m', c: '#A78BFA' },
           ].map((a) => (
             <div
@@ -124,7 +124,7 @@ function CommandDashboard() {
               <span style={{ fontSize: 9, color: '#D1D5DB', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {a.name}
               </span>
-              <span style={{ fontSize: 8, color: '#6B7280' }}>{a.time}</span>
+              <span style={{ fontSize: 8, color: 'var(--muted-foreground)' }}>{a.time}</span>
             </div>
           ))}
         </div>
@@ -143,7 +143,7 @@ function CommandDashboard() {
             display: 'grid',
             gridTemplateColumns: '1.6fr 1fr 1fr 0.9fr',
             fontSize: 7.5,
-            color: '#6B7280',
+            color: 'var(--muted-foreground)',
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
             fontWeight: 600,
@@ -159,7 +159,7 @@ function CommandDashboard() {
         </div>
         {[
           { patient: 'Rahul Sharma', test: 'CBC', lab: 'Apollo', status: 'Verified', c: '#34D399' },
-          { patient: 'Priya Mehta', test: 'Thyroid', lab: 'SRL', status: 'Pending', c: '#FBBF24' },
+          { patient: 'Priya Mehta', test: 'Thyroid', lab: 'SRL', status: 'Pending', c: 'var(--primary)' },
           { patient: 'Anil Kumar', test: 'HbA1c', lab: 'Thyrocare', status: 'Alert', c: '#FC7F7F' },
         ].map((r) => (
           <div
@@ -197,7 +197,7 @@ export default function CommandCenter() {
             transition={{ duration: 0.5 }}
             whileHover={{ y: -3 }}
             style={{
-              background: '#0D1117',
+              background: 'var(--foreground)',
               borderRadius: 16,
               padding: '26px 26px 22px',
               display: 'flex',
@@ -235,7 +235,7 @@ export default function CommandCenter() {
                 >
                   The Patient Command Center
                 </h3>
-                <p style={{ fontSize: 12.5, color: '#6B7280', maxWidth: 300, lineHeight: 1.55 }}>
+                <p style={{ fontSize: 12.5, color: 'var(--muted-foreground)', maxWidth: 300, lineHeight: 1.55 }}>
                   Access your entire medical history, track biomarkers in real time, and share reports across your care team.
                 </p>
               </div>
@@ -245,8 +245,8 @@ export default function CommandCenter() {
                 style={{
                   fontSize: 12,
                   fontWeight: 600,
-                  color: '#111827',
-                  background: '#FACC15',
+                  color: 'var(--foreground)',
+                  background: 'var(--secondary)',
                   border: 'none',
                   padding: '8px 14px',
                   borderRadius: 8,
@@ -258,7 +258,7 @@ export default function CommandCenter() {
                   transition: 'background 0.15s',
                 }}
                 onMouseEnter={e => ((e.currentTarget as HTMLButtonElement).style.background = '#FDE047')}
-                onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.background = '#FACC15')}
+                onMouseLeave={e => ((e.currentTarget as HTMLButtonElement).style.background = 'var(--secondary)')}
               >
                 Explore Dashboard
                 <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
@@ -306,8 +306,8 @@ export default function CommandCenter() {
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M10 2L3.5 5V10c0 4.09 2.91 7.86 6.5 9 3.59-1.14 6.5-4.91 6.5-9V5L10 2Z" stroke="#FACC15" strokeWidth="1.6" strokeLinejoin="round" />
-                  <path d="M7 10l2.2 2.2L13 8" stroke="#FACC15" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M10 2L3.5 5V10c0 4.09 2.91 7.86 6.5 9 3.59-1.14 6.5-4.91 6.5-9V5L10 2Z" stroke="var(--secondary)" strokeWidth="1.6" strokeLinejoin="round" />
+                  <path d="M7 10l2.2 2.2L13 8" stroke="var(--secondary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </div>
               <div>
@@ -322,7 +322,7 @@ export default function CommandCenter() {
                 >
                   Military Grade Privacy
                 </h4>
-                <p style={{ fontSize: 12.5, color: '#6B7280', lineHeight: 1.6 }}>
+                <p style={{ fontSize: 12.5, color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
                   AES-256 encryption at rest and in transit. True zero-knowledge architecture — your data, your keys.
                 </p>
               </div>
@@ -333,7 +333,7 @@ export default function CommandCenter() {
                     style={{
                       fontSize: 9.5,
                       fontWeight: 600,
-                      color: '#FBBF24',
+                      color: 'var(--primary)',
                       background: 'rgba(251,191,36,0.1)',
                       padding: '3px 9px',
                       borderRadius: 20,
@@ -377,8 +377,8 @@ export default function CommandCenter() {
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <rect x="2" y="5" width="16" height="10" rx="2" stroke="#2563EB" strokeWidth="1.6" />
-                  <path d="M6 10.5h1.5M9.5 10.5H13M6 13h3" stroke="#2563EB" strokeWidth="1.3" strokeLinecap="round" />
+                  <rect x="2" y="5" width="16" height="10" rx="2" stroke="var(--primary)" strokeWidth="1.6" />
+                  <path d="M6 10.5h1.5M9.5 10.5H13M6 13h3" stroke="var(--primary)" strokeWidth="1.3" strokeLinecap="round" />
                 </svg>
               </div>
               <div>
@@ -386,14 +386,14 @@ export default function CommandCenter() {
                   style={{
                     fontSize: 14,
                     fontWeight: 700,
-                    color: '#111827',
+                    color: 'var(--foreground)',
                     marginBottom: 7,
                     letterSpacing: '-0.015em',
                   }}
                 >
                   Lab Integration
                 </h4>
-                <p style={{ fontSize: 12.5, color: '#6B7280', lineHeight: 1.6 }}>
+                <p style={{ fontSize: 12.5, color: 'var(--muted-foreground)', lineHeight: 1.6 }}>
                   Connect with Apollo, SRL, Thyrocare and 200+ labs. Reports sync automatically.
                 </p>
               </div>

@@ -74,7 +74,7 @@ export default function VoiceSummaryButton({ text, lang, reportId, patientId, di
                     ? 'border-gray-100 text-gray-300 cursor-not-allowed'
                     : status === 'playing'
                     ? 'border-rose-200 bg-rose-50 text-rose-500'
-                    : 'border-gray-200 bg-white text-gray-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50'
+                    : 'border-gray-200 bg-white text-gray-500 hover:text-[var(--primary)] hover:border-blue-200 hover:bg-[var(--accent-soft)]'
                 }`}
                 title={status === 'playing' ? 'Stop Audio' : 'Play Voice Summary'}
             >
@@ -100,7 +100,7 @@ export default function VoiceSummaryButton({ text, lang, reportId, patientId, di
                     : status === 'playing'
                     ? 'bg-rose-500 text-white shadow-rose-500/30'
                     : patientId 
-                    ? 'bg-[#1F2933] text-white hover:bg-[#4F6F6F] shadow-lg'
+                    ? 'bg-[var(--foreground)] text-white hover:bg-[var(--primary)] shadow-lg'
                     : 'bg-[#F5C842] text-[#1a1000] hover:bg-[#f0c030] shadow-[#F5C842]/30'
                 }`}
                 title={status === 'playing' ? "Stop Audio" : `Play ${displayLabel}`}
@@ -131,11 +131,11 @@ export default function VoiceSummaryButton({ text, lang, reportId, patientId, di
                 ? 'bg-slate-50 text-slate-300 border-slate-100 cursor-not-allowed opacity-60'
                 : status === 'playing'
                 ? 'bg-rose-500 text-white border-rose-600 hover:bg-rose-600 shadow-lg'
-                : 'bg-[#F6F7F5] text-[#4F6F6F] border-[#E2E8F0] hover:bg-white hover:shadow-md hover:border-[#8FB9A8]'
+                : 'bg-[var(--background)] text-[var(--primary)] border-[var(--border)] hover:bg-white hover:shadow-md hover:border-[var(--secondary)]'
             }`}
         >
             {status === 'loading' ? (
-                <div className="w-4 h-4 border-2 border-[#4F6F6F]/30 border-t-[#4F6F6F] rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-2 border-[var(--primary)]/30 border-t-[var(--primary)] rounded-full animate-spin"></div>
             ) : status === 'playing' ? (
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
             ) : (

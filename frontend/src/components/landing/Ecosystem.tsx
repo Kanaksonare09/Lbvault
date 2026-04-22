@@ -9,14 +9,14 @@ const columns = [
     title: 'Everything for you',
     icon: (
       <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
-        <circle cx="9.5" cy="6" r="3" stroke="#D97706" strokeWidth="1.6" />
-        <path d="M3.5 17.5c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
+        <circle cx="9.5" cy="6" r="3" stroke="var(--primary)" strokeWidth="1.6" />
+        <path d="M3.5 17.5c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="var(--primary)" strokeWidth="1.6" strokeLinecap="round" />
       </svg>
     ),
-    iconBg: '#FFFBEB',
-    accentColor: '#D97706',
-    tickColor: '#D97706',
-    tickBg: '#FEF3C7',
+    iconBg: 'var(--accent-soft)',
+    accentColor: 'var(--primary)',
+    tickColor: 'var(--primary)',
+    tickBg: 'var(--accent)',
     points: [
       'Instant access to all lab reports',
       'Secure sharing with doctors',
@@ -34,13 +34,13 @@ const columns = [
     title: 'Insights for doctors',
     icon: (
       <svg width="19" height="19" viewBox="0 0 19 19" fill="none">
-        <rect x="3" y="4" width="13" height="11" rx="2" stroke="#2563EB" strokeWidth="1.6" />
-        <path d="M6.5 9h6M6.5 12h4" stroke="#2563EB" strokeWidth="1.3" strokeLinecap="round" />
+        <rect x="3" y="4" width="13" height="11" rx="2" stroke="var(--primary)" strokeWidth="1.6" />
+        <path d="M6.5 9h6M6.5 12h4" stroke="var(--primary)" strokeWidth="1.3" strokeLinecap="round" />
       </svg>
     ),
     iconBg: '#EFF6FF',
-    accentColor: '#2563EB',
-    tickColor: '#2563EB',
+    accentColor: 'var(--primary)',
+    tickColor: 'var(--primary)',
     tickBg: '#DBEAFE',
     points: [
       'Instant lab result notifications',
@@ -117,7 +117,7 @@ export default function Ecosystem() {
             style={{
               fontSize: 'clamp(24px, 3vw, 34px)',
               fontWeight: 800,
-              color: '#111827',
+              color: 'var(--foreground)',
               letterSpacing: '-0.025em',
               lineHeight: 1.2,
               marginBottom: 12,
@@ -128,7 +128,7 @@ export default function Ecosystem() {
           <p
             style={{
               fontSize: 14.5,
-              color: '#6B7280',
+              color: 'var(--muted-foreground)',
               lineHeight: 1.65,
               maxWidth: 460,
               margin: '0 auto',
@@ -195,7 +195,7 @@ export default function Ecosystem() {
                     style={{
                       fontSize: 14,
                       fontWeight: 700,
-                      color: '#111827',
+                      color: 'var(--foreground)',
                       letterSpacing: '-0.015em',
                     }}
                   >

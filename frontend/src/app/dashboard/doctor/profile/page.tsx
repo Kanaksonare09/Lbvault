@@ -16,12 +16,12 @@ const SPECIALTIES = [
 /* ─── BANNER HELPERS ──────────────────────────────────────────── */
 function SuccessBanner({ message, onDismiss }: { message: string; onDismiss: () => void }) {
     return (
-        <div className="flex items-center gap-3 p-4 bg-[#FEF9EC] border border-[#FDE68A] rounded-2xl animate-in fade-in duration-300">
-            <div className="w-7 h-7 bg-[#C8A84B] rounded-xl flex items-center justify-center flex-shrink-0">
+        <div className="flex items-center gap-3 p-4 bg-[var(--accent-soft)] border border-[#FDE68A] rounded-2xl animate-in fade-in duration-300">
+            <div className="w-7 h-7 bg-[var(--primary)] rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
             </div>
-            <p className="text-sm font-bold text-[#92400E] flex-1">{message}</p>
-            <button onClick={onDismiss} className="text-[#C8A84B] hover:text-[#92400E] transition-colors">
+            <p className="text-sm font-bold text-[var(--primary)] flex-1">{message}</p>
+            <button onClick={onDismiss} className="text-[var(--primary)] hover:text-[var(--primary)] transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
             </button>
         </div>
@@ -49,7 +49,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     );
 }
 
-const INPUT = "w-full px-4 py-3 rounded-xl border border-[#E2E8F0] text-[13.5px] font-medium text-[#0F172A] outline-none focus:border-[#C8A84B] focus:ring-2 focus:ring-[#C8A84B]/10 transition-all bg-white placeholder:text-[#CBD5E0]";
+const INPUT = "w-full px-4 py-3 rounded-xl border border-[var(--border)] text-[13.5px] font-medium text-[#0F172A] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/10 transition-all bg-white placeholder:text-[#CBD5E0]";
 const SELECT = INPUT + " appearance-none cursor-pointer";
 
 /* ─── PAGE ───────────────────────────────────────────────────── */
@@ -136,7 +136,7 @@ export default function DoctorProfilePage() {
     if (profileLoading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="w-8 h-8 border-4 border-[#C8A84B]/20 border-t-[#C8A84B] rounded-full animate-spin" />
+                <div className="w-8 h-8 border-4 border-[var(--primary)]/20 border-t-[var(--primary)] rounded-full animate-spin" />
             </div>
         );
     }
@@ -289,9 +289,9 @@ export default function DoctorProfilePage() {
                         ))}
                     </div>
 
-                    <div className="bg-[#FEF9EC] border border-[#FDE68A] rounded-2xl p-4 flex gap-3">
-                        <svg className="text-[#C8A84B] mt-0.5 shrink-0" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <p className="text-[12px] font-medium text-[#92400E]">Use a strong password that is at least 8 characters and includes a mix of letters, numbers, and symbols.</p>
+                    <div className="bg-[var(--accent-soft)] border border-[#FDE68A] rounded-2xl p-4 flex gap-3">
+                        <svg className="text-[var(--primary)] mt-0.5 shrink-0" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <p className="text-[12px] font-medium text-[var(--primary)]">Use a strong password that is at least 8 characters and includes a mix of letters, numbers, and symbols.</p>
                     </div>
 
                     <button

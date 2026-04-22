@@ -1,5 +1,5 @@
 // ============================================================
-//  LabVault — Complete MongoDB Schema
+//  HealthScan — Complete MongoDB Schema
 //  MongoDB 6.0+
 //  Copy-paste into MongoDB Shell or Compass
 //  Run each block in order
@@ -149,7 +149,7 @@ db.createCollection("reports", {
       properties: {
         _id:            { bsonType: "objectId" },
         patientId:      { bsonType: "objectId" },  // ref: users._id
-        lvId:           { bsonType: "string" },    // Denormalized LabVault ID for quick search
+        lvId:           { bsonType: "string" },    // Denormalized HealthScan ID for quick search
         uploadedBy:     { bsonType: "objectId" },  // ref: users._id (patient or pathology user)
         uploadedByRole: { enum: ["patient", "pathology", "api", "doctor"] },
         pathologyId:    { bsonType: "objectId" },  // ref: users._id (where role=pathology) (null if self-upload)

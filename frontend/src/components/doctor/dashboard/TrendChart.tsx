@@ -31,24 +31,24 @@ const TrendChart: React.FC<TrendChartProps> = ({ parameter, data }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-2">
-         <p className="font-black text-[#1F2933] text-sm uppercase tracking-wide">{parameter}</p>
+         <p className="font-black text-[var(--foreground)] text-sm uppercase tracking-wide">{parameter}</p>
          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-[#6B7280]">{data.length} measurements</span>
+            <span className="text-[10px] font-bold text-[var(--muted-foreground)]">{data.length} measurements</span>
             {data[data.length - 1].isAbnormal && (
                <span className="w-2 h-2 bg-rose-500 rounded-full animate-pulse" />
             )}
          </div>
       </div>
-      <div className="h-[180px] w-full bg-[#F8FAF9] rounded-[30px] p-6 border border-[#F6F7F5] group hover:border-[#8FB9A8]/30 transition-colors">
+      <div className="h-[180px] w-full bg-[#F8FAF9] rounded-[30px] p-6 border border-[var(--background)] group hover:border-[var(--secondary)]/30 transition-colors">
          <ResponsiveContainer width="100%" height="100%">
            <AreaChart data={chartData}>
              <defs>
                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                 <stop offset="5%" stopColor="#8FB9A8" stopOpacity={0.3}/>
-                 <stop offset="95%" stopColor="#8FB9A8" stopOpacity={0}/>
+                 <stop offset="5%" stopColor="var(--secondary)" stopOpacity={0.3}/>
+                 <stop offset="95%" stopColor="var(--secondary)" stopOpacity={0}/>
                </linearGradient>
              </defs>
-             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
              <XAxis 
                 dataKey="displayDate" 
                 axisLine={false} 
@@ -59,14 +59,14 @@ const TrendChart: React.FC<TrendChartProps> = ({ parameter, data }) => {
              <YAxis hide domain={['auto', 'auto']} />
              <Tooltip 
                 contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', padding: '12px' }}
-                itemStyle={{ fontSize: '12px', fontWeight: 900, color: '#4F6F6F' }}
+                itemStyle={{ fontSize: '12px', fontWeight: 900, color: 'var(--primary)' }}
                 labelStyle={{ fontSize: '10px', fontWeight: 700, color: '#A0AEC0', marginBottom: '4px' }}
                 formatter={(value: any, name: any, props: any) => [`${value} ${props.payload.unit}`, 'Value']}
              />
              <Area 
                 type="monotone" 
                 dataKey="val" 
-                stroke="#4F6F6F" 
+                stroke="var(--primary)" 
                 strokeWidth={3} 
                 fillOpacity={1} 
                 fill={`url(#${gradientId})`} 

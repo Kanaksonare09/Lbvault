@@ -1,7 +1,7 @@
 {
-  "name": "labvault-backend",
+  "name": "healthscan-backend",
   "version": "1.0.0",
-  "description": "LabVault Node.js Express Backend",
+  "description": "HealthScan Node.js Express Backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

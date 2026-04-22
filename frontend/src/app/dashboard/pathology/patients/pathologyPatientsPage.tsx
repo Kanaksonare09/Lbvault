@@ -45,7 +45,7 @@ export default function PatientsPage() {
                 <Link
                     href="/dashboard/pathology/upload-report"
                     className="inline-flex items-center gap-2 text-[12.5px] font-semibold px-4 py-2.5 rounded-lg transition-colors"
-                    style={{ background: '#C8A84B', color: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}
+                    style={{ background: 'var(--primary)', color: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}
                 >
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -99,7 +99,7 @@ export default function PatientsPage() {
                                     <td colSpan={4} className="px-6 py-12 text-center">
                                         <div
                                             className="w-8 h-8 border-4 rounded-full animate-spin mx-auto"
-                                            style={{ borderColor: '#E8EDF2', borderTopColor: '#C8A84B' }}
+                                            style={{ borderColor: '#E8EDF2', borderTopColor: 'var(--primary)' }}
                                         />
                                     </td>
                                 </tr>
@@ -159,7 +159,7 @@ export default function PatientsPage() {
                                                 {patient.age ? (
                                                     <span
                                                         className="text-[10px] font-bold px-2 py-0.5 rounded"
-                                                        style={{ background: '#FEF3C7', color: '#92400E' }}
+                                                        style={{ background: 'var(--accent)', color: 'var(--primary)' }}
                                                     >
                                                         {patient.age} yrs
                                                     </span>
@@ -191,8 +191,8 @@ export default function PatientsPage() {
                                                 href={`/dashboard/pathology/upload-report?patientId=${patient._id}&name=${encodeURIComponent(patient.name)}`}
                                                 className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold px-3 py-1.5 rounded-lg transition-all"
                                                 style={{
-                                                    background: '#FEF3C7',
-                                                    color: '#92400E',
+                                                    background: 'var(--accent)',
+                                                    color: 'var(--primary)',
                                                     border: '1px solid #FDE68A',
                                                 }}
                                             >

@@ -45,7 +45,7 @@ function AlertBadge() {
         </svg>
       </div>
       <div>
-        <p style={{ fontSize: 10.5, fontWeight: 600, color: '#111827', lineHeight: 1.3 }}>High HbA1c Alert</p>
+        <p style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--foreground)', lineHeight: 1.3 }}>High HbA1c Alert</p>
         <p style={{ fontSize: 9, color: '#9CA3AF', lineHeight: 1.4, marginTop: 1 }}>Flagged · just now</p>
       </div>
     </motion.div>
@@ -92,7 +92,7 @@ function VerifiedBadge() {
         </svg>
       </div>
       <div>
-        <p style={{ fontSize: 10.5, fontWeight: 600, color: '#111827', lineHeight: 1.3 }}>Report Verified</p>
+        <p style={{ fontSize: 10.5, fontWeight: 600, color: 'var(--foreground)', lineHeight: 1.3 }}>Report Verified</p>
         <p style={{ fontSize: 9, color: '#9CA3AF', lineHeight: 1.4, marginTop: 1 }}>CBC · Dr. Mehta · 2m ago</p>
       </div>
     </motion.div>
@@ -132,9 +132,9 @@ function VitalsBadge() {
         Vitals
       </p>
       {[
-        { l: 'Blood Pressure', v: '118/76', c: '#3B82F6' },
+        { l: 'Blood Pressure', v: '118/76', c: 'var(--primary)' },
         { l: 'SpO₂', v: '98%', c: '#10B981' },
-        { l: 'Heart Rate', v: '72 bpm', c: '#F59E0B' },
+        { l: 'Heart Rate', v: '72 bpm', c: 'var(--primary)' },
       ].map((row) => (
         <div
           key={row.l}
@@ -145,7 +145,7 @@ function VitalsBadge() {
             marginBottom: 5,
           }}
         >
-          <span style={{ fontSize: 9, color: '#6B7280' }}>{row.l}</span>
+          <span style={{ fontSize: 9, color: 'var(--muted-foreground)' }}>{row.l}</span>
           <span style={{ fontSize: 9.5, fontWeight: 700, color: row.c }}>{row.v}</span>
         </div>
       ))}
@@ -160,7 +160,7 @@ function DashboardMock() {
       style={{
         width: '100%',
         height: '100%',
-        background: '#0D1117',
+        background: 'var(--foreground)',
         borderRadius: 14,
         overflow: 'hidden',
         padding: '16px',
@@ -178,18 +178,18 @@ function DashboardMock() {
               width: 18,
               height: 18,
               borderRadius: 5,
-              background: 'rgba(250,204,21,0.18)',
+              background: 'rgba(144, 161, 125, 0.1)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FACC15' }} />
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--secondary)' }} />
           </div>
-          <span style={{ fontSize: 9.5, color: '#6B7280', fontWeight: 500 }}>HealthScan Dashboard</span>
+          <span style={{ fontSize: 9.5, color: 'var(--muted-foreground)', fontWeight: 500 }}>HealthScan Dashboard</span>
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
-          {['#EF4444', '#F59E0B', '#10B981'].map((c) => (
+          {['#EF4444', 'var(--primary)', '#10B981'].map((c) => (
             <div key={c} style={{ width: 7, height: 7, borderRadius: '50%', background: c, opacity: 0.7 }} />
           ))}
         </div>
@@ -198,9 +198,9 @@ function DashboardMock() {
       {/* Stats row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
         {[
-          { label: 'Reports', val: '142', trend: '+12%', c: '#3B82F6' },
+          { label: 'Reports', val: '142', trend: '+12%', c: 'var(--primary)' },
           { label: 'Patients', val: '38', trend: '+5', c: '#10B981' },
-          { label: 'Alerts', val: '3', trend: '-2', c: '#F59E0B' },
+          { label: 'Alerts', val: '3', trend: '-2', c: 'var(--primary)' },
         ].map((s) => (
           <div
             key={s.label}
@@ -210,7 +210,7 @@ function DashboardMock() {
               padding: '8px 10px',
             }}
           >
-            <p style={{ fontSize: 8, color: '#6B7280', marginBottom: 3 }}>{s.label}</p>
+            <p style={{ fontSize: 8, color: 'var(--muted-foreground)', marginBottom: 3 }}>{s.label}</p>
             <p style={{ fontSize: 16, fontWeight: 700, color: '#F9FAFB', lineHeight: 1 }}>{s.val}</p>
             <p style={{ fontSize: 8, color: s.c, marginTop: 2 }}>{s.trend}</p>
           </div>
@@ -227,12 +227,12 @@ function DashboardMock() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <p style={{ fontSize: 8, color: '#6B7280' }}>Report Volume — Last 7 days</p>
+          <p style={{ fontSize: 8, color: 'var(--muted-foreground)' }}>Report Volume — Last 7 days</p>
           <span
             style={{
               fontSize: 7.5,
               fontWeight: 600,
-              color: '#3B82F6',
+              color: 'var(--primary)',
               background: 'rgba(59,130,246,0.1)',
               padding: '2px 6px',
               borderRadius: 20,
@@ -244,8 +244,8 @@ function DashboardMock() {
         <svg viewBox="0 0 220 56" style={{ width: '100%', height: 48 }} preserveAspectRatio="none">
           <defs>
             <linearGradient id="hg1" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.38" />
-              <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.38" />
+              <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
             </linearGradient>
           </defs>
           <path
@@ -255,7 +255,7 @@ function DashboardMock() {
           <path
             d="M0 48 C20 40 40 22 70 26 C100 30 130 14 160 16 C185 18 205 8 220 5"
             fill="none"
-            stroke="#3B82F6"
+            stroke="var(--primary)"
             strokeWidth="1.4"
             strokeLinecap="round"
           />
@@ -278,7 +278,7 @@ function DashboardMock() {
         </p>
         {[
           { name: 'CBC Report', lab: 'Apollo Diagnostics', status: 'Verified', c: '#10B981' },
-          { name: 'Lipid Profile', lab: 'Thyrocare', status: 'Pending', c: '#F59E0B' },
+          { name: 'Lipid Profile', lab: 'Thyrocare', status: 'Pending', c: 'var(--primary)' },
           { name: 'HbA1c Test', lab: 'SRL Labs', status: 'Alert', c: '#EF4444' },
         ].map((r) => (
           <div
@@ -295,7 +295,7 @@ function DashboardMock() {
           >
             <div>
               <p style={{ fontSize: 9, fontWeight: 600, color: '#F9FAFB' }}>{r.name}</p>
-              <p style={{ fontSize: 8, color: '#6B7280' }}>{r.lab}</p>
+              <p style={{ fontSize: 8, color: 'var(--muted-foreground)' }}>{r.lab}</p>
             </div>
             <span
               style={{
@@ -356,7 +356,7 @@ export default function Hero() {
           width: 560,
           height: 560,
           borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(250,204,21,0.09) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(144, 161, 125, 0.1) 0%, transparent 70%)',
           pointerEvents: 'none',
         }}
       />
@@ -403,8 +403,8 @@ export default function Hero() {
               gap: 6,
               padding: '5px 11px',
               borderRadius: 20,
-              background: '#FFFBEB',
-              border: '1px solid #FDE68A',
+              background: 'var(--accent-soft)',
+              border: '1px solid var(--border)',
               marginBottom: 22,
               alignSelf: 'flex-start',
             }}
@@ -414,7 +414,7 @@ export default function Hero() {
                 width: 6,
                 height: 6,
                 borderRadius: '50%',
-                background: '#F59E0B',
+                background: 'var(--primary)',
                 display: 'inline-block',
                 animation: 'pulse 2s ease-in-out infinite',
               }}
@@ -423,7 +423,7 @@ export default function Hero() {
               style={{
                 fontSize: 11,
                 fontWeight: 600,
-                color: '#B45309',
+                color: 'var(--primary)',
                 letterSpacing: '0.04em',
               }}
             >
@@ -436,7 +436,7 @@ export default function Hero() {
             style={{
               fontSize: 'clamp(32px, 4vw, 48px)',
               fontWeight: 800,
-              color: '#111827',
+              color: 'var(--foreground)',
               lineHeight: 1.1,
               letterSpacing: '-0.03em',
               marginBottom: 18,
@@ -447,7 +447,7 @@ export default function Hero() {
             <br />
             <span
               style={{
-                backgroundImage: 'linear-gradient(135deg, #D97706 0%, #F59E0B 60%, #FBBF24 100%)',
+                backgroundImage: 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 60%, #5C7C7C 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
@@ -461,7 +461,7 @@ export default function Hero() {
           <p
             style={{
               fontSize: 15,
-              color: '#6B7280',
+              color: 'var(--muted-foreground)',
               lineHeight: 1.65,
               maxWidth: 420,
               marginBottom: 32,
@@ -486,7 +486,7 @@ export default function Hero() {
                   fontWeight: 700,
                   fontSize: 13.5,
                   color: '#1C1917',
-                  background: 'linear-gradient(145deg, #FACC15 0%, #F59E0B 100%)',
+                  background: 'linear-gradient(145deg, var(--secondary) 0%, var(--primary) 100%)',
                   boxShadow: '0 4px 18px rgba(245,158,11,0.32)',
                   textDecoration: 'none',
                   letterSpacing: '-0.1px',
@@ -537,9 +537,9 @@ export default function Hero() {
                 </div>
               ))}
             </div>
-            <p style={{ fontSize: 12.5, color: '#6B7280', fontWeight: 500 }}>
+            <p style={{ fontSize: 12.5, color: 'var(--muted-foreground)', fontWeight: 500 }}>
               Trusted by{' '}
-              <span style={{ fontWeight: 700, color: '#111827' }}>10,000+</span>{' '}
+              <span style={{ fontWeight: 700, color: 'var(--foreground)' }}>10,000+</span>{' '}
               medical practitioners
             </p>
           </div>
@@ -564,7 +564,7 @@ export default function Hero() {
               width: 320,
               height: 320,
               borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(250,204,21,0.14) 0%, transparent 70%)',
+              background: 'radial-gradient(circle, rgba(144, 161, 125, 0.14) 0%, transparent 70%)',
               pointerEvents: 'none',
               zIndex: 0,
             }}

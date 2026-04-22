@@ -15,14 +15,14 @@ function ClinicalIllustration() {
       {/* Dark base card */}
       <div
         className="absolute inset-0 rounded-[16px] overflow-hidden"
-        style={{ background: '#100804' }}
+        style={{ background: 'var(--sidebar)' }}
       >
         {/* Warm radial glow */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              'radial-gradient(ellipse 60% 55% at 52% 52%, rgba(185,100,8,0.55) 0%, rgba(140,60,5,0.22) 50%, transparent 72%)',
+              'radial-gradient(ellipse 60% 55% at 52% 52%, rgba(75,96,67,0.55) 0%, rgba(45,54,42,0.22) 50%, transparent 72%)',
           }}
         />
         {/* Secondary cool glow top-right */}
@@ -54,7 +54,7 @@ function ClinicalIllustration() {
             <line
               key={i}
               x1={x1} y1={y1} x2={x2} y2={y2}
-              stroke="rgba(210,150,60,0.25)"
+              stroke="rgba(144,161,125,0.25)"
               strokeWidth="0.8"
             />
           ))}
@@ -67,7 +67,7 @@ function ClinicalIllustration() {
             width: 64, height: 64,
             top: '50%', left: '50%',
             transform: 'translate(-50%, -50%)',
-            background: 'radial-gradient(circle at 36% 32%, #d4860a 0%, #8a4502 55%, #3a1800 100%)',
+            background: 'radial-gradient(circle at 36% 32%, var(--secondary) 0%, #4B6043 55%, #1F2B1A 100%)',
             boxShadow: '0 0 32px rgba(200,120,10,0.65), 0 0 8px rgba(200,120,10,0.3) inset',
           }}
         />
@@ -91,7 +91,7 @@ function ClinicalIllustration() {
           { x: 62, y: 180, r: 13, g: 'radial-gradient(circle at 35% 30%, #c07a07, #5a2c02)' },
           { x: 32, y: 110, r: 9, g: 'radial-gradient(circle at 35% 30%, #a06004, #3e1c01)' },
           { x: 168, y: 36, r: 8, g: 'radial-gradient(circle at 35% 30%, #b86c06, #4a2001)' },
-          { x: 110, y: 32, r: 6, g: 'radial-gradient(circle at 35% 30%, #906004, #3a1800)' },
+          { x: 110, y: 32, r: 6, g: 'radial-gradient(circle at 35% 30%, #906004, #1F2B1A)' },
           { x: 88, y: 175, r: 7, g: 'radial-gradient(circle at 35% 30%, #a06804, #3e1c01)' },
         ].map((s, i) => (
           <div
@@ -125,7 +125,7 @@ function ClinicalIllustration() {
           className="flex items-center justify-center rounded-full flex-shrink-0"
           style={{
             width: 22, height: 22,
-            background: 'linear-gradient(135deg, #C97B06, #F59E0B)',
+            background: 'linear-gradient(135deg, #C97B06, var(--primary))',
           }}
         >
           <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
@@ -138,7 +138,7 @@ function ClinicalIllustration() {
         <span
           style={{
             fontSize: 11, fontWeight: 700, letterSpacing: '0.12em',
-            color: '#1a1f2e', textTransform: 'uppercase',
+            color: 'var(--foreground)', textTransform: 'uppercase',
           }}
         >
           Verified
@@ -205,7 +205,7 @@ export default function LoginPage() {
         className="hidden lg:flex flex-col justify-between flex-shrink-0"
         style={{
           width: 468,
-          background: '#EDE8A2',
+          background: 'var(--accent)',
           padding: '40px 40px 36px',
           position: 'relative',
           overflow: 'hidden',
@@ -256,7 +256,7 @@ export default function LoginPage() {
             Secure Access
             <br />
             to Your{' '}
-            <span style={{ color: '#2563EB' }}>
+            <span style={{ color: 'var(--primary)' }}>
               Clinical
               <br />
               Sanctuary.
@@ -275,7 +275,7 @@ export default function LoginPage() {
             style={{
               fontSize: 12.5,
               lineHeight: 1.62,
-              color: '#2563EB',
+              color: 'var(--primary)',
               maxWidth: 300,
               marginBottom: 14,
             }}
@@ -288,7 +288,7 @@ export default function LoginPage() {
               fontSize: 10,
               fontWeight: 600,
               letterSpacing: '0.12em',
-              color: '#2563EB',
+              color: 'var(--primary)',
               textTransform: 'uppercase',
               opacity: 0.75,
             }}
@@ -318,7 +318,7 @@ export default function LoginPage() {
                 style={{
                   fontSize: 32,
                   fontWeight: 800,
-                  color: '#0D1117',
+                  color: 'var(--foreground)',
                   letterSpacing: '-0.03em',
                   lineHeight: 1.1,
                   marginBottom: 8,
@@ -326,7 +326,7 @@ export default function LoginPage() {
               >
                 Welcome Back
               </h2>
-              <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.5 }}>
+              <p style={{ fontSize: 14, color: 'var(--muted-foreground)', lineHeight: 1.5 }}>
                 Please enter your clinical credentials to continue.
               </p>
             </motion.div>
@@ -388,13 +388,13 @@ export default function LoginPage() {
                     borderRadius: 14,
                     padding: '13px 16px',
                     fontSize: 14,
-                    color: '#0D1117',
+                    color: 'var(--foreground)',
                     outline: 'none',
                     transition: 'border-color 0.18s, box-shadow 0.18s',
                     boxSizing: 'border-box',
                   }}
                   onFocus={(e) => {
-                    e.target.style.borderColor = '#2563EB';
+                    e.target.style.borderColor = 'var(--primary)';
                     e.target.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.10)';
                     e.target.style.background = '#ffffff';
                   }}
@@ -420,7 +420,7 @@ export default function LoginPage() {
                   </label>
                   <Link
                     href="#"
-                    style={{ fontSize: 12.5, fontWeight: 600, color: '#2563EB', textDecoration: 'none' }}
+                    style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--primary)', textDecoration: 'none' }}
                   >
                     Forgot password?
                   </Link>
@@ -441,13 +441,13 @@ export default function LoginPage() {
                       borderRadius: 14,
                       padding: '13px 44px 13px 16px',
                       fontSize: 14,
-                      color: '#0D1117',
+                      color: 'var(--foreground)',
                       outline: 'none',
                       transition: 'border-color 0.18s, box-shadow 0.18s',
                       boxSizing: 'border-box',
                     }}
                     onFocus={(e) => {
-                      e.target.style.borderColor = '#2563EB';
+                      e.target.style.borderColor = 'var(--primary)';
                       e.target.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.10)';
                       e.target.style.background = '#ffffff';
                     }}
@@ -493,8 +493,8 @@ export default function LoginPage() {
                   onClick={() => setRememberMe(!rememberMe)}
                   style={{
                     width: 18, height: 18, borderRadius: '50%',
-                    border: `2px solid ${rememberMe ? '#2563EB' : '#D1D5DB'}`,
-                    background: rememberMe ? '#2563EB' : 'transparent',
+                    border: `2px solid ${rememberMe ? 'var(--primary)' : '#D1D5DB'}`,
+                    background: rememberMe ? 'var(--primary)' : 'transparent',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     flexShrink: 0, cursor: 'pointer', transition: 'all 0.15s',
                   }}
@@ -517,7 +517,7 @@ export default function LoginPage() {
                 style={{
                   width: '100%',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  background: '#2563EB',
+                  background: 'var(--primary)',
                   border: 'none', borderRadius: 14,
                   padding: '14px 0',
                   fontSize: 15,
@@ -578,7 +578,7 @@ export default function LoginPage() {
                   background: '#F5F6FA',
                   border: '1px solid #E5E7EB',
                   borderRadius: 12, padding: '11px 0',
-                  fontSize: 13.5, fontWeight: 600, color: '#0D1117',
+                  fontSize: 13.5, fontWeight: 600, color: 'var(--foreground)',
                   cursor: 'pointer',
                   boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                   transition: 'box-shadow 0.18s',
@@ -599,14 +599,14 @@ export default function LoginPage() {
               style={{
                 textAlign: 'center',
                 fontSize: 13,
-                color: '#6B7280',
+                color: 'var(--muted-foreground)',
                 marginTop: 24,
               }}
             >
               Not a member of the clinic yet?{' '}
               <Link
                 href="/signup"
-                style={{ fontWeight: 700, color: '#2563EB', textDecoration: 'none' }}
+                style={{ fontWeight: 700, color: 'var(--primary)', textDecoration: 'none' }}
               >
                 Request Access
               </Link>

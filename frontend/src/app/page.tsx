@@ -8,18 +8,18 @@ import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 ───────────────────────────────────────────── */
 function HeroDashboard() {
   return (
-    <div className="w-full h-full bg-[#0D1117] flex flex-col gap-2.5 p-3.5">
+    <div className="w-full h-full bg-[var(--foreground)] flex flex-col gap-2.5 p-3.5">
       {/* Top bar */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <div className="w-3.5 h-3.5 rounded bg-yellow-400/20 flex items-center justify-center">
             <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
           </div>
-          <span className="text-[8.5px] text-gray-500 font-medium">LabVault Dashboard</span>
+          <span className="text-[8.5px] text-gray-500 font-medium">HealthScan Dashboard</span>
         </div>
         <div className="flex gap-1">
           <div className="w-2 h-2 rounded-full bg-red-500/60" />
-          <div className="w-2 h-2 rounded-full bg-yellow-500/60" />
+          <div className="w-2 h-2 rounded-full bg-[var(--accent-soft)]0/60" />
           <div className="w-2 h-2 rounded-full bg-green-500/60" />
         </div>
       </div>
@@ -45,12 +45,12 @@ function HeroDashboard() {
         <svg viewBox="0 0 210 52" className="w-full h-10" preserveAspectRatio="none">
           <defs>
             <linearGradient id="hg" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.38" />
-              <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+              <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.38" />
+              <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
             </linearGradient>
           </defs>
           <path d="M0 46 C28 38 55 20 85 24 C115 28 145 12 178 14 C192 15 203 8 210 5 L210 52 L0 52Z" fill="url(#hg)" />
-          <path d="M0 46 C28 38 55 20 85 24 C115 28 145 12 178 14 C192 15 203 8 210 5" fill="none" stroke="#3B82F6" strokeWidth="1.5" strokeLinecap="round" />
+          <path d="M0 46 C28 38 55 20 85 24 C115 28 145 12 178 14 C192 15 203 8 210 5" fill="none" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </div>
 
@@ -112,8 +112,8 @@ function CommandDashboard() {
           <svg viewBox="0 0 240 68" className="w-full flex-1" preserveAspectRatio="none">
             <defs>
               <linearGradient id="cg1" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+                <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
               </linearGradient>
               <linearGradient id="cg2" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#10B981" stopOpacity="0.2" />
@@ -121,7 +121,7 @@ function CommandDashboard() {
               </linearGradient>
             </defs>
             <path d="M0 56 C30 46 60 26 90 30 C120 34 152 16 185 18 C210 20 230 10 240 7 L240 68 L0 68Z" fill="url(#cg1)" />
-            <path d="M0 56 C30 46 60 26 90 30 C120 34 152 16 185 18 C210 20 230 10 240 7" fill="none" stroke="#3B82F6" strokeWidth="1.4" strokeLinecap="round" />
+            <path d="M0 56 C30 46 60 26 90 30 C120 34 152 16 185 18 C210 20 230 10 240 7" fill="none" stroke="var(--primary)" strokeWidth="1.4" strokeLinecap="round" />
             <path d="M0 64 C30 60 60 54 90 52 C120 50 152 42 185 38 C210 34 230 26 240 22 L240 68 L0 68Z" fill="url(#cg2)" />
             <path d="M0 64 C30 60 60 54 90 52 C120 50 152 42 185 38 C210 34 230 26 240 22" fill="none" stroke="#10B981" strokeWidth="1.3" strokeLinecap="round" />
           </svg>
@@ -185,7 +185,7 @@ function Navbar() {
               <path d="M5 1L9 5L5 9L1 5L5 1Z" fill="white" />
             </svg>
           </div>
-          <span className="text-[17px] font-bold text-gray-900 tracking-tight">LabVault</span>
+          <span className="text-[17px] font-bold text-gray-900 tracking-tight">HealthScan</span>
         </Link>
 
         <div className="flex items-center gap-5">
@@ -194,7 +194,7 @@ function Navbar() {
           </Link>
           <Link
             href="/signup"
-            className="text-[13px] font-semibold bg-[#111827] text-white px-5 py-2.5 rounded-[8px] hover:bg-gray-800 transition-colors"
+            className="text-[13px] font-semibold bg-[var(--foreground)] text-white px-5 py-2.5 rounded-[8px] hover:bg-gray-800 transition-colors"
           >
             Sign Up
           </Link>
@@ -226,8 +226,8 @@ function Hero() {
   return (
     <section className="relative bg-white overflow-hidden min-h-[88vh] flex items-center">
       {/* Bg glows */}
-      <div className="absolute top-0 right-0 w-[520px] h-[520px] rounded-full bg-amber-50/70 blur-3xl -translate-y-1/3 translate-x-1/4 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[320px] h-[320px] rounded-full bg-blue-50/50 blur-3xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[520px] h-[520px] rounded-full bg-[var(--accent-soft)]/70 blur-3xl -translate-y-1/3 translate-x-1/4 pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[320px] h-[320px] rounded-full bg-[var(--accent-soft)]/50 blur-3xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
 
       <div className="relative max-w-[1100px] mx-auto px-6 w-full py-16 grid lg:grid-cols-[1fr_1.1fr] gap-12 items-center">
 
@@ -248,7 +248,7 @@ function Hero() {
           </h1>
 
           <p className="text-[14.5px] text-gray-500 leading-[1.65] max-w-[400px] mb-8">
-            LabVault connects your medical records with clinical precision.
+            HealthScan connects your medical records with clinical precision.
             Experience the security of modern healthcare management for
             patients and professionals.
           </p>
@@ -377,19 +377,19 @@ function Features() {
           <path d="M11 8v6M8.5 10.5l2.5-2.5 2.5 2.5" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       ),
-      iconBg: 'bg-amber-50',
+      iconBg: 'bg-[var(--accent-soft)]',
       title: 'Upload Report',
       desc: 'Drag-and-drop any format — PDF, JPEG, DICOM. Instant OCR extraction with zero data loss and automatic structuring.',
     },
     {
       icon: (
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <circle cx="11" cy="11" r="7.5" stroke="#2563EB" strokeWidth="1.7" />
-          <path d="M8 11c0-1.657 1.343-3 3-3s3 1.343 3 3-1.343 3-3 3" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" />
-          <circle cx="11" cy="11" r="1.3" fill="#2563EB" />
+          <circle cx="11" cy="11" r="7.5" stroke="var(--primary)" strokeWidth="1.7" />
+          <path d="M8 11c0-1.657 1.343-3 3-3s3 1.343 3 3-1.343 3-3 3" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" />
+          <circle cx="11" cy="11" r="1.3" fill="var(--primary)" />
         </svg>
       ),
-      iconBg: 'bg-blue-50',
+      iconBg: 'bg-[var(--accent-soft)]',
       title: 'AI Analysis',
       desc: 'Your AI co-pilot scans biomarkers and highlights anomalies you need to know — in plain language you can understand.',
     },
@@ -400,7 +400,7 @@ function Features() {
           <path d="M5 19c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#B45309" strokeWidth="1.7" strokeLinecap="round" />
         </svg>
       ),
-      iconBg: 'bg-yellow-50',
+      iconBg: 'bg-[var(--accent-soft)]',
       title: 'Doctor Insights',
       desc: 'Securely connect reports with your care team. Doctors get context-rich views and can annotate findings in real time.',
     },
@@ -417,7 +417,7 @@ function Features() {
           transition={{ duration: 0.45 }}
           className="text-center mb-12"
         >
-          <p className="text-[11px] font-semibold text-amber-600 uppercase tracking-[0.1em] mb-3">
+          <p className="text-[11px] font-semibold text-[var(--primary)] uppercase tracking-[0.1em] mb-3">
             Seamless Medical Intelligence
           </p>
           <h2 className="text-[30px] font-extrabold text-gray-900 tracking-[-0.025em] leading-tight mb-3">
@@ -471,7 +471,7 @@ function CommandCenter() {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
             whileHover={{ y: -3 }}
-            className="bg-[#0D1117] rounded-2xl p-6 flex flex-col gap-5 min-h-[400px] shadow-2xl transition-transform"
+            className="bg-[var(--foreground)] rounded-2xl p-6 flex flex-col gap-5 min-h-[400px] shadow-2xl transition-transform"
           >
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -542,12 +542,12 @@ function CommandCenter() {
               viewport={{ once: true }}
               transition={{ delay: 0.18, duration: 0.4 }}
               whileHover={{ y: -3 }}
-              className="flex-1 bg-amber-50 rounded-2xl p-5 flex flex-col gap-4 border border-amber-100 shadow-sm transition-transform"
+              className="flex-1 bg-[var(--accent-soft)] rounded-2xl p-5 flex flex-col gap-4 border border-[var(--border)] shadow-sm transition-transform"
             >
               <div className="w-10 h-10 rounded-[10px] bg-white flex items-center justify-center shadow-sm">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <rect x="2" y="5" width="16" height="10" rx="2" stroke="#2563EB" strokeWidth="1.6" />
-                  <path d="M6 10.5h1.5M9.5 10.5H13M6 13h3" stroke="#2563EB" strokeWidth="1.3" strokeLinecap="round" />
+                  <rect x="2" y="5" width="16" height="10" rx="2" stroke="var(--primary)" strokeWidth="1.6" />
+                  <path d="M6 10.5h1.5M9.5 10.5H13M6 13h3" stroke="var(--primary)" strokeWidth="1.3" strokeLinecap="round" />
                 </svg>
               </div>
               <div>
@@ -558,7 +558,7 @@ function CommandCenter() {
               </div>
               <div className="mt-auto grid grid-cols-3 gap-1.5">
                 {['Apollo', 'SRL', 'Labs+'].map((lab) => (
-                  <div key={lab} className="text-center py-1.5 rounded-[7px] bg-white border border-amber-100 text-[10px] font-semibold text-gray-600">
+                  <div key={lab} className="text-center py-1.5 rounded-[7px] bg-white border border-[var(--border)] text-[10px] font-semibold text-gray-600">
                     {lab}
                   </div>
                 ))}
@@ -584,9 +584,9 @@ function Ecosystem() {
           <path d="M4 18c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="#D97706" strokeWidth="1.6" strokeLinecap="round" />
         </svg>
       ),
-      iconBg: 'bg-amber-50',
+      iconBg: 'bg-[var(--accent-soft)]',
       points: ['Instant access to all lab reports', 'Secure sharing with doctors', 'Health trend visualizations', 'AI plain-language insights'],
-      tickClr: '#D97706', tickBg: '#FEF3C7',
+      tickClr: '#D97706', tickBg: 'var(--accent)',
       cta: 'Start Your Access',
       ctaCls: 'border border-gray-200 text-gray-700 hover:border-gray-300 bg-white',
       href: '/signup',
@@ -596,15 +596,15 @@ function Ecosystem() {
       eyebrow: 'Insights for doctors',
       icon: (
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <rect x="3" y="4" width="14" height="12" rx="2" stroke="#2563EB" strokeWidth="1.6" />
-          <path d="M6.5 9.5h7M6.5 12.5h5" stroke="#2563EB" strokeWidth="1.4" strokeLinecap="round" />
+          <rect x="3" y="4" width="14" height="12" rx="2" stroke="var(--primary)" strokeWidth="1.6" />
+          <path d="M6.5 9.5h7M6.5 12.5h5" stroke="var(--primary)" strokeWidth="1.4" strokeLinecap="round" />
         </svg>
       ),
-      iconBg: 'bg-blue-50',
+      iconBg: 'bg-[var(--accent-soft)]',
       points: ['Instant lab result notifications', 'Full patient history at a glance', 'Annotate & share reports', 'HIPAA-compliant data access'],
-      tickClr: '#2563EB', tickBg: '#DBEAFE',
+      tickClr: 'var(--primary)', tickBg: '#DBEAFE',
       cta: 'Clinician Demo',
-      ctaCls: 'bg-blue-600 text-white hover:bg-blue-700 shadow-lg shadow-blue-100',
+      ctaCls: 'bg-[var(--primary)] text-white hover:bg-blue-700 shadow-lg shadow-blue-100',
       href: '/signup?role=doctor',
       featured: true,
     },
@@ -643,7 +643,7 @@ function Ecosystem() {
             Built for every stakeholder
           </h2>
           <p className="text-[14px] text-gray-500 max-w-sm mx-auto leading-relaxed">
-            Whether you're a patient, clinician, or laboratory — LabVault fits your workflow seamlessly.
+            Whether you're a patient, clinician, or laboratory — HealthScan fits your workflow seamlessly.
           </p>
         </motion.div>
 
@@ -745,9 +745,9 @@ function Security() {
                 bg: 'bg-emerald-50', border: 'border-emerald-100',
               },
               {
-                icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3.5" fill="#DBEAFE" /><rect x="2" y="2" width="14" height="14" rx="3.5" stroke="#2563EB" strokeWidth="1.3" /><path d="M5.5 9l2 2 3.5-3.2" stroke="#2563EB" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></svg>,
+                icon: <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="2" y="2" width="14" height="14" rx="3.5" fill="#DBEAFE" /><rect x="2" y="2" width="14" height="14" rx="3.5" stroke="var(--primary)" strokeWidth="1.3" /><path d="M5.5 9l2 2 3.5-3.2" stroke="var(--primary)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></svg>,
                 label: 'SOC 2 Type II', sub: 'Independent audit verified annually',
-                bg: 'bg-blue-50', border: 'border-blue-100',
+                bg: 'bg-[var(--accent-soft)]', border: 'border-blue-100',
               },
             ].map((b) => (
               <div
@@ -804,14 +804,14 @@ function Security() {
                 Zero-Knowledge Vault
               </h4>
               <p className="text-[13.5px] text-gray-500 leading-relaxed mb-7">
-                No one — not even LabVault engineers — can see your raw lab data. True cryptographic privacy with patient-held decryption keys.
+                No one — not even HealthScan engineers — can see your raw lab data. True cryptographic privacy with patient-held decryption keys.
               </p>
 
               <div className="space-y-4">
                 {[
                   { label: 'Encryption layer', pct: 100, color: '#10B981' },
-                  { label: 'Access control', pct: 100, color: '#3B82F6' },
-                  { label: 'Audit coverage', pct: 98, color: '#F59E0B' },
+                  { label: 'Access control', pct: 100, color: 'var(--primary)' },
+                  { label: 'Audit coverage', pct: 98, color: 'var(--primary)' },
                 ].map((r) => (
                   <div key={r.label}>
                     <div className="flex justify-between items-center mb-1.5">
@@ -845,12 +845,12 @@ function Security() {
 function Testimonials() {
   const items = [
     {
-      quote: '"LabVault changed how I manage my chronic condition. It saves me 3 trips to the clinic every year. My doctor can review my CBC results as soon as they\'re uploaded — auto-flagged anomalies are a lifesaver."',
+      quote: '"HealthScan changed how I manage my chronic condition. It saves me 3 trips to the clinic every year. My doctor can review my CBC results as soon as they\'re uploaded — auto-flagged anomalies are a lifesaver."',
       name: 'Shruti Venkatesan', role: 'Patient · Type 2 Diabetes',
-      initials: 'SV', from: '#93C5FD', to: '#3B82F6',
+      initials: 'SV', from: '#93C5FD', to: 'var(--primary)',
     },
     {
-      quote: '"As a physician, the clarity LabVault brings to patient history is remarkable. I spend less time chasing documents and more time making clinical decisions grounded in complete, real-time data."',
+      quote: '"As a physician, the clarity HealthScan brings to patient history is remarkable. I spend less time chasing documents and more time making clinical decisions grounded in complete, real-time data."',
       name: 'Dr. Eira Rodrigues', role: 'Internal Medicine Physician',
       initials: 'ER', from: '#C4B5FD', to: '#7C3AED',
     },
@@ -888,7 +888,7 @@ function Testimonials() {
               {/* Stars */}
               <div className="flex gap-1">
                 {[...Array(5)].map((_, si) => (
-                  <svg key={si} width="13" height="13" viewBox="0 0 13 13" fill="#F59E0B">
+                  <svg key={si} width="13" height="13" viewBox="0 0 13 13" fill="var(--primary)">
                     <path d="M6.5 1l1.4 2.8L11 4.3 8.8 6.5l.5 3.1L6.5 8.3 3.7 9.6l.5-3.1L2 4.3l3.1-.5L6.5 1Z" />
                   </svg>
                 ))}
@@ -937,7 +937,7 @@ function Footer() {
                 <path d="M5 1L9 5L5 9L1 5L5 1Z" fill="white" />
               </svg>
             </div>
-            <span className="text-[14px] font-bold text-gray-900 tracking-tight">LabVault</span>
+            <span className="text-[14px] font-bold text-gray-900 tracking-tight">HealthScan</span>
           </Link>
           <p className="text-[13px] text-gray-500 leading-relaxed max-w-[190px]">
             Secure, connected healthcare data management for the modern world.
@@ -967,7 +967,7 @@ function Footer() {
       <div className="border-t border-gray-100">
         <div className="max-w-[1100px] mx-auto px-6 py-4 flex items-center justify-between">
           <p className="text-[12px] text-gray-400">
-            &copy; {new Date().getFullYear()} LabVault Digital Health. All rights reserved.
+            &copy; {new Date().getFullYear()} HealthScan Digital Health. All rights reserved.
           </p>
           <div className="flex gap-5">
             {['Privacy', 'Terms', 'HIPAA'].map((l) => (

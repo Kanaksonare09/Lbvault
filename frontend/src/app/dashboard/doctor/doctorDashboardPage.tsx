@@ -9,20 +9,20 @@ import api from '@/services/api';
 import DoctorPatientChat from '@/components/doctor/DoctorPatientChat';
 import VoiceSummaryButton from '@/components/patient/VoiceSummaryButton';
 
-// ─── LabVault Design Tokens — exact match to login page ─────────────────────
-// Login page uses: bg=#F6F7F5, btn=#2B59FF (--primary), text=#1F2933,
-// accent/links=#4F6F6F, subtext=#6B7280, borders=#E2E8F0
+// ─── HealthScan Design Tokens — exact match to login page ─────────────────────
+// Login page uses: bg=var(--background), btn=var(--primary) (--primary), text=var(--foreground),
+// accent/links=var(--primary), subtext=var(--muted-foreground), borders=var(--border)
 const CLR = {
-  primary:    '#2B59FF',               // vivid blue
-  primaryHov: '#1a3ecc',
-  sage:       '#C8A84B',               // amber — replaces sage-green
-  sageBg:     'rgba(200,168,75,0.08)', // soft amber tint
-  secondary:  '#FCEEA5',               // light amber
-  bg:         '#F6F7F5',
+  primary:    'var(--primary)',
+  primaryHov: '#3B4D36',
+  sage:       'var(--primary)',
+  sageBg:     'rgba(144, 161, 125, 0.1)',
+  secondary:  'var(--secondary)',
+  bg:         'var(--background)',
   card:       '#FFFFFF',
-  border:     '#E2E8F0',
-  dark:       '#1F2933',
-  muted:      '#6B7280',
+  border:     'var(--border)',
+  dark:       'var(--foreground)',
+  muted:      'var(--muted-foreground)',
   mutedLight: '#94A3B8',
 };
 
@@ -82,7 +82,7 @@ function computeRisk(r: EnrichedReport | null) {
 function RiskBadge({ score }: { score: string }) {
   const m: Record<string, { lbl: string; style: React.CSSProperties }> = {
     Low:      { lbl: '✓ Low Risk',    style: { background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE' } },
-    Medium:   { lbl: '⚠ Medium Risk', style: { background: '#FFFBEB', color: '#92400E', border: '1px solid #FDE68A' } },
+    Medium:   { lbl: '⚠ Medium Risk', style: { background: 'var(--accent-soft)', color: 'var(--primary)', border: '1px solid #FDE68A' } },
     High:     { lbl: '↑ High Risk',   style: { background: '#FFF5F5', color: '#C53030', border: '1px solid #FED7D7' } },
     Critical: { lbl: '! Critical',    style: { background: '#FFF5F5', color: '#9B1C1C', border: '1px solid #FC8181' } },
   };
@@ -96,16 +96,16 @@ function RiskBadge({ score }: { score: string }) {
 
 function StatusBadge({ b }: { b: Biomarker }) {
   if (b.severity === 'Critical') return <span style={{ background: '#FFF5F5', color: '#9B1C1C', border: '1px solid #FC8181', fontSize: 10, fontWeight: 800, padding: '2px 10px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: '#E53E3E', display: 'inline-block', animation: 'pulse 2s infinite' }}/>Critical</span>;
-  if (!b.isAbnormal)             return <span style={{ background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', fontSize: 10, fontWeight: 800, padding: '2px 10px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: '#2563EB', display: 'inline-block' }}/>Normal</span>;
+  if (!b.isAbnormal)             return <span style={{ background: '#EFF6FF', color: '#1D4ED8', border: '1px solid #BFDBFE', fontSize: 10, fontWeight: 800, padding: '2px 10px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: 'var(--primary)', display: 'inline-block' }}/>Normal</span>;
   if (b.value > b.referenceMax)  return <span style={{ background: '#FFF5F5', color: '#C53030', border: '1px solid #FED7D7', fontSize: 10, fontWeight: 800, padding: '2px 10px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: '#FC8181', display: 'inline-block' }}/>High</span>;
-  return <span style={{ background: '#FFFBEB', color: '#92400E', border: '1px solid #FDE68A', fontSize: 10, fontWeight: 800, padding: '2px 10px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: '#D69E2E', display: 'inline-block' }}/>Low</span>;
+  return <span style={{ background: 'var(--accent-soft)', color: 'var(--primary)', border: '1px solid #FDE68A', fontSize: 10, fontWeight: 800, padding: '2px 10px', borderRadius: 99, display: 'inline-flex', alignItems: 'center', gap: 4 }}><span style={{ width: 6, height: 6, borderRadius: 99, background: '#D69E2E', display: 'inline-block' }}/>Low</span>;
 }
 
 function TrendArrow({ b }: { b: Biomarker }) {
   const dir = b.comparison?.trendDirection ?? (b.trend === 'Increasing' ? 'up' : b.trend === 'Decreasing' ? 'down' : 'stable');
   const imp = b.comparison?.improvementStatus ?? 'neutral';
-  if (dir === 'up')   return <span style={{ color: imp === 'improving' ? '#2563EB' : '#E53E3E', fontWeight: 800, fontSize: 16 }}>↑</span>;
-  if (dir === 'down') return <span style={{ color: imp === 'improving' ? '#2563EB' : '#D69E2E', fontWeight: 800, fontSize: 16 }}>↓</span>;
+  if (dir === 'up')   return <span style={{ color: imp === 'improving' ? 'var(--primary)' : '#E53E3E', fontWeight: 800, fontSize: 16 }}>↑</span>;
+  if (dir === 'down') return <span style={{ color: imp === 'improving' ? 'var(--primary)' : '#D69E2E', fontWeight: 800, fontSize: 16 }}>↓</span>;
   return <span style={{ color: CLR.mutedLight, fontWeight: 800, fontSize: 16 }}>→</span>;
 }
 
@@ -184,7 +184,7 @@ export default function DoctorDashboard() {
   const doctorName  = user?.name?.split(' ').pop() ?? 'Doctor';
 
   const Spinner = () => (
-    <div className="w-8 h-8 rounded-full border-4 animate-spin" style={{ borderColor: '#FCEEA5', borderTopColor: '#C8A84B' }} />
+    <div className="w-8 h-8 rounded-full border-4 animate-spin" style={{ borderColor: 'var(--accent)', borderTopColor: 'var(--primary)' }} />
   );
 
   // ─── RENDER ──────────────────────────────────────────────────────────────
@@ -199,7 +199,7 @@ export default function DoctorDashboard() {
             <span className="ml-2 text-[10px] font-black px-2 py-0.5 rounded-lg uppercase tracking-wider"
               style={{ background: CLR.primary, color: '#fff' }}>VERIFIED</span>
           </h1>
-          <p className="text-[11px] mt-0.5" style={{ color: CLR.muted }}>LabVault Clinical Command Center</p>
+          <p className="text-[11px] mt-0.5" style={{ color: CLR.muted }}>HealthScan Clinical Command Center</p>
         </div>
         <div className="flex items-center gap-3">
           {selectedPt && (
@@ -278,7 +278,7 @@ export default function DoctorDashboard() {
         <div className="flex-1 flex flex-col overflow-hidden">
           {!selectedPt ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center gap-3">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center border border-[#E2E8F0]"
+              <div className="w-20 h-20 rounded-full flex items-center justify-center border border-[var(--border)]"
                 style={{ background: CLR.sageBg }}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={CLR.primary} strokeWidth="2">
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
@@ -381,7 +381,7 @@ export default function DoctorDashboard() {
                             <span className="text-[10px] font-black text-red-700 bg-red-50 border border-red-100 px-2 py-1 rounded-full shrink-0">{critCount} critical</span>
                           )}
                           {abnCount > 0 && critCount === 0 && (
-                            <span className="text-[10px] font-bold bg-amber-50 border border-amber-100 px-2 py-1 rounded-full shrink-0" style={{ color: '#92400E' }}>{abnCount} abnormal</span>
+                            <span className="text-[10px] font-bold bg-[var(--accent-soft)] border border-[var(--border)] px-2 py-1 rounded-full shrink-0" style={{ color: 'var(--primary)' }}>{abnCount} abnormal</span>
                           )}
                           {r.fileUrl && (
                             <a href={`${apiBase}${r.fileUrl}`} target="_blank" rel="noopener noreferrer"
@@ -429,7 +429,7 @@ export default function DoctorDashboard() {
                     <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: `1px solid ${CLR.border}` }}>
                       <h3 className="text-sm font-black" style={{ color: CLR.dark }}>🧪 Biomarker Analysis</h3>
                       <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-widest">
-                        {[['#2563EB','Normal'],['#D69E2E','Low'],['#FC8181','High'],['#E53E3E','Critical']].map(([c,l]) => (
+                        {[['var(--primary)','Normal'],['#D69E2E','Low'],['#FC8181','High'],['#E53E3E','Critical']].map(([c,l]) => (
                           <span key={l} className="flex items-center gap-1" style={{ color: c }}>
                             <span style={{ width: 6, height: 6, borderRadius: 99, background: c, display: 'inline-block' }}/>
                             {l}
@@ -449,12 +449,12 @@ export default function DoctorDashboard() {
                         <tbody>
                           {biomarkers.map(b => (
                             <tr key={b._id} style={{
-                              background: b.severity === 'Critical' ? '#FFF5F5' : b.isAbnormal ? '#FFFBEB' : 'transparent',
+                              background: b.severity === 'Critical' ? '#FFF5F5' : b.isAbnormal ? 'var(--accent-soft)' : 'transparent',
                               borderBottom: `1px solid ${CLR.bg}`
                             }}>
                               <td className="px-4 py-3 font-semibold capitalize" style={{ color: CLR.dark }}>{b.biomarkerName}</td>
                               <td className="px-4 py-3 font-bold font-mono">
-                                <span style={{ color: b.severity === 'Critical' ? '#C53030' : b.isAbnormal ? '#92400E' : CLR.dark }}>{b.value}</span>
+                                <span style={{ color: b.severity === 'Critical' ? '#C53030' : b.isAbnormal ? 'var(--primary)' : CLR.dark }}>{b.value}</span>
                                 <span className="font-normal ml-1 text-[10px]" style={{ color: CLR.mutedLight }}>{b.unit}</span>
                               </td>
                               <td className="px-4 py-3 font-mono" style={{ color: CLR.muted }}>
@@ -490,7 +490,7 @@ export default function DoctorDashboard() {
                       </div>
                     )}
                     {noteSaved && (
-                      <div className="text-[11px] font-bold mb-2 flex items-center gap-1" style={{ color: '#C8A84B' }}>
+                      <div className="text-[11px] font-bold mb-2 flex items-center gap-1" style={{ color: 'var(--primary)' }}>
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
                         Note saved successfully
                       </div>
@@ -521,7 +521,7 @@ export default function DoctorDashboard() {
           style={{ background: CLR.card, borderLeft: `1px solid ${CLR.border}` }}>
 
           <div className="px-5 py-4 shrink-0" style={{ borderBottom: `1px solid ${CLR.border}` }}>
-             <h3 className="text-sm font-black text-[#1F2933] uppercase flex items-center gap-2">
+             <h3 className="text-sm font-black text-[var(--foreground)] uppercase flex items-center gap-2">
                🧠 AI Insights
              </h3>
           </div>
@@ -537,7 +537,7 @@ export default function DoctorDashboard() {
                       <div className="grid grid-cols-3 gap-2 mt-4 text-center">
                         {[
                           { n: biomarkers.length, lbl: 'Total', color: CLR.dark, border: CLR.border },
-                          { n: allAbnormal.length, lbl: 'Abnormal', color: '#92400E', border: '#FDE68A' },
+                          { n: allAbnormal.length, lbl: 'Abnormal', color: 'var(--primary)', border: '#FDE68A' },
                           { n: criticals.length, lbl: 'Critical', color: '#C53030', border: '#FED7D7' },
                         ].map(( { n, lbl, color, border }) => (
                           <div key={lbl} className="bg-white rounded-2xl p-2.5" style={{ border: `1px solid ${border}` }}>
@@ -549,21 +549,21 @@ export default function DoctorDashboard() {
                     </div>
 
                     {allAbnormal.length > 0 ? (
-                      <div className="rounded-3xl p-4 border border-amber-100" style={{ background: '#FFFBEB' }}>
-                        <p className="text-[9px] font-black uppercase tracking-widest mb-3 text-amber-700">⚠️ Key Abnormalities</p>
+                      <div className="rounded-3xl p-4 border border-[var(--border)]" style={{ background: 'var(--accent-soft)' }}>
+                        <p className="text-[9px] font-black uppercase tracking-widest mb-3 text-[var(--primary)]">⚠️ Key Abnormalities</p>
                         <div className="space-y-2">
                           {allAbnormal.slice(0, 6).map(b => (
                             <div key={b._id} className="flex items-center justify-between">
                               <span className="text-xs font-semibold capitalize" style={{ color: CLR.dark }}>{b.biomarkerName}</span>
-                              <span className="text-xs font-bold font-mono" style={{ color: b.severity === 'Critical' ? '#C53030' : '#92400E' }}>{b.value} {b.unit}</span>
+                              <span className="text-xs font-bold font-mono" style={{ color: b.severity === 'Critical' ? '#C53030' : 'var(--primary)' }}>{b.value} {b.unit}</span>
                             </div>
                           ))}
                           {allAbnormal.length > 6 && <p className="text-[10px] text-center" style={{ color: CLR.muted }}>+{allAbnormal.length - 6} more</p>}
                         </div>
                       </div>
                     ) : (
-                      <div className="rounded-3xl p-4 text-center" style={{ background: '#FEF3C7', border: '1px solid #FDE68A' }}>
-                        <p className="text-sm font-bold" style={{ color: '#92400E' }}>✓ All values normal</p>
+                      <div className="rounded-3xl p-4 text-center" style={{ background: 'var(--accent)', border: '1px solid #FDE68A' }}>
+                        <p className="text-sm font-bold" style={{ color: 'var(--primary)' }}>✓ All values normal</p>
                         <p className="text-xs mt-1" style={{ color: '#B45309' }}>No abnormalities detected.</p>
                       </div>
                     )}

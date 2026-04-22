@@ -64,7 +64,7 @@ export default function Security() {
               style={{
                 fontSize: 'clamp(24px, 3vw, 34px)',
                 fontWeight: 800,
-                color: '#111827',
+                color: 'var(--foreground)',
                 letterSpacing: '-0.025em',
                 lineHeight: 1.2,
                 marginBottom: 14,
@@ -85,7 +85,7 @@ export default function Security() {
             <p
               style={{
                 fontSize: 14,
-                color: '#6B7280',
+                color: 'var(--muted-foreground)',
                 lineHeight: 1.65,
                 maxWidth: 400,
                 marginBottom: 32,
@@ -112,8 +112,8 @@ export default function Security() {
                 {
                   icon: (
                     <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                      <rect x="4" y="4" width="14" height="14" rx="3.5" fill="#DBEAFE" stroke="#2563EB" strokeWidth="1.5" />
-                      <path d="M8 11l2.2 2.2L14 9" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      <rect x="4" y="4" width="14" height="14" rx="3.5" fill="#DBEAFE" stroke="var(--primary)" strokeWidth="1.5" />
+                      <path d="M8 11l2.2 2.2L14 9" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   ),
                   label: 'SOC 2 Type II',
@@ -138,8 +138,8 @@ export default function Security() {
                 >
                   <div style={{ flexShrink: 0 }}>{b.icon}</div>
                   <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: 13.5, fontWeight: 700, color: '#111827', marginBottom: 2 }}>{b.label}</p>
-                    <p style={{ fontSize: 12, color: '#6B7280' }}>{b.sub}</p>
+                    <p style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--foreground)', marginBottom: 2 }}>{b.label}</p>
+                    <p style={{ fontSize: 12, color: 'var(--muted-foreground)' }}>{b.sub}</p>
                   </div>
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, opacity: 0.35 }}>
                     <circle cx="8" cy="8" r="6.5" stroke="#374151" strokeWidth="1.2" />
@@ -197,7 +197,7 @@ export default function Security() {
               <div
                 style={{
                   height: 4,
-                  background: 'linear-gradient(90deg, #FACC15, #F59E0B, #FBBF24)',
+                  background: 'linear-gradient(90deg, var(--secondary), var(--primary), var(--primary))',
                 }}
               />
 
@@ -208,7 +208,7 @@ export default function Security() {
                     width: 52,
                     height: 52,
                     borderRadius: 14,
-                    background: 'linear-gradient(135deg, #FACC15, #F59E0B)',
+                    background: 'linear-gradient(135deg, var(--secondary), var(--primary))',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -227,7 +227,7 @@ export default function Security() {
                   style={{
                     fontSize: 18,
                     fontWeight: 800,
-                    color: '#111827',
+                    color: 'var(--foreground)',
                     letterSpacing: '-0.02em',
                     marginBottom: 8,
                   }}
@@ -237,7 +237,7 @@ export default function Security() {
                 <p
                   style={{
                     fontSize: 13.5,
-                    color: '#6B7280',
+                    color: 'var(--muted-foreground)',
                     lineHeight: 1.65,
                     marginBottom: 24,
                   }}
@@ -249,8 +249,8 @@ export default function Security() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   {[
                     { label: 'Encryption layer', pct: 100, color: '#10B981' },
-                    { label: 'Access control', pct: 100, color: '#3B82F6' },
-                    { label: 'Audit coverage', pct: 98, color: '#F59E0B' },
+                    { label: 'Access control', pct: 100, color: 'var(--primary)' },
+                    { label: 'Audit coverage', pct: 98, color: 'var(--primary)' },
                   ].map((row) => (
                     <div key={row.label}>
                       <div
@@ -261,7 +261,7 @@ export default function Security() {
                         }}
                       >
                         <span style={{ fontSize: 12.5, color: '#374151', fontWeight: 500 }}>{row.label}</span>
-                        <span style={{ fontSize: 12.5, fontWeight: 700, color: '#111827' }}>{row.pct}%</span>
+                        <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--foreground)' }}>{row.pct}%</span>
                       </div>
                       <div
                         style={{

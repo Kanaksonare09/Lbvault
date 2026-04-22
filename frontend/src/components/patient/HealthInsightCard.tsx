@@ -22,18 +22,18 @@ export default function HealthInsightCard({ label, value, unit, ranges }: Health
     const statusConfig: Record<SmartStatus, { text: string; color: string; border: string; bg: string; bar: string; icon: React.ReactNode }> = {
         safe: {
             text: "Verified Safe",
-            color: "text-[#4F6F6F]",
+            color: "text-[var(--primary)]",
             bg: "bg-[#F0F5F5]",
-            border: "border-[#4F6F6F]/10",
-            bar: "bg-[#4F6F6F]",
+            border: "border-[var(--primary)]/10",
+            bar: "bg-[var(--primary)]",
             icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
         },
         mild: {
             text: "Monitoring",
-            color: "text-[#8B7E5D]",
-            bg: "bg-[#FDFBF5]",
-            border: "border-[#8B7E5D]/10",
-            bar: "bg-[#8B7E5D]",
+            color: "text-[var(--primary)]",
+            bg: "bg-[var(--accent-soft)]",
+            border: "border-[var(--primary)]/10",
+            bar: "bg-[var(--primary)]",
             icon: <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
         },
         urgent: {
@@ -53,7 +53,7 @@ export default function HealthInsightCard({ label, value, unit, ranges }: Health
     const progress = ranges ? Math.min(Math.max(((value - (ranges.min * 0.5)) / (ranges.max * 1.5 - (ranges.min * 0.5))) * 100, 5), 95) : 50;
 
     return (
-        <div className="group bg-white p-6 rounded-[32px] shadow-sm border border-[#E2E8F0] hover:border-[#4F6F6F]/30 hover:shadow-xl hover:shadow-[#4F6F6F]/5 transition-all duration-300 relative overflow-hidden">
+        <div className="group bg-white p-6 rounded-[32px] shadow-sm border border-[var(--border)] hover:border-[var(--primary)]/30 hover:shadow-xl hover:shadow-[var(--primary)]/5 transition-all duration-300 relative overflow-hidden">
             <div className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 rounded-full opacity-[0.03] transition-transform duration-500 group-hover:scale-150 ${config.bar}`}></div>
             
             <div className="flex justify-between items-start mb-4 relative z-10">
@@ -62,8 +62,8 @@ export default function HealthInsightCard({ label, value, unit, ranges }: Health
                         {config.icon}
                     </div>
                     <div>
-                        <h4 className="text-[#6B7280] text-[10px] font-black uppercase tracking-[0.15em] mb-0.5">{t(label)}</h4>
-                        <p className="text-2xl font-black text-[#1F2933] flex items-baseline tracking-tight">
+                        <h4 className="text-[var(--muted-foreground)] text-[10px] font-black uppercase tracking-[0.15em] mb-0.5">{t(label)}</h4>
+                        <p className="text-2xl font-black text-[var(--foreground)] flex items-baseline tracking-tight">
                             {value} <span className="text-[10px] text-[#94A3B8] font-bold ml-1 uppercase">{unit}</span>
                         </p>
                     </div>
@@ -84,7 +84,7 @@ export default function HealthInsightCard({ label, value, unit, ranges }: Health
             </div>
  
             <div className="flex items-start space-x-2">
-                <p className={`text-[11px] font-bold leading-relaxed tracking-tight ${smartStatus === 'safe' ? 'text-emerald-700' : smartStatus === 'mild' ? 'text-amber-700' : 'text-rose-700'}`}>
+                <p className={`text-[11px] font-bold leading-relaxed tracking-tight ${smartStatus === 'safe' ? 'text-emerald-700' : smartStatus === 'mild' ? 'text-[var(--primary)]' : 'text-rose-700'}`}>
                     {statusText}
                 </p>
             </div>

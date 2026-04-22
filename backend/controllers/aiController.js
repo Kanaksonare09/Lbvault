@@ -46,7 +46,7 @@ exports.askAI = async (req, res) => {
         }
 
         // --- Build conversation messages for Llama ---
-        const systemPrompt = `You are LabVault AI, a helpful and empathetic medical assistant.
+        const systemPrompt = `You are HealthScan AI, a helpful and empathetic medical assistant.
 You are answering a patient's questions about their medical report.
 Always be warm, clear, and non-alarming. Use simple language — avoid jargon.
 Never diagnose. Always recommend consulting a doctor for serious concerns.

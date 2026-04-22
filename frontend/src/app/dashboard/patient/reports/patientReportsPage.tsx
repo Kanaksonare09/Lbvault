@@ -114,10 +114,10 @@ function VoiceToggle({ reportId }: { reportId: string }) {
                                 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full
                                 text-[9px] font-black border transition-all
                                 ${isPlaying
-                                    ? 'bg-[#1E3A5F] border-[#1E3A5F] text-white shadow-sm'
+                                    ? 'bg-[var(--primary)] border-[var(--primary)] text-white shadow-sm'
                                     : isLoadThis
                                         ? 'bg-[#EEF2FF] border-[#C7D2FE] text-[#4338CA]'
-                                        : 'bg-[#F8FAFC] border-[#E2E8F0] text-[#334155] hover:border-[#94A3B8] hover:bg-white'
+                                        : 'bg-[#F8FAFC] border-[var(--border)] text-[#334155] hover:border-[#94A3B8] hover:bg-white'
                                 }
                                 disabled:opacity-40 disabled:cursor-not-allowed
                             `}
@@ -148,7 +148,7 @@ function VoiceToggle({ reportId }: { reportId: string }) {
                     <button
                         onClick={stopAudio}
                         title="Stop"
-                        className="w-6 h-6 rounded-full bg-[#FFF1F2] border border-[#FECDD3] text-[#F43F5E] flex items-center justify-center hover:bg-[#FFE4E6] transition-colors"
+                        className="w-6 h-6 rounded-full bg-[var(--accent-soft)] border border-[var(--border)] text-[#F43F5E] flex items-center justify-center hover:bg-[#FFE4E6] transition-colors"
                     >
                         <svg width="7" height="7" fill="currentColor" viewBox="0 0 24 24">
                             <rect x="6" y="6" width="12" height="12" rx="1"/>
@@ -172,7 +172,7 @@ type CatKey = 'Blood Test' | 'Hormone Test' | 'Urine Test' | 'Imaging' | 'Other'
 
 const CAT: Record<CatKey, { label: string; bg: string; color: string; keywords: string[]; icon: React.ReactNode }> = {
     'Blood Test': {
-        label: 'HEMATOLOGY', bg: 'bg-[#FEF3C7]', color: '#D97706',
+        label: 'HEMATOLOGY', bg: 'bg-[var(--accent)]', color: 'var(--primary)',
         keywords: ['blood', 'hematol', 'cbc', 'haemato', 'hemo', 'platelet', 'rbc', 'wbc', 'hemoglobin'],
         icon: <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 2a5 5 0 0 1 5 5c0 5-5 11-5 11S7 12 7 7a5 5 0 0 1 5-5z"/><circle cx="12" cy="7" r="2"/></svg>,
     },
@@ -187,7 +187,7 @@ const CAT: Record<CatKey, { label: string; bg: string; color: string; keywords: 
         icon: <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>,
     },
     'Imaging': {
-        label: 'RADIOLOGY', bg: 'bg-[#DBEAFE]', color: '#2563EB',
+        label: 'RADIOLOGY', bg: 'bg-[#DBEAFE]', color: 'var(--primary)',
         keywords: ['imaging', 'radiol', 'xray', 'x-ray', 'mri', 'ct scan', 'ultrasound', 'scan', 'digital', 'chest'],
         icon: <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
     },
@@ -197,7 +197,7 @@ const CAT: Record<CatKey, { label: string; bg: string; color: string; keywords: 
         icon: <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>,
     },
     'default': {
-        label: 'REPORT', bg: 'bg-[#F3F4F6]', color: '#6B7280',
+        label: 'REPORT', bg: 'bg-[#F3F4F6]', color: 'var(--muted-foreground)',
         keywords: [],
         icon: <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>,
     },
@@ -222,15 +222,15 @@ function StabilityBadge({ report }: { report: any }) {
 
     if (isAbnormal) {
         return (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FFF1F2] border border-[#FECDD3] text-[10px] font-black text-[#BE123C] tracking-wide">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--accent-soft)] border border-[var(--border)] text-[10px] font-black text-[var(--primary)] tracking-wide">
                 <span className="w-[6px] h-[6px] rounded-full bg-[#F43F5E]" />
                 High Priority
             </span>
         );
     }
     return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#FEF9EC] border border-[#FDE68A] text-[10px] font-black text-[#92400E] tracking-wide">
-            <span className="w-[6px] h-[6px] rounded-full bg-[#C8A84B]" />
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[var(--accent-soft)] border border-[var(--border)] text-[10px] font-black text-[var(--primary)] tracking-wide">
+            <span className="w-[6px] h-[6px] rounded-full bg-[var(--primary)]" />
             Normal Range
         </span>
     );
@@ -281,7 +281,7 @@ function SharePopover({ report }: { report: any }) {
             <button
                 id={`share-btn-${report._id}`}
                 onClick={() => setOpen(o => !o)}
-                className="w-8 h-8 rounded-full hover:bg-[#EFF6FF] text-[#94A3B8] hover:text-[#2563EB] transition-colors flex items-center justify-center"
+                className="w-8 h-8 rounded-full hover:bg-[#EFF6FF] text-[#94A3B8] hover:text-[var(--primary)] transition-colors flex items-center justify-center"
                 title="Share Report"
             >
                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -317,12 +317,12 @@ function SharePopover({ report }: { report: any }) {
                             }}
                             className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
                         >
-                            <span style={{ color: copied ? '#C8A84B' : '#6B7280' }}>
+                            <span style={{ color: copied ? 'var(--primary)' : 'var(--muted-foreground)' }}>
                                 {copied
                                     ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="18" height="18"><polyline points="20 6 9 17 4 12"/></svg>
                                     : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>}
                             </span>
-                            <span className={`text-[12.5px] font-semibold ${copied ? 'text-[#C8A84B]' : 'text-gray-700'}`}>
+                            <span className={`text-[12.5px] font-semibold ${copied ? 'text-[var(--primary)]' : 'text-gray-700'}`}>
                                 {copied ? 'Link Copied!' : 'Copy Link'}
                             </span>
                         </button>
@@ -349,7 +349,7 @@ function ReportCard({ report, onShare, onSchedule }: { report: any; onShare: (r:
     const dateStr = dateRaw ? new Date(dateRaw).toLocaleDateString('en', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
 
     return (
-        <div className="bg-white rounded-[18px] border border-[#EEE9DE] shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.07)] transition-all duration-300 px-6 py-5 flex items-center gap-5">
+        <div className="bg-white rounded-[18px] border border-[var(--border)] shadow-[0_2px_10px_rgba(0,0,0,0.04)] hover:shadow-[0_4px_20px_rgba(0,0,0,0.07)] transition-all duration-300 px-6 py-5 flex items-center gap-5">
 
             {/* Category icon */}
             <div className={`w-14 h-14 rounded-[16px] ${cat.bg} flex items-center justify-center shrink-0`} style={{ color: cat.color }}>
@@ -358,10 +358,10 @@ function ReportCard({ report, onShare, onSchedule }: { report: any; onShare: (r:
 
             {/* Info */}
             <div className="flex-1 min-w-0">
-                <h3 className="text-[14.5px] font-black text-[#1E3A5F] leading-tight mb-2">
+                <h3 className="text-[14.5px] font-black text-[var(--primary)] leading-tight mb-2">
                     {report.reportName}
                 </h3>
-                <span className="inline-block px-2.5 py-[3px] rounded-full border border-[#E2E8F0] text-[8px] font-black text-[#64748B] tracking-[0.14em] uppercase mb-2.5">
+                <span className="inline-block px-2.5 py-[3px] rounded-full border border-[var(--border)] text-[8px] font-black text-[#64748B] tracking-[0.14em] uppercase mb-2.5">
                     {cat.label}
                 </span>
                 <div className="space-y-[4px]">
@@ -396,7 +396,7 @@ function ReportCard({ report, onShare, onSchedule }: { report: any; onShare: (r:
                 {/* Insights → report detail */}
                 <Link
                     href={`/dashboard/patient/reports/${report._id}`}
-                    className="w-8 h-8 rounded-full hover:bg-[#FEF3C7] text-[#94A3B8] hover:text-[#C8A84B] transition-colors flex items-center justify-center"
+                    className="w-8 h-8 rounded-full hover:bg-[var(--accent)] text-[#94A3B8] hover:text-[var(--primary)] transition-colors flex items-center justify-center"
                     title="View Insights"
                 >
                     <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -425,7 +425,7 @@ function ReportCard({ report, onShare, onSchedule }: { report: any; onShare: (r:
             {/* View button */}
             <Link
                 href={`/dashboard/patient/reports/${report._id}`}
-                className="flex items-center gap-2 bg-[#1E3A5F] hover:bg-[#152C4A] active:scale-95 text-white text-[11.5px] font-black px-5 py-2.5 rounded-full transition-all shadow-[0_2px_8px_rgba(30,58,95,0.3)] shrink-0"
+                className="flex items-center gap-2 bg-[var(--primary)] hover:bg-[#152C4A] active:scale-95 text-white text-[11.5px] font-black px-5 py-2.5 rounded-full transition-all shadow-none shrink-0"
             >
                 <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8-10-8-10-8z"/>
@@ -575,16 +575,16 @@ export default function PatientReportsPage() {
                         <button onClick={() => setReviewReport(null)} className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 text-gray-400 transition-colors">
                             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         </button>
-                        <div className="w-12 h-12 bg-[#FEF3C7] rounded-2xl flex items-center justify-center mb-4">
-                            <svg width="22" height="22" fill="none" stroke="#C8A84B" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <div className="w-12 h-12 bg-[var(--accent)] rounded-2xl flex items-center justify-center mb-4">
+                            <svg width="22" height="22" fill="none" stroke="var(--primary)" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         </div>
-                        <h2 className="text-lg font-black text-[#1E3A5F] mb-1">Request Doctor Review</h2>
+                        <h2 className="text-lg font-black text-[var(--primary)] mb-1">Request Doctor Review</h2>
                         <p className="text-[12px] text-gray-500 font-medium mb-2">Notify your doctors about <strong>{reviewReport.reportName}</strong>.</p>
                         <p className="text-[11px] text-gray-400 mb-6 leading-relaxed">A notification will be sent to all doctors who have access to your records. They will receive your contact information and can reach out to schedule a consultation.</p>
-                        {reviewMsg && <p className={`text-xs font-bold mb-4 ${reviewMsg.includes('sent') ? 'text-[#C8A84B]' : 'text-rose-500'}`}>{reviewMsg}</p>}
+                        {reviewMsg && <p className={`text-xs font-bold mb-4 ${reviewMsg.includes('sent') ? 'text-[var(--primary)]' : 'text-rose-500'}`}>{reviewMsg}</p>}
                         <button onClick={handleScheduleReview} disabled={reviewSending}
-                            className="w-full py-3 bg-[#1E3A5F] text-white font-black rounded-2xl hover:bg-[#152C4A] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-                            {reviewSending ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Sending…</> : '📅 Send Review Request'}
+                            className="w-full py-3 bg-[var(--primary)] text-white font-black rounded-2xl hover:bg-[#152C4A] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                            {reviewSending ? <><div className="w-4 h-4 border-[var(--primary)] border-white/30 border-t-white rounded-full animate-spin" /> Sending…</> : '📅 Send Review Request'}
                         </button>
                     </div>
                 </div>
@@ -612,12 +612,12 @@ export default function PatientReportsPage() {
                             const url = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
                             const a = document.createElement('a'); a.href=url; a.download='reports.csv'; a.click();
                         })}
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-[#E2E8F0] bg-white text-[12px] font-black text-[#334155] hover:bg-[#F8FAFC] transition-colors shadow-sm">
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-[var(--border)] bg-white text-[12px] font-black text-[#334155] hover:bg-[#F8FAFC] transition-colors shadow-sm">
                         <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         Export All
                     </button>
                     <Link href="/dashboard/patient"
-                        className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#1E3A5F] hover:bg-[#152C4A] text-white text-[12px] font-black transition-colors shadow-[0_2px_8px_rgba(30,58,95,0.25)]">
+                        className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[var(--primary)] hover:bg-[#152C4A] text-white text-[12px] font-black transition-colors shadow-[0_2px_8px_rgba(30,58,95,0.25)]">
                         <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m16 16-4-4-4 4"/></svg>
                         Upload Report
                     </Link>
@@ -636,8 +636,8 @@ export default function PatientReportsPage() {
                             onClick={() => changeFilter(f)}
                             className={`px-4 py-2 rounded-full text-[11.5px] font-bold border transition-all ${
                                 filter === f
-                                    ? 'bg-[#FBBF24] border-[#FBBF24] text-[#1A202C] shadow-sm'
-                                    : 'bg-white border-[#E2E8F0] text-[#64748B] hover:border-[#CBD5E0]'
+                                    ? 'bg-[var(--primary)] border-[var(--primary)] text-[#1A202C] shadow-sm'
+                                    : 'bg-white border-[var(--border)] text-[#64748B] hover:border-[#CBD5E0]'
                             }`}
                         >
                             {f}
@@ -648,7 +648,7 @@ export default function PatientReportsPage() {
                 <div ref={sortRef} className="relative">
                     <button
                         onClick={() => setShowSort(s => !s)}
-                        className="text-[11px] text-[#64748B] font-bold flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#E2E8F0] bg-white hover:bg-[#F8FAFC] transition-colors"
+                        className="text-[11px] text-[#64748B] font-bold flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[var(--border)] bg-white hover:bg-[#F8FAFC] transition-colors"
                     >
                         <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <line x1="21" y1="10" x2="7" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/>
@@ -658,11 +658,11 @@ export default function PatientReportsPage() {
                         <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                     </button>
                     {showSort && (
-                        <div className="absolute right-0 top-full mt-1.5 bg-white rounded-2xl shadow-xl border border-[#E2E8F0] py-1.5 z-20 min-w-[200px]">
+                        <div className="absolute right-0 top-full mt-1.5 bg-white rounded-2xl shadow-xl border border-[var(--border)] py-1.5 z-20 min-w-[200px]">
                             {SORT_OPTIONS.map(opt => (
                                 <button key={opt.key} onClick={() => { setSortKey(opt.key); setShowSort(false); setPage(1); }}
                                     className={`w-full text-left px-4 py-2.5 text-[12px] font-bold transition-colors ${
-                                        sortKey === opt.key ? 'text-[#C8A84B] bg-[#FEF9EC]' : 'text-[#64748B] hover:bg-[#F8FAFC]'
+                                        sortKey === opt.key ? 'text-[var(--primary)] bg-[var(--accent-soft)]' : 'text-[#64748B] hover:bg-[#F8FAFC]'
                                     }`}>
                                     {opt.label}
                                 </button>
@@ -675,10 +675,10 @@ export default function PatientReportsPage() {
             {/* List */}
             {loading ? (
                 <div className="flex items-center justify-center py-20">
-                    <div className="w-10 h-10 border-4 border-[#FBBF24] border-t-transparent rounded-full animate-spin" />
+                    <div className="w-10 h-10 border-[var(--primary)] border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
                 </div>
             ) : filtered.length === 0 ? (
-                <div className="bg-white rounded-[18px] border border-dashed border-[#E2E8F0] py-20 flex flex-col items-center gap-3">
+                <div className="bg-white rounded-[18px] border border-dashed border-[var(--border)] py-20 flex flex-col items-center gap-3">
                     <div className="w-14 h-14 bg-[#F8FAFC] rounded-full flex items-center justify-center">
                         <svg width="24" height="24" fill="none" stroke="#CBD5E0" strokeWidth="1.5" viewBox="0 0 24 24">
                             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
@@ -699,7 +699,7 @@ export default function PatientReportsPage() {
                             <div className="flex justify-end mt-1.5 pr-1">
                                 <button
                                     onClick={() => setReviewReport(r)}
-                                    className="text-[10.5px] font-bold text-[#94A3B8] hover:text-[#1E3A5F] transition-colors flex items-center gap-1"
+                                    className="text-[10.5px] font-bold text-[#94A3B8] hover:text-[var(--primary)] transition-colors flex items-center gap-1"
                                 >
                                     <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                                     Schedule Doctor Review
@@ -720,7 +720,7 @@ export default function PatientReportsPage() {
                         <button
                             onClick={() => setPage(p => Math.max(1, p - 1))}
                             disabled={page === 1}
-                            className="w-8 h-8 rounded-full border border-[#E2E8F0] bg-white flex items-center justify-center text-[#64748B] hover:bg-[#F8FAFC] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            className="w-8 h-8 rounded-full border border-[var(--border)] bg-white flex items-center justify-center text-[#64748B] hover:bg-[#F8FAFC] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                         >
                             <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
                         </button>
@@ -730,8 +730,8 @@ export default function PatientReportsPage() {
                                 onClick={() => setPage(n)}
                                 className={`w-8 h-8 rounded-full text-[12px] font-black transition-colors ${
                                     page === n
-                                        ? 'bg-[#1E3A5F] text-white shadow-sm'
-                                        : 'border border-[#E2E8F0] bg-white text-[#64748B] hover:bg-[#F8FAFC]'
+                                        ? 'bg-[var(--primary)] text-white shadow-sm'
+                                        : 'border border-[var(--border)] bg-white text-[#64748B] hover:bg-[#F8FAFC]'
                                 }`}
                             >
                                 {n}
@@ -740,7 +740,7 @@ export default function PatientReportsPage() {
                         <button
                             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                             disabled={page === totalPages}
-                            className="w-8 h-8 rounded-full border border-[#E2E8F0] bg-white flex items-center justify-center text-[#64748B] hover:bg-[#F8FAFC] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                            className="w-8 h-8 rounded-full border border-[var(--border)] bg-white flex items-center justify-center text-[#64748B] hover:bg-[#F8FAFC] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                         >
                             <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
                         </button>

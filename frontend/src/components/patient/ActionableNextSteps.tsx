@@ -25,15 +25,15 @@ export default function ActionableNextSteps({ steps }: ActionableNextStepsProps)
             <div className="relative z-10 space-y-10">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#E9E1C1]/50 pb-8">
                     <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-white text-[#4F6F6F] rounded-2xl border border-[#E9E1C1]/50 shadow-sm transition-transform duration-500 group-hover:rotate-12">
+                        <div className="p-3 bg-white text-[var(--primary)] rounded-2xl border border-[#E9E1C1]/50 shadow-sm transition-transform duration-500 group-hover:rotate-12">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"/><path d="m17 7-5-5-5 5"/><path d="m17 17-5 5-5-5"/></svg>
                         </div>
                         <div>
-                            <h4 className="text-[12px] font-black text-[#8B7E5D] uppercase tracking-[0.25em] mb-1 leading-none">{t('prescription_advice') || 'Doctor’s Guidance'}</h4>
-                            <p className="text-[#6B7280] text-sm font-medium tracking-tight">Personalized action plan for your health journey</p>
+                            <h4 className="text-[12px] font-black text-[var(--primary)] uppercase tracking-[0.25em] mb-1 leading-none">{t('prescription_advice') || 'Doctor’s Guidance'}</h4>
+                            <p className="text-[var(--muted-foreground)] text-sm font-medium tracking-tight">Personalized action plan for your health journey</p>
                         </div>
                     </div>
-                    <div className="text-[10px] font-bold text-[#8B7E5D]/40 uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full border border-[#E9E1C1]/30">
+                    <div className="text-[10px] font-bold text-[var(--primary)]/40 uppercase tracking-widest bg-white/50 px-3 py-1 rounded-full border border-[#E9E1C1]/30">
                         Date: {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </div>
                 </div>
@@ -48,7 +48,7 @@ export default function ActionableNextSteps({ steps }: ActionableNextStepsProps)
                                 <div className="w-0.5 h-8 bg-gradient-to-b from-[#E9E1C1]/50 to-transparent"></div>
                             </div>
                             <div className="pt-2">
-                                <p className="text-lg text-[#1F2933] font-medium leading-snug tracking-tight group-hover/item:translate-x-1 transition-transform duration-300">
+                                <p className="text-lg text-[var(--foreground)] font-medium leading-snug tracking-tight group-hover/item:translate-x-1 transition-transform duration-300">
                                     {t(step.text) || step.text}
                                 </p>
                             </div>
@@ -57,12 +57,12 @@ export default function ActionableNextSteps({ steps }: ActionableNextStepsProps)
                 </div>
 
                 <div className="pt-6 flex items-center justify-between border-t border-[#E9E1C1]/30">
-                    <div className="flex items-center space-x-2 text-[#4F6F6F]/70">
-                        <div className="w-2 h-2 rounded-full bg-[#8FB9A8] animate-pulse"></div>
+                    <div className="flex items-center space-x-2 text-[var(--primary)]/70">
+                        <div className="w-2 h-2 rounded-full bg-[var(--secondary)] animate-pulse"></div>
                         <span className="text-[10px] font-bold tracking-[0.1em] uppercase opacity-70 italic">Small steps lead to big change</span>
                     </div>
                     <div className="h-6 w-24 opacity-20 filter grayscale contrast-125 select-none pointer-events-none overflow-hidden">
-                        <svg viewBox="0 0 100 40" className="w-full h-full text-[#4F6F6F]" style={{ opacity: 0.5 }}>
+                        <svg viewBox="0 0 100 40" className="w-full h-full text-[var(--primary)]" style={{ opacity: 0.5 }}>
                             <path d="M10,20 Q30,10 50,20 T90,20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                         </svg>
                     </div>

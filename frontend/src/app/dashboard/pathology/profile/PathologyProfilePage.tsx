@@ -78,7 +78,7 @@ export default function PathologyProfilePage() {
             <div className="flex items-center justify-center min-h-[50vh]">
                 <div
                     className="w-9 h-9 border-4 rounded-full animate-spin"
-                    style={{ borderColor: '#E8EDF2', borderTopColor: '#C8A84B' }}
+                    style={{ borderColor: '#E8EDF2', borderTopColor: 'var(--primary)' }}
                 />
             </div>
         );
@@ -103,7 +103,7 @@ export default function PathologyProfilePage() {
                         {profile.isVerified && (
                             <span
                                 className="text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-widest"
-                                style={{ background: '#FEF3C7', color: '#92400E' }}
+                                style={{ background: 'var(--accent)', color: 'var(--primary)' }}
                             >
                                 ✓ Verified
                             </span>
@@ -119,7 +119,7 @@ export default function PathologyProfilePage() {
                     <button
                         onClick={() => setIsEditing(true)}
                         className="inline-flex items-center gap-2 text-[12.5px] font-semibold px-4 py-2.5 rounded-lg transition-colors"
-                        style={{ background: '#C8A84B', color: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}
+                        style={{ background: 'var(--primary)', color: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}
                     >
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -133,7 +133,7 @@ export default function PathologyProfilePage() {
                             type="button"
                             onClick={() => setIsEditing(false)}
                             className="text-[12.5px] font-semibold px-4 py-2.5 rounded-lg transition-colors"
-                            style={{ background: '#F4F6F9', color: '#6B7280' }}
+                            style={{ background: '#F4F6F9', color: 'var(--muted-foreground)' }}
                         >
                             Discard
                         </button>
@@ -143,7 +143,7 @@ export default function PathologyProfilePage() {
                             disabled={saving}
                             className="inline-flex items-center gap-2 text-[12.5px] font-semibold px-4 py-2.5 rounded-lg transition-colors"
                             style={{
-                                background: saving ? '#E5E7EB' : '#C8A84B',
+                                background: saving ? '#E5E7EB' : 'var(--primary)',
                                 color: saving ? '#9CA3AF' : '#fff',
                             }}
                         >
@@ -157,7 +157,7 @@ export default function PathologyProfilePage() {
             {savedOk && (
                 <div
                     className="flex items-center gap-2 text-[12px] font-semibold px-4 py-2.5 rounded-xl"
-                    style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A' }}
+                    style={{ background: 'var(--accent)', color: 'var(--primary)', border: '1px solid #FDE68A' }}
                 >
                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                         <polyline points="20 6 9 17 4 12" />
@@ -178,7 +178,7 @@ export default function PathologyProfilePage() {
                         >
                             <div
                                 className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-black text-white mb-4"
-                                style={{ background: '#C8A84B' }}
+                                style={{ background: 'var(--primary)' }}
                             >
                                 {initials}
                             </div>
@@ -201,7 +201,7 @@ export default function PathologyProfilePage() {
                                     <h2 className="text-[16px] font-black text-gray-900">{profile.labName || 'Lab Name'}</h2>
                                     <span
                                         className="text-[9px] font-bold px-3 py-1 rounded-full mt-2 uppercase tracking-widest"
-                                        style={{ background: '#FEF3C7', color: '#92400E' }}
+                                        style={{ background: 'var(--accent)', color: 'var(--primary)' }}
                                     >
                                         Pathology Center
                                     </span>
@@ -232,8 +232,8 @@ export default function PathologyProfilePage() {
                                     className="text-[10px] font-bold px-2.5 py-1 rounded-full"
                                     style={
                                         profile.isVerified
-                                            ? { background: '#FEF3C7', color: '#92400E' }
-                                            : { background: '#F4F6F9', color: '#6B7280' }
+                                            ? { background: 'var(--accent)', color: 'var(--primary)' }
+                                            : { background: '#F4F6F9', color: 'var(--muted-foreground)' }
                                     }
                                 >
                                     {profile.isVerified ? 'Verified' : 'Pending Verification'}

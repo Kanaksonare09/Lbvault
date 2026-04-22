@@ -54,10 +54,10 @@ export default function HealthTimeline({ label, unit, data, status }: HealthTime
     }
 
     return (
-        <div className="bg-[#FCFDFB] p-8 rounded-[32px] border border-[#E2E8F0] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] relative overflow-hidden group">
+        <div className="bg-[#FCFDFB] p-8 rounded-[32px] border border-[var(--border)] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] relative overflow-hidden group">
             {/* Clinical Grid Background */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none" 
-                 style={{ backgroundImage: 'radial-gradient(#4F6F6F 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
+                 style={{ backgroundImage: 'radial-gradient(var(--primary) 1px, transparent 1px)', backgroundSize: '16px 16px' }}></div>
             
             <div className="relative z-10 flex flex-col lg:flex-row items-end justify-between gap-8">
                 <div className="w-full lg:w-1/3 space-y-4">
@@ -70,7 +70,7 @@ export default function HealthTimeline({ label, unit, data, status }: HealthTime
                         </div>
                     </div>
                     <div>
-                        <h3 className="text-xl font-medium text-[#1F2933] tracking-tight capitalize leading-none mb-2">
+                        <h3 className="text-xl font-medium text-[var(--foreground)] tracking-tight capitalize leading-none mb-2">
                             {t(label) || label} <span className="text-[#94A3B8] font-light">Progress</span>
                         </h3>
                         <p className="text-[#64748B] text-xs font-normal leading-relaxed">
@@ -85,7 +85,7 @@ export default function HealthTimeline({ label, unit, data, status }: HealthTime
                             <path
                                 d={pathData}
                                 fill="none"
-                                stroke="#4F6F6F"
+                                stroke="var(--primary)"
                                 strokeWidth="3"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
@@ -98,12 +98,12 @@ export default function HealthTimeline({ label, unit, data, status }: HealthTime
                                         cy={c.y} 
                                         r="5" 
                                         fill="white" 
-                                        stroke="#4F6F6F" 
+                                        stroke="var(--primary)" 
                                         strokeWidth="2"
                                         className="transition-transform duration-300 group-hover/point:scale-150"
                                     />
                                     {i === coords.length - 1 && (
-                                        <circle cx={c.x} cy={c.y} r="12" fill="#4F6F6F" className="animate-ping opacity-10" />
+                                        <circle cx={c.x} cy={c.y} r="12" fill="var(--primary)" className="animate-ping opacity-10" />
                                     )}
                                 </g>
                             ))}
@@ -111,11 +111,11 @@ export default function HealthTimeline({ label, unit, data, status }: HealthTime
                     </div>
 
                     <div className="text-right shrink-0 pb-1">
-                        <div className="text-4xl font-light text-[#1F2933] flex items-baseline justify-end">
+                        <div className="text-4xl font-light text-[var(--foreground)] flex items-baseline justify-end">
                             {data[data.length - 1].value}
                             <span className="text-sm text-[#94A3B8] ml-2 font-medium uppercase tracking-tighter">{unit}</span>
                         </div>
-                        <div className="text-[10px] font-bold text-[#4F6F6F] uppercase tracking-[0.2em] mt-1 opacity-50">Current Metric</div>
+                        <div className="text-[10px] font-bold text-[var(--primary)] uppercase tracking-[0.2em] mt-1 opacity-50">Current Metric</div>
                     </div>
                 </div>
             </div>

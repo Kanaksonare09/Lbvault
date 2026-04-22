@@ -36,8 +36,8 @@ interface AnalyticsChartProps {
 const CustomTooltip = ({ active, payload, label, unit }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-[#1F2933] text-white rounded-2xl px-4 py-3 shadow-2xl text-xs">
-        <p className="font-black text-[#8FB9A8] mb-1">{label}</p>
+      <div className="bg-[var(--foreground)] text-white rounded-2xl px-4 py-3 shadow-2xl text-xs">
+        <p className="font-black text-[var(--secondary)] mb-1">{label}</p>
         <p className="font-black text-lg">
           {payload[0]?.value}
           {unit && <span className="text-xs ml-1 opacity-70">{unit}</span>}
@@ -51,7 +51,7 @@ const CustomTooltip = ({ active, payload, label, unit }: any) => {
 export default function AnalyticsChart({
   data,
   dataKey = 'value',
-  color = '#4F6F6F',
+  color = 'var(--primary)',
   type = 'area',
   height = 200,
   unit = '',
@@ -63,7 +63,7 @@ export default function AnalyticsChart({
 }: AnalyticsChartProps) {
   const gradientId = `grad-${color.replace('#', '')}-${Math.random().toString(36).slice(2, 7)}`;
 
-  const axisStyle = { fontSize: 11, fill: '#6B7280', fontWeight: 700 };
+  const axisStyle = { fontSize: 11, fill: 'var(--muted-foreground)', fontWeight: 700 };
   const gridStyle = { stroke: '#F0F2F4', strokeDasharray: '4 4' };
 
   const commonProps = {
@@ -94,7 +94,7 @@ export default function AnalyticsChart({
 
   const refLines = referenceRange ? (
     <>
-      <ReferenceLine y={referenceRange.min} stroke="#F59E0B" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: 'Min', fill: '#F59E0B', fontSize: 10, fontWeight: 700 }} />
+      <ReferenceLine y={referenceRange.min} stroke="var(--primary)" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: 'Min', fill: 'var(--primary)', fontSize: 10, fontWeight: 700 }} />
       <ReferenceLine y={referenceRange.max} stroke="#EF4444" strokeDasharray="4 4" strokeWidth={1.5} label={{ value: 'Max', fill: '#EF4444', fontSize: 10, fontWeight: 700 }} />
     </>
   ) : null;
@@ -164,8 +164,8 @@ export default function AnalyticsChart({
     <div>
       {(title || subtitle) && (
         <div className="mb-4">
-          {title && <p className="text-sm font-black text-[#1F2933]">{title}</p>}
-          {subtitle && <p className="text-xs text-[#6B7280] font-medium mt-0.5">{subtitle}</p>}
+          {title && <p className="text-sm font-black text-[var(--foreground)]">{title}</p>}
+          {subtitle && <p className="text-xs text-[var(--muted-foreground)] font-medium mt-0.5">{subtitle}</p>}
         </div>
       )}
       <ResponsiveContainer width="100%" height={height}>

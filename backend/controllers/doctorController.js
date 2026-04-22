@@ -186,7 +186,7 @@ exports.doctorChatWithPatient = async (req, res) => {
         }
 
         // 4. Build system prompt for the doctor-facing AI
-        const systemPrompt = `You are LabVault Clinical AI, an expert medical intelligence assistant for doctors.
+        const systemPrompt = `You are HealthScan Clinical AI, an expert medical intelligence assistant for doctors.
 You are analyzing a patient's complete health history from their uploaded lab reports.
 You must answer the doctor's clinical question clearly, concisely, and accurately.
 

@@ -1,29 +1,43 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-sidebar: var(--sidebar);
+}
+
 
 :root {
-  --background: #F1F5F5;
+  --background: #F8F9FA;
   --primary: #4F6F6F;
   --primary-foreground: #FFFFFF;
   --secondary: #8FB9A8;
-  --secondary-foreground: #2D3A3A;
-  --foreground: #2D3A3A;
+  --secondary-foreground: #1D2939;
+  --foreground: #1D2939;
   --card: #FFFFFF;
-  --card-foreground: #2D3A3A;
-  --muted: #F8FAFA;
-  --muted-foreground: #5C7C7C;
-  --accent: #FFEAB0;
-  --accent-foreground: #1F2933;
-  --border: #E2E8F0;
-  --radius: 1.5rem;
+  --card-foreground: #1D2939;
+  --muted: #F3F4F6;
+  --muted-foreground: #667085;
+  --accent: #E6EEEB;
+  --accent-foreground: #2C3939;
+  --border: #ECF0F1;
+  --radius: 2rem;
   
-  /* HealthScan Specifics */
-  --sidebar: #2D3A3A;
-  --accent-soft: #FFFBEB;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --danger: #EF4444;
+  /* HealthScan Specifics — Professional Dark Sidebar */
+  --sidebar: #2C3939;
+  --sidebar-foreground: #FFFFFF;
+  --accent-soft: #F9FAFB;
+  --success: #6D8B74;
+  --warning: #B99B6B;
+  --danger: #A64B2A;
 }
 
 body {

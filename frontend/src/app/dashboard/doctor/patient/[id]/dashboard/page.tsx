@@ -122,7 +122,7 @@ export default function PatientDashboard() {
   if (loading) {
     return (
       <div className="-m-8 min-h-screen bg-white flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-yellow-100 border-t-[#F5C842] rounded-full animate-spin" />
+        <div className="w-10 h-10 border-4 border-[var(--border)] border-t-[#F5C842] rounded-full animate-spin" />
       </div>
     );
   }
@@ -236,8 +236,8 @@ export default function PatientDashboard() {
                     <div className="h-px bg-gray-100 mx-3 my-1" />
                     <button onClick={async () => { await navigator.clipboard.writeText(shareUrl); setShareCopied(true); setTimeout(() => { setShareCopied(false); setShareOpen(false); }, 1800); }}
                       className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left">
-                      <span style={{ color: shareCopied ? '#C8A84B' : '#6B7280' }}>🔗</span>
-                      <span className={`text-[12.5px] font-semibold ${shareCopied ? 'text-[#C8A84B]' : 'text-gray-700'}`}>{shareCopied ? 'Copied!' : 'Copy Link'}</span>
+                      <span style={{ color: shareCopied ? 'var(--primary)' : 'var(--muted-foreground)' }}>🔗</span>
+                      <span className={`text-[12.5px] font-semibold ${shareCopied ? 'text-[var(--primary)]' : 'text-gray-700'}`}>{shareCopied ? 'Copied!' : 'Copy Link'}</span>
                     </button>
                   </div>
                 </div>
@@ -261,7 +261,7 @@ export default function PatientDashboard() {
             <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.07)] border border-gray-100 p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--muted-foreground)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/>
                   </svg>
                   <h2 className="text-[15px] font-bold text-gray-800">Session History</h2>
@@ -365,7 +365,7 @@ export default function PatientDashboard() {
             </div>
 
             {/* AI Correlation Analysis */}
-            <div className="bg-[#FFFBEA] rounded-2xl border border-yellow-100 shadow-[0_4px_24px_rgba(245,200,66,0.15)] p-6">
+            <div className="bg-[#FFFBEA] rounded-2xl border border-[var(--border)] shadow-[0_4px_24px_rgba(245,200,66,0.15)] p-6">
               <div className="flex items-start gap-4">
                 <div className="w-11 h-11 shrink-0 bg-[#F5C842] rounded-xl flex items-center justify-center">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -448,7 +448,7 @@ export default function PatientDashboard() {
               {/* DYNAMIC sources */}
               <div className="space-y-3">
                 {/* Source 1 — always show report ref */}
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-blue-50 transition-all cursor-pointer group">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-[var(--accent-soft)] transition-all cursor-pointer group">
                   <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2B4BC4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                   </div>
@@ -460,8 +460,8 @@ export default function PatientDashboard() {
                 </div>
 
                 {/* Source 2 — HealthScan AI pipeline */}
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-yellow-50 transition-all cursor-pointer group">
-                  <div className="w-9 h-9 bg-amber-100 rounded-full flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-[var(--accent-soft)] transition-all cursor-pointer group">
+                  <div className="w-9 h-9 bg-[var(--accent)] rounded-full flex items-center justify-center shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B8860B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
                   </div>
                   <div className="flex-1 min-w-0">

@@ -5,12 +5,12 @@ import { motion } from 'framer-motion';
 const testimonials = [
   {
     quote:
-      '"LabVault changed how I manage my chronic condition. It saves me 3 trips to the clinic every year. My doctor can review my CBC results as soon as they\'re uploaded — and auto-flagged anomalies are a lifesaver."',
+      '"HealthScan changed how I manage my chronic condition. It saves me 3 trips to the clinic every year. My doctor can review my CBC results as soon as they\'re uploaded — and auto-flagged anomalies are a lifesaver."',
     name: 'Shruti Venkatesan',
     role: 'Patient · Type 2 Diabetes',
     initials: 'SV',
     gradFrom: '#93C5FD',
-    gradTo: '#3B82F6',
+    gradTo: 'var(--primary)',
   },
   {
     quote:
@@ -57,7 +57,7 @@ export default function Testimonials() {
             style={{
               fontSize: 'clamp(24px, 3vw, 34px)',
               fontWeight: 800,
-              color: '#111827',
+              color: 'var(--foreground)',
               letterSpacing: '-0.025em',
               lineHeight: 1.2,
             }}
@@ -99,7 +99,7 @@ export default function Testimonials() {
               {/* Stars */}
               <div style={{ display: 'flex', gap: 3 }}>
                 {[...Array(5)].map((_, si) => (
-                  <svg key={si} width="14" height="14" viewBox="0 0 14 14" fill="#F59E0B">
+                  <svg key={si} width="14" height="14" viewBox="0 0 14 14" fill="var(--primary)">
                     <path d="M7 1l1.545 3.09L12 4.635l-2.5 2.43.59 3.435L7 8.76l-3.09 1.74.59-3.435L2 4.635l3.455-.545L7 1Z" />
                   </svg>
                 ))}
@@ -146,7 +146,7 @@ export default function Testimonials() {
                   {t.initials}
                 </div>
                 <div>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: '#111827' }}>{t.name}</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--foreground)' }}>{t.name}</p>
                   <p style={{ fontSize: 11.5, color: '#9CA3AF' }}>{t.role}</p>
                 </div>
               </div>

@@ -162,7 +162,7 @@ export default function DoctorPatientChat({ patientId, patientName, reportCount 
                     <button
                       key={i}
                       onClick={() => sendMessage(q)}
-                      className="w-full text-left px-4 py-3 bg-white rounded-xl border border-gray-100 text-[12px] text-gray-700 hover:border-[#2B4BC4] hover:text-[#2B4BC4] hover:bg-blue-50 transition-all shadow-sm font-medium"
+                      className="w-full text-left px-4 py-3 bg-white rounded-xl border border-gray-100 text-[12px] text-gray-700 hover:border-[#2B4BC4] hover:text-[#2B4BC4] hover:bg-[var(--accent-soft)] transition-all shadow-sm font-medium"
                     >
                       {q}
                     </button>
@@ -200,7 +200,7 @@ export default function DoctorPatientChat({ patientId, patientName, reportCount 
                   </div>
                   {msg.role === 'user' && (
                     <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center shrink-0 mt-0.5">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--muted-foreground)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                       </svg>
                     </div>

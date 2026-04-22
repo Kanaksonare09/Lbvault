@@ -143,7 +143,7 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
         <button
           onClick={togglePlay}
           disabled={isLoading}
-          className="w-10 h-10 bg-[#4F6F6F] text-white rounded-full flex items-center justify-center hover:bg-[#1F2933] transition-all shadow-md active:scale-95 disabled:opacity-50"
+          className="w-10 h-10 bg-[var(--primary)] text-white rounded-full flex items-center justify-center hover:bg-[var(--foreground)] transition-all shadow-md active:scale-95 disabled:opacity-50"
         >
           {isLoading ? (
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -158,7 +158,7 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
         <select
           value={language}
           onChange={e => handleLanguageChange(e.target.value)}
-          className="text-xs font-bold text-[#4F6F6F] bg-white border border-[#E2E8F0] rounded-xl px-3 py-2 outline-none"
+          className="text-xs font-bold text-[var(--primary)] bg-white border border-[var(--border)] rounded-xl px-3 py-2 outline-none"
         >
           {LANGUAGES.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
         </select>
@@ -167,18 +167,18 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
   }
 
   return (
-    <div className="bg-white border border-[#E2E8F0] rounded-[32px] p-6 shadow-sm">
+    <div className="bg-white border border-[var(--border)] rounded-[32px] p-6 shadow-sm">
       <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 bg-[#4F6F6F]/10 rounded-2xl flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <div className="w-10 h-10 bg-[var(--primary)]/10 rounded-2xl flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
           </svg>
         </div>
         <div className="flex-1">
-          <p className="text-xs font-black text-[#6B7280] uppercase tracking-widest">AI Voice Summary</p>
-          {reportName && <p className="text-sm font-bold text-[#1F2933] truncate">{reportName}</p>}
+          <p className="text-xs font-black text-[var(--muted-foreground)] uppercase tracking-widest">AI Voice Summary</p>
+          {reportName && <p className="text-sm font-bold text-[var(--foreground)] truncate">{reportName}</p>}
         </div>
       </div>
 
@@ -189,8 +189,8 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
             key={l.value}
             onClick={() => handleLanguageChange(l.value)}
             className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all ${language === l.value
-              ? 'bg-[#4F6F6F] text-white shadow-md'
-              : 'bg-[#F6F7F5] text-[#6B7280] hover:bg-[#E2E8F0]'
+              ? 'bg-[var(--primary)] text-white shadow-md'
+              : 'bg-[var(--background)] text-[var(--muted-foreground)] hover:bg-[var(--border)]'
             }`}
           >
             {l.label}
@@ -200,11 +200,11 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
 
       {/* Progress Bar */}
       <div
-        className="h-2 bg-[#F6F7F5] rounded-full mb-3 cursor-pointer relative overflow-hidden"
+        className="h-2 bg-[var(--background)] rounded-full mb-3 cursor-pointer relative overflow-hidden"
         onClick={handleSeek}
       >
         <div
-          className="h-full bg-gradient-to-r from-[#4F6F6F] to-[#8FB9A8] rounded-full transition-all duration-200"
+          className="h-full bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] rounded-full transition-all duration-200"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -218,7 +218,7 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
         <button
           onClick={togglePlay}
           disabled={isLoading}
-          className="w-14 h-14 bg-[#4F6F6F] text-white rounded-full flex items-center justify-center hover:bg-[#1F2933] transition-all shadow-lg active:scale-95 disabled:opacity-60"
+          className="w-14 h-14 bg-[var(--primary)] text-white rounded-full flex items-center justify-center hover:bg-[var(--foreground)] transition-all shadow-lg active:scale-95 disabled:opacity-60"
         >
           {isLoading ? (
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -233,7 +233,7 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
       </div>
 
       {isReady && (
-        <p className="text-center text-xs font-bold text-[#4F6F6F] mt-3 animate-pulse">
+        <p className="text-center text-xs font-bold text-[var(--primary)] mt-3 animate-pulse">
           ✅ Audio ready — tap ▶ to play
         </p>
       )}
@@ -245,7 +245,7 @@ export default function AudioPlayer({ reportId, reportName, compact = false }: A
       )}
 
       {isLoading && (
-        <p className="text-center text-xs font-bold text-[#4F6F6F] mt-4 animate-pulse">
+        <p className="text-center text-xs font-bold text-[var(--primary)] mt-4 animate-pulse">
           Generating AI voice in {language}…
         </p>
       )}

@@ -61,13 +61,13 @@ export default function ChangePasswordPage() {
 
     return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] p-8">
-            <div className="w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl border border-[#E2E8F0] animate-in zoom-in-95 duration-500">
+            <div className="w-full max-w-md bg-white rounded-[2.5rem] p-10 shadow-xl border border-[var(--border)] animate-in zoom-in-95 duration-500">
                 <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-[#4F6F6F] rounded-2xl flex items-center justify-center mx-auto mb-6 text-white shadow-lg">
+                    <div className="w-16 h-16 bg-[var(--primary)] rounded-2xl flex items-center justify-center mx-auto mb-6 text-white shadow-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                     </div>
-                    <h2 className="text-3xl font-black text-[#1F2933] mb-2">Secure Your Account</h2>
-                    <p className="text-[#6B7280] font-medium leading-relaxed">Please change your temporary password to continue accessing your dashboard.</p>
+                    <h2 className="text-3xl font-black text-[var(--foreground)] mb-2">Secure Your Account</h2>
+                    <p className="text-[var(--muted-foreground)] font-medium leading-relaxed">Please change your temporary password to continue accessing your dashboard.</p>
                 </div>
 
                 {error && (
@@ -78,25 +78,25 @@ export default function ChangePasswordPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-1">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-[#4F6F6F] ml-1">New Password</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-[var(--primary)] ml-1">New Password</label>
                         <input
                             type="password"
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-5 py-4 rounded-2xl border border-[#E2E8F0] focus:ring-4 focus:ring-[#4F6F6F]/10 outline-none transition-all font-medium"
+                            className="w-full px-5 py-4 rounded-2xl border border-[var(--border)] focus:ring-4 focus:ring-[var(--primary)]/10 outline-none transition-all font-medium"
                             placeholder="••••••••"
                         />
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-[#4F6F6F] ml-1">Confirm Password</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-[var(--primary)] ml-1">Confirm Password</label>
                         <input
                             type="password"
                             required
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full px-5 py-4 rounded-2xl border border-[#E2E8F0] focus:ring-4 focus:ring-[#4F6F6F]/10 outline-none transition-all font-medium"
+                            className="w-full px-5 py-4 rounded-2xl border border-[var(--border)] focus:ring-4 focus:ring-[var(--primary)]/10 outline-none transition-all font-medium"
                             placeholder="••••••••"
                         />
                     </div>
@@ -104,7 +104,7 @@ export default function ChangePasswordPage() {
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full btn-primary h-14 group mt-4 shadow-lg shadow-[#4F6F6F]/20"
+                        className="w-full btn-primary h-14 group mt-4 shadow-lg shadow-[var(--primary)]/20"
                     >
                         {isLoading ? (
                             <div className="flex items-center space-x-2">

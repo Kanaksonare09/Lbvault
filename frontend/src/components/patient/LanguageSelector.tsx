@@ -8,11 +8,11 @@ export default function LanguageSelector() {
 
     return (
         <div className="flex items-center space-x-2">
-            <label className="text-sm font-bold text-[#1F2933]">{t('selectLanguage')}:</label>
+            <label className="text-sm font-bold text-[var(--foreground)]">{t('selectLanguage')}:</label>
             <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as any)}
-                className="bg-white border border-[#E2E8F0] rounded-xl px-3 py-1.5 text-sm font-bold text-[#4F6F6F] focus:outline-none focus:ring-2 focus:ring-[#8FB9A8]"
+                className="bg-white border border-[var(--border)] rounded-xl px-3 py-1.5 text-sm font-bold text-[var(--primary)] focus:outline-none focus:ring-2 focus:ring-[var(--secondary)]"
             >
                 <option value="en">English</option>
                 <option value="hi">हिन्दी (Hindi)</option>

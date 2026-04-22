@@ -5,14 +5,14 @@ const User = require('../models/User');
 
 const seedSuperAdmin = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27018/labvault_final', {
+        await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27018/healthscan_final', {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });
 
         console.log('Connected to MongoDB...');
 
-        const adminEmail = 'admin@labvault.com';
+        const adminEmail = 'admin@healthscan.com';
         const existingAdmin = await User.findOne({ email: adminEmail });
 
         if (existingAdmin) {
@@ -35,7 +35,7 @@ const seedSuperAdmin = async () => {
 
         await admin.save();
         console.log('SuperAdmin created successfully!');
-        console.log('Email: admin@labvault.com');
+        console.log('Email: admin@healthscan.com');
         console.log('Password: Admin@123');
         
         process.exit(0);

@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
 exports.sendNotification = async (to, subject, text) => {
     try {
         await transporter.sendMail({
-            from: '"LabVault Notification" <noreply@labvault.com>',
+            from: '"HealthScan Notification" <noreply@healthscan.com>',
             to,
             subject,
             text

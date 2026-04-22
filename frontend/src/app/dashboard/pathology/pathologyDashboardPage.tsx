@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 
 // ─── Color tokens matching reference image ───────────────────────────────────
-const DONUT_COLORS = ['#5C4A1E', '#2563EB', '#C8A84B'];
+const DONUT_COLORS = ['#5C4A1E', 'var(--primary)', 'var(--primary)'];
 
 const DAYS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
@@ -67,7 +67,7 @@ function CustomBar(props: any) {
                 y={y}
                 width={width}
                 height={accentH}
-                fill={isActive ? '#C8A84B' : '#D4B84A'}
+                fill={isActive ? 'var(--primary)' : '#D4B84A'}
                 rx={radius}
             />
         </g>
@@ -183,7 +183,7 @@ export default function PathologyDashboardPage() {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <div className="flex flex-col items-center gap-3">
-                    <div className="w-10 h-10 border-4 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin" />
+                    <div className="w-10 h-10 border-4 border-[var(--accent)] border-t-[var(--primary)] rounded-full animate-spin" />
                     <p className="text-[13px] font-semibold text-gray-500 tracking-wide">Synchronizing Lab Data...</p>
                 </div>
             </div>
@@ -207,7 +207,7 @@ export default function PathologyDashboardPage() {
                         Welcome back,{' '}
                         <span className="text-gray-800 font-semibold">{displayName}</span>.
                         {' '}Running{' '}
-                        <span className="text-blue-500 font-semibold">{labName}</span>{' '}
+                        <span className="text-[var(--primary)] font-semibold">{labName}</span>{' '}
                         — {reportsToday} reports processed today.
                     </p>
                 </div>
@@ -231,7 +231,7 @@ export default function PathologyDashboardPage() {
                     <Link
                         href="/dashboard/pathology/upload-report"
                         className="flex items-center gap-2 text-[12.5px] font-semibold px-4 py-2.5 rounded-lg transition-colors"
-                        style={{ background: '#C8A84B', color: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}
+                        style={{ background: 'var(--primary)', color: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}
                     >
                         <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -348,7 +348,7 @@ export default function PathologyDashboardPage() {
                         className="absolute left-4 top-4 w-9 h-9 rounded-xl flex items-center justify-center"
                         style={{ background: 'rgba(255,255,255,0.08)' }}
                     >
-                        <svg width="18" height="18" fill="none" stroke="#FCEEA5" strokeWidth="2" viewBox="0 0 24 24">
+                        <svg width="18" height="18" fill="none" stroke="var(--accent)" strokeWidth="2" viewBox="0 0 24 24">
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                         </svg>
                     </div>
@@ -425,7 +425,7 @@ export default function PathologyDashboardPage() {
                                         fontWeight: 700,
                                         padding: '6px 12px',
                                     }}
-                                    itemStyle={{ color: '#FCEEA5' }}
+                                    itemStyle={{ color: 'var(--accent)' }}
                                     labelStyle={{ color: '#9CA3AF', marginBottom: 2 }}
                                 />
                                 <Bar
@@ -521,7 +521,7 @@ export default function PathologyDashboardPage() {
                     </div>
                     <Link
                         href="/dashboard/pathology/reports"
-                        className="text-[12px] font-semibold text-blue-500 hover:text-blue-600 transition-colors"
+                        className="text-[12px] font-semibold text-[var(--primary)] hover:text-[var(--primary)] transition-colors"
                     >
                         View All Feed
                     </Link>
@@ -598,7 +598,7 @@ export default function PathologyDashboardPage() {
                                                     className="text-[10px] font-bold px-2.5 py-1 rounded"
                                                     style={{
                                                         background: isExternal ? '#F0F0F0' : '#EBF3FF',
-                                                        color: isExternal ? '#6B7280' : '#1D62D9',
+                                                        color: isExternal ? 'var(--muted-foreground)' : '#1D62D9',
                                                         letterSpacing: '0.04em',
                                                     }}
                                                 >
@@ -659,7 +659,7 @@ export default function PathologyDashboardPage() {
                                                 className="text-[10px] font-bold px-2.5 py-1 rounded"
                                                 style={{
                                                     background: row.external ? '#F0F0F0' : '#EBF3FF',
-                                                    color: row.external ? '#6B7280' : '#1D62D9',
+                                                    color: row.external ? 'var(--muted-foreground)' : '#1D62D9',
                                                     letterSpacing: '0.04em',
                                                 }}
                                             >

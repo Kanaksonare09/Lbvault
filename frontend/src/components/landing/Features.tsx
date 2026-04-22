@@ -6,21 +6,21 @@ const features = [
   {
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <rect x="3" y="3" width="14" height="14" rx="3" stroke="#D97706" strokeWidth="1.6" />
-        <path d="M10 7.5v5M7.5 10l2.5-2.5 2.5 2.5" stroke="#D97706" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <rect x="3" y="3" width="14" height="14" rx="3" stroke="var(--primary)" strokeWidth="1.6" />
+        <path d="M10 7.5v5M7.5 10l2.5-2.5 2.5 2.5" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
-    iconBg: '#FFFBEB',
-    iconBorder: '#FDE68A',
+    iconBg: 'var(--accent-soft)',
+    iconBorder: 'var(--border)',
     title: 'Upload Report',
     desc: 'Drag-and-drop any format — PDF, JPEG, DICOM. OCR extracts structured data instantly, zero manual entry.',
   },
   {
     icon: (
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <circle cx="10" cy="10" r="7" stroke="#2563EB" strokeWidth="1.6" />
-        <path d="M7.5 10c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" />
-        <circle cx="10" cy="10" r="1" fill="#2563EB" />
+        <circle cx="10" cy="10" r="7" stroke="var(--primary)" strokeWidth="1.6" />
+        <path d="M7.5 10c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5" stroke="var(--primary)" strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="10" cy="10" r="1" fill="var(--primary)" />
       </svg>
     ),
     iconBg: '#EFF6FF',
@@ -65,7 +65,7 @@ export default function Features() {
             style={{
               fontSize: 11,
               fontWeight: 600,
-              color: '#D97706',
+              color: 'var(--primary)',
               textTransform: 'uppercase',
               letterSpacing: '0.1em',
               marginBottom: 12,
@@ -77,7 +77,7 @@ export default function Features() {
             style={{
               fontSize: 'clamp(24px, 3vw, 34px)',
               fontWeight: 800,
-              color: '#111827',
+              color: 'var(--foreground)',
               letterSpacing: '-0.025em',
               lineHeight: 1.2,
               marginBottom: 12,
@@ -88,7 +88,7 @@ export default function Features() {
           <p
             style={{
               fontSize: 14.5,
-              color: '#6B7280',
+              color: 'var(--muted-foreground)',
               lineHeight: 1.65,
               maxWidth: 480,
               margin: '0 auto',
@@ -146,14 +146,14 @@ export default function Features() {
                   style={{
                     fontSize: 14,
                     fontWeight: 700,
-                    color: '#111827',
+                    color: 'var(--foreground)',
                     marginBottom: 7,
                     letterSpacing: '-0.015em',
                   }}
                 >
                   {f.title}
                 </h3>
-                <p style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.62 }}>{f.desc}</p>
+                <p style={{ fontSize: 13, color: 'var(--muted-foreground)', lineHeight: 1.62 }}>{f.desc}</p>
               </div>
               <div style={{ marginTop: 'auto', paddingTop: 4 }}>
                 <button

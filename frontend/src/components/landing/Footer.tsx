@@ -39,7 +39,7 @@ export default function Footer() {
                 width: 26,
                 height: 26,
                 borderRadius: 7,
-                background: 'linear-gradient(135deg, #FACC15, #F59E0B)',
+                background: 'linear-gradient(135deg, var(--secondary), var(--primary))',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -51,12 +51,12 @@ export default function Footer() {
                 <path d="M6 1.5L10.5 6L6 10.5L1.5 6L6 1.5Z" fill="white" />
               </svg>
             </div>
-            <span style={{ fontSize: 15, fontWeight: 700, color: '#111827', letterSpacing: '-0.3px' }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--foreground)', letterSpacing: '-0.3px' }}>
               HealthScan
             </span>
           </Link>
 
-          <p style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.6, maxWidth: 200 }}>
+          <p style={{ fontSize: 13, color: 'var(--muted-foreground)', lineHeight: 1.6, maxWidth: 200 }}>
             Secure, connected healthcare data management for the modern world.
           </p>
 
@@ -107,13 +107,13 @@ export default function Footer() {
                     href="#"
                     style={{
                       fontSize: 13.5,
-                      color: '#6B7280',
+                      color: 'var(--muted-foreground)',
                       textDecoration: 'none',
                       fontWeight: 400,
                       transition: 'color 0.15s',
                     }}
-                    onMouseEnter={e => (e.currentTarget.style.color = '#111827')}
-                    onMouseLeave={e => (e.currentTarget.style.color = '#6B7280')}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--foreground)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted-foreground)')}
                   >
                     {link}
                   </a>

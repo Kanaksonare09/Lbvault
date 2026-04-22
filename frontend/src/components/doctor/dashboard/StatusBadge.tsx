@@ -7,8 +7,8 @@ interface StatusBadgeProps {
 const StatusBadge: React.FC<StatusBadgeProps> = ({ severity }) => {
   const styles: Record<string, string> = {
     Critical: 'bg-rose-50 text-rose-700 border-rose-100',
-    Moderate: 'bg-amber-50 text-amber-700 border-amber-100',
-    Mild: 'bg-amber-50 text-amber-700 border-amber-100',
+    Moderate: 'bg-[var(--accent-soft)] text-[var(--primary)] border-[var(--border)]',
+    Mild: 'bg-[var(--accent-soft)] text-[var(--primary)] border-[var(--border)]',
     Normal: 'bg-emerald-50 text-emerald-700 border-emerald-100',
   };
 

@@ -1,4 +1,4 @@
-# LabVault — Intelligent Pathology Management System
+# HealthScan — Intelligent Pathology Management System
 
 > *A privacy-first, AI-powered platform that transforms medical reports into patient-friendly insights, voice summaries, and interactive health analytics.*
 
@@ -27,7 +27,7 @@
 
 ## Overview
 
-**LabVault** is a comprehensive pathology management platform connecting patients, doctors, and pathology labs. Upload any medical report — blood test, urine analysis, liver function, kidney panel, thyroid, lipid profile, radiology — and get instant AI analysis, visual analytics, multilingual voice summaries, and an interactive AI chat assistant, all powered locally on your machine.
+**HealthScan** is a comprehensive pathology management platform connecting patients, doctors, and pathology labs. Upload any medical report — blood test, urine analysis, liver function, kidney panel, thyroid, lipid profile, radiology — and get instant AI analysis, visual analytics, multilingual voice summaries, and an interactive AI chat assistant, all powered locally on your machine.
 
 ---
 
@@ -204,7 +204,7 @@ Create the file `backend/.env` with the following:
 PORT=5010
 
 # Database
-MONGODB_URI=mongodb://localhost:27017/labvault
+MONGODB_URI=mongodb://localhost:27017/healthscan
 
 # Security (use any long random string)
 JWT_SECRET=your_strong_jwt_secret_here
@@ -306,7 +306,7 @@ Since SuperAdmin accounts cannot be registered publicly, you must run the seedin
 cd Lbvault/backend
 node scripts/seedAdmin.js
 ```
-- **Login Email**: `admin@labvault.com`
+- **Login Email**: `admin@healthscan.com`
 - **Login Password**: `Admin@123`
 
 ---

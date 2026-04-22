@@ -124,7 +124,7 @@ export default function AccessManagement() {
                     {/* Grant New Access Link */}
                     <button
                         onClick={() => setShowGrantForm(true)}
-                        className="mt-4 w-full text-center text-[12px] font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                        className="mt-4 w-full text-center text-[12px] font-bold text-[var(--primary)] hover:text-blue-700 transition-colors"
                     >
                         + Grant New Access
                     </button>
@@ -141,7 +141,7 @@ export default function AccessManagement() {
                             className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-[12px] text-gray-800 outline-none focus:border-blue-300 transition-colors"
                         />
                         {isSearching && (
-                            <div className="absolute right-3 top-2.5 w-4 h-4 border-2 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin" />
+                            <div className="absolute right-3 top-2.5 w-4 h-4 border-2 border-[var(--accent)] border-t-[var(--primary)] rounded-full animate-spin" />
                         )}
                     </div>
 
@@ -156,7 +156,7 @@ export default function AccessManagement() {
                                         <p className="text-[12px] font-bold text-gray-800">Dr. {doc.name}</p>
                                         <p className="text-[10px] text-gray-400">{doc.specialty}</p>
                                     </div>
-                                    <span className="text-[10px] font-bold text-blue-500">Select</span>
+                                    <span className="text-[10px] font-bold text-[var(--primary)]">Select</span>
                                 </button>
                             ))}
                         </div>
@@ -168,7 +168,7 @@ export default function AccessManagement() {
                             Cancel
                         </button>
                         <button type="submit" disabled={!selectedDoctor || loading}
-                            className="flex-1 py-2 text-[12px] font-bold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50">
+                            className="flex-1 py-2 text-[12px] font-bold text-white bg-[var(--primary)] rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50">
                             {loading ? 'Granting...' : 'Grant'}
                         </button>
                     </div>

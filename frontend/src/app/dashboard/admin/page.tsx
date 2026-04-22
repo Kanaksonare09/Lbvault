@@ -79,7 +79,7 @@ export default function AdminDashboardPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[400px]">
-                <div className="w-12 h-12 border-4 border-[#FCEEA5] border-t-[#C8A84B] rounded-full animate-spin"></div>
+                <div className="w-12 h-12 border-4 border-[var(--accent)] border-t-[var(--primary)] rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -88,8 +88,8 @@ export default function AdminDashboardPage() {
         <div className="space-y-8 animate-in fade-in duration-700">
             {/* Header */}
             <div>
-                <h1 className="text-3xl font-black text-[#1F2933]">Verification Queue</h1>
-                <p className="text-[#6B7280] mt-1 text-lg font-medium">Verify credentials for medical practitioners and laboratory centers.</p>
+                <h1 className="text-3xl font-black text-[var(--foreground)]">Verification Queue</h1>
+                <p className="text-[var(--muted-foreground)] mt-1 text-lg font-medium">Verify credentials for medical practitioners and laboratory centers.</p>
             </div>
 
             {status && (
@@ -109,9 +109,9 @@ export default function AdminDashboardPage() {
 
             {/* Stats Summary */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-3xl border border-[#E2E8F0] shadow-sm">
-                    <p className="text-[#6B7280] text-sm font-bold uppercase tracking-wider">Pending verification</p>
-                    <p className="text-4xl font-black text-[#1F2933] mt-2">{pendingUsers.length}</p>
+                <div className="bg-white p-6 rounded-3xl border border-[var(--border)] shadow-sm">
+                    <p className="text-[var(--muted-foreground)] text-sm font-bold uppercase tracking-wider">Pending verification</p>
+                    <p className="text-4xl font-black text-[var(--foreground)] mt-2">{pendingUsers.length}</p>
                 </div>
             </div>
 
@@ -119,50 +119,50 @@ export default function AdminDashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {pendingUsers.length > 0 ? (
                     pendingUsers.map((user) => (
-                        <div key={user._id} className="bg-white rounded-[2rem] border border-[#E2E8F0] shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col">
+                        <div key={user._id} className="bg-white rounded-[2rem] border border-[var(--border)] shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col">
                             <div className="p-8 flex-1">
                                 <div className="flex justify-between items-start mb-6">
                                     <div className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                                        user.role === 'doctor' ? 'bg-[#8FB9A8]/20 text-[#4F6F6F]' : 'bg-purple-50 text-purple-600'
+                                        user.role === 'doctor' ? 'bg-[var(--secondary)]/20 text-[var(--primary)]' : 'bg-purple-50 text-purple-600'
                                     }`}>
                                         {user.role} Account
                                     </div>
-                                    <p className="text-[#6B7280] text-xs font-bold">{new Date(user.createdAt).toLocaleDateString()}</p>
+                                    <p className="text-[var(--muted-foreground)] text-xs font-bold">{new Date(user.createdAt).toLocaleDateString()}</p>
                                 </div>
 
                                 <div className="flex items-center mb-8">
-                                    <div className="w-16 h-16 rounded-2xl bg-[#F6F7F5] border border-[#E2E8F0] flex items-center justify-center text-[#4F6F6F] font-black text-2xl mr-4">
+                                    <div className="w-16 h-16 rounded-2xl bg-[var(--background)] border border-[var(--border)] flex items-center justify-center text-[var(--primary)] font-black text-2xl mr-4">
                                         {user.name.charAt(0)}
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black text-[#1F2933]">{user.name}</h3>
-                                        <p className="text-[#6B7280] font-medium">{user.email}</p>
+                                        <h3 className="text-xl font-black text-[var(--foreground)]">{user.name}</h3>
+                                        <p className="text-[var(--muted-foreground)] font-medium">{user.email}</p>
                                     </div>
                                 </div>
 
-                                <div className="bg-[#F6F7F5] rounded-2xl p-6 space-y-4 border border-[#E2E8F0]">
+                                <div className="bg-[var(--background)] rounded-2xl p-6 space-y-4 border border-[var(--border)]">
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <p className="text-[10px] text-[#6B7280] font-black uppercase tracking-tighter">Registration #</p>
-                                            <p className="text-sm font-bold text-[#1F2933] break-all">{user.registrationNumber || user.licenseNumber || 'Not Provided'}</p>
+                                            <p className="text-[10px] text-[var(--muted-foreground)] font-black uppercase tracking-tighter">Registration #</p>
+                                            <p className="text-sm font-bold text-[var(--foreground)] break-all">{user.registrationNumber || user.licenseNumber || 'Not Provided'}</p>
                                         </div>
                                         <div>
-                                            <p className="text-[10px] text-[#6B7280] font-black uppercase tracking-tighter">
+                                            <p className="text-[10px] text-[var(--muted-foreground)] font-black uppercase tracking-tighter">
                                                 {user.role === 'doctor' ? 'Specialization' : 'Lab Identity'}
                                             </p>
-                                            <p className="text-sm font-bold text-[#1F2933]">{user.specialty || user.labName || 'General Practice'}</p>
+                                            <p className="text-sm font-bold text-[var(--foreground)]">{user.specialty || user.labName || 'General Practice'}</p>
                                         </div>
                                     </div>
                                     {user.role === 'doctor' && user.hospitalName && (
                                         <div>
-                                            <p className="text-[10px] text-[#6B7280] font-black uppercase tracking-tighter">Hospital / Clinic</p>
-                                            <p className="text-sm font-bold text-[#1F2933]">{user.hospitalName}</p>
+                                            <p className="text-[10px] text-[var(--muted-foreground)] font-black uppercase tracking-tighter">Hospital / Clinic</p>
+                                            <p className="text-sm font-bold text-[var(--foreground)]">{user.hospitalName}</p>
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            <div className="p-4 bg-[#F6F7F5]/50 border-t border-[#E2E8F0] flex gap-4">
+                            <div className="p-4 bg-[var(--background)]/50 border-t border-[var(--border)] flex gap-4">
                                 <button
                                     onClick={() => handleApprove(user._id)}
                                     disabled={!!actionLoading}
@@ -188,12 +188,12 @@ export default function AdminDashboardPage() {
                         </div>
                     ))
                 ) : (
-                    <div className="col-span-full bg-white rounded-[2rem] border border-dashed border-[#E2E8F0] p-16 text-center">
-                        <div className="w-20 h-20 bg-[#F6F7F5] rounded-3xl flex items-center justify-center mx-auto mb-6">
-                            <svg className="w-10 h-10 text-[#6B7280]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <div className="col-span-full bg-white rounded-[2rem] border border-dashed border-[var(--border)] p-16 text-center">
+                        <div className="w-20 h-20 bg-[var(--background)] rounded-3xl flex items-center justify-center mx-auto mb-6">
+                            <svg className="w-10 h-10 text-[var(--muted-foreground)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                         </div>
-                        <h3 className="text-2xl font-black text-[#1F2933]">Queue Empty</h3>
-                        <p className="text-[#6B7280] mt-2 font-medium">All pending applications have been processed.</p>
+                        <h3 className="text-2xl font-black text-[var(--foreground)]">Queue Empty</h3>
+                        <p className="text-[var(--muted-foreground)] mt-2 font-medium">All pending applications have been processed.</p>
                     </div>
                 )}
             </div>

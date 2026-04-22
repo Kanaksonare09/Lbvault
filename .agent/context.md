@@ -1,6 +1,6 @@
-# LabVault — Project Context Anchor
+# HealthScan — Project Context Anchor
 
-This is the **current, canonical version** of the LabVault project.
+This is the **current, canonical version** of the HealthScan project.
 
 ## Key Identifiers (What Makes This Version Unique)
 - **Frontend**: Next.js 16 + React 19 + TypeScript + Tailwind CSS v4

@@ -149,13 +149,13 @@ export default function VoiceReport({ reportId, summaryText }: VoiceReportProps)
             {/* Controls Row */}
             <div className="flex items-center gap-2 flex-wrap">
                 {/* Language Selector */}
-                <div className="flex items-center gap-1.5 px-3 py-2 bg-[#F6F7F5] rounded-xl border border-[#E2E8F0]">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+                <div className="flex items-center gap-1.5 px-3 py-2 bg-[var(--background)] rounded-xl border border-[var(--border)]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
                     <select
                         value={language}
                         onChange={e => setLanguage(e.target.value)}
                         disabled={status === 'loading' || isActive}
-                        className="bg-transparent text-xs font-bold text-[#4F6F6F] outline-none cursor-pointer disabled:opacity-50"
+                        className="bg-transparent text-xs font-bold text-[var(--primary)] outline-none cursor-pointer disabled:opacity-50"
                     >
                         {LANGUAGES.map(l => (
                             <option key={l.value} value={l.value}>{l.label}</option>
@@ -169,7 +169,7 @@ export default function VoiceReport({ reportId, summaryText }: VoiceReportProps)
                         id={`voice-generate-${reportId}`}
                         onClick={handleGenerate}
                         disabled={status === 'loading'}
-                        className="flex-1 flex items-center justify-center gap-2 px-5 py-2 rounded-xl bg-[#4F6F6F] text-white text-xs font-black uppercase tracking-widest hover:bg-[#1F2933] transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+                        className="flex-1 flex items-center justify-center gap-2 px-5 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-black uppercase tracking-widest hover:bg-[var(--foreground)] transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         {status === 'loading' ? (
                             <>
@@ -189,7 +189,7 @@ export default function VoiceReport({ reportId, summaryText }: VoiceReportProps)
                         <button
                             id={`voice-playpause-${reportId}`}
                             onClick={handlePlayPause}
-                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#4F6F6F] text-white hover:bg-[#1F2933] transition-all active:scale-95"
+                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--primary)] text-white hover:bg-[var(--foreground)] transition-all active:scale-95"
                         >
                             {status === 'playing' ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
@@ -204,7 +204,7 @@ export default function VoiceReport({ reportId, summaryText }: VoiceReportProps)
                         </button>
 
                         {/* Download */}
-                        <button onClick={handleDownload} title="Download audio" className="w-9 h-9 flex items-center justify-center rounded-xl bg-[#8FB9A8]/20 border border-[#8FB9A8]/30 text-[#4F6F6F] hover:bg-[#8FB9A8]/40 transition-all active:scale-95">
+                        <button onClick={handleDownload} title="Download audio" className="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--secondary)]/20 border border-[var(--secondary)]/30 text-[var(--primary)] hover:bg-[var(--secondary)]/40 transition-all active:scale-95">
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         </button>
                     </div>
@@ -214,12 +214,12 @@ export default function VoiceReport({ reportId, summaryText }: VoiceReportProps)
             {/* Progress Bar */}
             {isActive && (
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold text-[#4F6F6F] tabular-nums w-8">
+                    <span className="text-[10px] font-bold text-[var(--primary)] tabular-nums w-8">
                         {audioRef.current ? formatTime(audioRef.current.currentTime) : '0:00'}
                     </span>
-                    <div className="relative flex-1 h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
+                    <div className="relative flex-1 h-1.5 bg-[var(--border)] rounded-full overflow-hidden">
                         <div
-                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-[#4F6F6F] to-[#8FB9A8] rounded-full transition-all"
+                            className="absolute top-0 left-0 h-full bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] rounded-full transition-all"
                             style={{ width: `${progress}%` }}
                         />
                         <input
@@ -229,7 +229,7 @@ export default function VoiceReport({ reportId, summaryText }: VoiceReportProps)
                             className="absolute inset-0 w-full opacity-0 cursor-pointer"
                         />
                     </div>
-                    <span className="text-[10px] font-bold text-[#4F6F6F] tabular-nums w-8 text-right">
+                    <span className="text-[10px] font-bold text-[var(--primary)] tabular-nums w-8 text-right">
                         {duration ? formatTime(duration) : '--:--'}
                     </span>
                 </div>
@@ -237,12 +237,12 @@ export default function VoiceReport({ reportId, summaryText }: VoiceReportProps)
 
             {/* Voice Script Preview */}
             {voiceScript && (
-                <div className="p-3 bg-gradient-to-br from-[#8FB9A8]/10 to-[#4F6F6F]/5 border border-[#8FB9A8]/20 rounded-xl">
+                <div className="p-3 bg-gradient-to-br from-[var(--secondary)]/10 to-[var(--primary)]/5 border border-[var(--secondary)]/20 rounded-xl">
                     <div className="flex items-center gap-1.5 mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-                        <span className="text-[10px] font-black text-[#4F6F6F] uppercase tracking-wider">Doctor's Voice Explanation</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                        <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-wider">Doctor's Voice Explanation</span>
                     </div>
-                    <p className="text-xs text-[#4F6F6F] leading-relaxed italic">"{voiceScript}"</p>
+                    <p className="text-xs text-[var(--primary)] leading-relaxed italic">"{voiceScript}"</p>
                 </div>
             )}
 

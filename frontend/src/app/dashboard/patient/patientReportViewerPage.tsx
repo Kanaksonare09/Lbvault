@@ -28,27 +28,27 @@ export default function PatientReportViewerPage() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                     <div className="flex items-center space-x-3 mb-2">
-                        <button onClick={() => window.history.back()} className="p-2 hover:bg-white rounded-xl transition-colors text-[#4F6F6F]">
+                        <button onClick={() => window.history.back()} className="p-2 hover:bg-white rounded-xl transition-colors text-[var(--primary)]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
                         </button>
-                        <h1 className="text-2xl font-black text-[#1F2933] tracking-tight">{mockReport.reportName}</h1>
+                        <h1 className="text-whitexl font-black text-[var(--foreground)] tracking-tight">{mockReport.reportName}</h1>
                     </div>
-                    <p className="text-[#6B7280] text-sm font-bold uppercase tracking-widest flex items-center">
-                        <span className="w-2 h-2 bg-[#8FB9A8] rounded-full mr-2"></span>
+                    <p className="text-[var(--muted-foreground)] text-sm font-bold uppercase tracking-widest flex items-center">
+                        <span className="w-2 h-2 bg-[var(--secondary)] rounded-full mr-2"></span>
                         {mockReport.pathologyLab} • {new Date(mockReport.uploadDate).toLocaleDateString()}
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
                     <VoiceSummaryButton text={`Health summary for your ${mockReport.reportName}. ${mockReport.insights.map(i => `${t(i.label)} is ${i.value}`).join('. ')}`} />
-                    <button className="bg-[#4F6F6F] text-white px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest shadow-md hover:bg-[#1F2933] transition-all">Download PDF</button>
+                    <button className="bg-[var(--primary)] text-white px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest shadow-md hover:bg-[var(--foreground)] transition-all">Download PDF</button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 flex-1 min-h-[600px]">
                 {/* Left: Report Preview (Placeholder) */}
-                <div className="lg:col-span-7 bg-white rounded-[40px] shadow-sm border border-[#E2E8F0] overflow-hidden flex flex-col">
-                    <div className="p-4 bg-[#F6F7F5] border-b border-[#E2E8F0] flex justify-between items-center">
-                        <span className="text-xs font-black text-[#6B7280] uppercase tracking-widest">Digital PDF Preview</span>
+                <div className="lg:col-span-7 bg-white rounded-[40px] shadow-sm border border-[var(--border)] overflow-hidden flex flex-col">
+                    <div className="p-4 bg-[var(--background)] border-b border-[var(--border)] flex justify-between items-center">
+                        <span className="text-xs font-black text-[var(--muted-foreground)] uppercase tracking-widest">Digital PDF Preview</span>
                         <div className="flex space-x-2">
                             <div className="w-3 h-3 rounded-full bg-rose-400"></div>
                             <div className="w-3 h-3 rounded-full bg-amber-400"></div>
@@ -57,24 +57,24 @@ export default function PatientReportViewerPage() {
                     </div>
                     <div className="flex-1 bg-[#DEE2E6] flex items-center justify-center p-12">
                         <div className="bg-white w-full max-w-lg h-full rounded-lg shadow-2xl p-12 flex flex-col space-y-6">
-                            <div className="h-4 bg-[#F6F7F5] w-3/4 rounded-full"></div>
-                            <div className="h-4 bg-[#F6F7F5] w-1/2 rounded-full"></div>
-                            <div className="h-32 bg-[#F6F7F5] w-full rounded-2xl"></div>
+                            <div className="h-4 bg-[var(--background)] w-3/4 rounded-full"></div>
+                            <div className="h-4 bg-[var(--background)] w-1/2 rounded-full"></div>
+                            <div className="h-32 bg-[var(--background)] w-full rounded-2xl"></div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="h-4 bg-[#F6F7F5] w-full rounded-full"></div>
-                                <div className="h-4 bg-[#F6F7F5] w-full rounded-full"></div>
+                                <div className="h-4 bg-[var(--background)] w-full rounded-full"></div>
+                                <div className="h-4 bg-[var(--background)] w-full rounded-full"></div>
                             </div>
-                            <div className="h-4 bg-[#F6F7F5] w-5/6 rounded-full"></div>
-                            <div className="h-4 bg-[#F6F7F5] w-2/3 rounded-full"></div>
+                            <div className="h-4 bg-[var(--background)] w-5/6 rounded-full"></div>
+                            <div className="h-4 bg-[var(--background)] w-2/3 rounded-full"></div>
                         </div>
                     </div>
                 </div>
 
                 {/* Right: Insights & AI Summary */}
                 <div className="lg:col-span-5 space-y-6">
-                    <div className="bg-white p-8 rounded-[40px] shadow-sm border border-[#E2E8F0]">
-                        <h3 className="text-xl font-black text-[#1F2933] mb-6 flex items-center space-x-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4F6F6F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg>
+                    <div className="bg-white p-8 rounded-[40px] shadow-sm border border-[var(--border)]">
+                        <h3 className="text-xl font-black text-[var(--foreground)] mb-6 flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /></svg>
                             <span>OCR AI Insights</span>
                         </h3>
 
@@ -91,7 +91,7 @@ export default function PatientReportViewerPage() {
                         </div>
                     </div>
 
-                    <div className="bg-[#4F6F6F] p-8 rounded-[40px] shadow-lg text-white">
+                    <div className="bg-[var(--primary)] p-8 rounded-[40px] shadow-lg text-white">
                         <div className="flex items-center space-x-3 mb-4">
                             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
@@ -101,7 +101,7 @@ export default function PatientReportViewerPage() {
                         <div className="bg-white/10 p-6 rounded-3xl border border-white/20 backdrop-blur-sm">
                             <p className="text-sm italic font-medium leading-relaxed">"{mockReport.doctorComment}"</p>
                             <div className="mt-4 flex items-center justify-between">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-[#8FB9A8]">Dr. S. K. Sharma</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--secondary)]">Dr. S. K. Sharma</span>
                                 <span className="text-[10px] font-bold text-white/60">Feb 11, 2026</span>
                             </div>
                         </div>

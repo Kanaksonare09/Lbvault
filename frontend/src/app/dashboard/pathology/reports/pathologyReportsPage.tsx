@@ -94,7 +94,7 @@ export default function ReportsPage() {
                     <Link
                         href="/dashboard/pathology/upload-report"
                         className="inline-flex items-center gap-2 text-[12.5px] font-semibold px-4 py-2.5 rounded-lg"
-                        style={{ background: '#C8A84B', color: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}
+                        style={{ background: 'var(--primary)', color: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.12)' }}
                     >
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -156,7 +156,7 @@ export default function ReportsPage() {
                     {!loading && (
                         <span
                             className="text-[11px] font-bold px-2.5 py-1 rounded-full ml-auto shrink-0"
-                            style={{ background: '#F4F6F9', color: '#6B7280' }}
+                            style={{ background: '#F4F6F9', color: 'var(--muted-foreground)' }}
                         >
                             {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''}
                         </span>
@@ -181,7 +181,7 @@ export default function ReportsPage() {
                                     <td colSpan={5} className="px-6 py-12 text-center">
                                         <div
                                             className="w-8 h-8 border-4 rounded-full animate-spin mx-auto"
-                                            style={{ borderColor: '#E8EDF2', borderTopColor: '#C8A84B' }}
+                                            style={{ borderColor: '#E8EDF2', borderTopColor: 'var(--primary)' }}
                                         />
                                     </td>
                                 </tr>

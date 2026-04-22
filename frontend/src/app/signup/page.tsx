@@ -42,7 +42,7 @@ const inputBase: React.CSSProperties = {
   borderRadius: 13,
   padding: '12px 14px',
   fontSize: 14,
-  color: '#0D1117',
+  color: 'var(--foreground)',
   outline: 'none',
   boxSizing: 'border-box',
   transition: 'border-color 0.16s, box-shadow 0.16s, background 0.16s',
@@ -170,7 +170,7 @@ export default function SignupPage() {
           style={{
             width: 465,
             flexShrink: 0,
-            background: '#EDE8A2',
+            background: 'var(--accent)',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -301,12 +301,12 @@ export default function SignupPage() {
             {/* Heading */}
             <div style={{ marginBottom: 26 }}>
               <h2 style={{
-                fontSize: 30, fontWeight: 700, color: '#0D1117',
+                fontSize: 30, fontWeight: 700, color: 'var(--foreground)',
                 letterSpacing: '-0.025em', lineHeight: 1.15, marginBottom: 8,
               }}>
                 Create Your Account
               </h2>
-              <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.5 }}>
+              <p style={{ fontSize: 14, color: 'var(--muted-foreground)', lineHeight: 1.5 }}>
                 Start your journey toward data-driven wellness today.
               </p>
             </div>
@@ -407,7 +407,7 @@ export default function SignupPage() {
                           border: 'none',
                           cursor: 'pointer',
                           background: selected ? '#E8B020' : '#E8EAF2',
-                          color: selected ? '#1C1200' : '#6B7280',
+                          color: selected ? '#1C1200' : 'var(--muted-foreground)',
                           boxShadow: selected ? '0 2px 10px rgba(232,176,32,0.32)' : 'none',
                           transition: 'all 0.15s ease',
                         }}
@@ -458,13 +458,13 @@ export default function SignupPage() {
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
                           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-                            <path d="M5 3a1.5 1.5 0 011.5-1.5H13l5 5V19a1.5 1.5 0 01-1.5 1.5H6.5A1.5 1.5 0 015 19V3Z" fill="#DBEAFE" stroke="#2563EB" strokeWidth="1" />
-                            <path d="M13 1.5V7a.5.5 0 00.5.5H18" stroke="#2563EB" strokeWidth="1" />
-                            <path d="M8,12h6M8,15h4" stroke="#2563EB" strokeWidth="1.1" strokeLinecap="round" />
+                            <path d="M5 3a1.5 1.5 0 011.5-1.5H13l5 5V19a1.5 1.5 0 01-1.5 1.5H6.5A1.5 1.5 0 015 19V3Z" fill="#DBEAFE" stroke="var(--primary)" strokeWidth="1" />
+                            <path d="M13 1.5V7a.5.5 0 00.5.5H18" stroke="var(--primary)" strokeWidth="1" />
+                            <path d="M8,12h6M8,15h4" stroke="var(--primary)" strokeWidth="1.1" strokeLinecap="round" />
                           </svg>
                         </div>
                         <div style={{ textAlign: 'center' }}>
-                          <p style={{ fontSize: 13.5, fontWeight: 600, color: '#0D1117', marginBottom: 3 }}>
+                          <p style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--foreground)', marginBottom: 3 }}>
                             {formData.degreeCertificate ? formData.degreeCertificate.name : 'Upload Medical License'}
                           </p>
                           <p style={{ fontSize: 12, color: '#9CA3AF' }}>PDF, JPG or PNG (max. 10MB)</p>
@@ -593,9 +593,9 @@ export default function SignupPage() {
                 )}
               </motion.button>
 
-              <p style={{ textAlign: 'center', fontSize: 13.5, color: '#6B7280' }}>
+              <p style={{ textAlign: 'center', fontSize: 13.5, color: 'var(--muted-foreground)' }}>
                 Already have an account?{' '}
-                <Link href="/login" style={{ fontWeight: 700, color: '#2563EB', textDecoration: 'none' }}>
+                <Link href="/login" style={{ fontWeight: 700, color: 'var(--primary)', textDecoration: 'none' }}>
                   Login
                 </Link>
               </p>
@@ -612,7 +612,7 @@ export default function SignupPage() {
         padding: '11px 16px',
         fontSize: 12, color: '#9CA3AF',
       }}>
-        © 2024 LabVault. Clinical precision meets human care.
+        © 2024 HealthScan. Clinical precision meets human care.
       </div>
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

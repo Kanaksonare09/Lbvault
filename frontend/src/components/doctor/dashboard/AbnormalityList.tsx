@@ -33,11 +33,11 @@ const AbnormalityList: React.FC<AbnormalityListProps> = ({ abnormalities }) => {
       <p className="text-[10px] font-black text-rose-600 uppercase tracking-[0.2em] mb-4">Urgent Attention Required</p>
       <div className="grid grid-cols-1 gap-3">
         {abnormalities.map((item) => (
-          <div key={item._id} className="bg-white p-4 rounded-2xl border border-[#E2E8F0] shadow-sm flex items-center justify-between group hover:border-rose-200 transition-colors">
+          <div key={item._id} className="bg-white p-4 rounded-2xl border border-[var(--border)] shadow-sm flex items-center justify-between group hover:border-rose-200 transition-colors">
             <div className="flex items-center gap-4">
                <div className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
                <div>
-                  <p className="text-sm font-black text-[#1F2933] uppercase tracking-tight">{item.biomarkerName}</p>
+                  <p className="text-sm font-black text-[var(--foreground)] uppercase tracking-tight">{item.biomarkerName}</p>
                   <p className="text-[10px] font-bold text-gray-400 capitalize">{item.severity} Deviation</p>
                </div>
             </div>

@@ -26,7 +26,7 @@ export default function AskAIPanel({ reportId, reportName, onClose }: AskAIPanel
     const [messages, setMessages] = useState<Message[]>([
         {
             role: 'assistant',
-            content: `Hello! I'm your LabVault AI assistant. I've reviewed **${reportName || 'your report'}** and I'm ready to answer any questions you have about your results. What would you like to know? 🩺`
+            content: `Hello! I'm your HealthScan AI assistant. I've reviewed **${reportName || 'your report'}** and I'm ready to answer any questions you have about your results. What would you like to know? 🩺`
         }
     ]);
     const [input, setInput] = useState('');
@@ -92,10 +92,10 @@ export default function AskAIPanel({ reportId, reportName, onClose }: AskAIPanel
                 style={{ maxHeight: '90vh', minHeight: '60vh' }}>
 
                 {/* Header */}
-                <div className="flex items-center gap-3 p-5 border-b border-[#F1F5F9] bg-gradient-to-r from-[#4F6F6F] to-[#6B8F8F]">
+                <div className="flex items-center gap-3 p-5 border-b border-[#F1F5F9] bg-gradient-to-r from-[var(--primary)] to-[#6B8F8F]">
                     <div className="w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center text-white text-xl flex-shrink-0">🩺</div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-white font-black text-sm">Ask LabVault AI</p>
+                        <p className="text-white font-black text-sm">Ask HealthScan AI</p>
                         <p className="text-white/70 text-[11px] font-medium truncate">{reportName || 'Report'} ·  powered by Llama 3.2</p>
                     </div>
                     <button onClick={onClose}
@@ -113,7 +113,7 @@ export default function AskAIPanel({ reportId, reportName, onClose }: AskAIPanel
                         <div key={i} className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                             {/* Avatar */}
                             <div className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs flex-shrink-0 font-black mt-0.5 ${
-                                msg.role === 'user' ? 'bg-[#4F6F6F] text-white' : 'bg-white border border-[#E2E8F0] text-[#4F6F6F]'
+                                msg.role === 'user' ? 'bg-[var(--primary)] text-white' : 'bg-white border border-[var(--border)] text-[var(--primary)]'
                             }`}>
                                 {msg.role === 'user' ? 'You' : '🤖'}
                             </div>
@@ -121,8 +121,8 @@ export default function AskAIPanel({ reportId, reportName, onClose }: AskAIPanel
                             {/* Bubble */}
                             <div className={`max-w-[82%] px-4 py-3 rounded-2xl text-sm leading-relaxed font-medium ${
                                 msg.role === 'user'
-                                    ? 'bg-[#4F6F6F] text-white rounded-tr-md'
-                                    : 'bg-white border border-[#E2E8F0] text-[#1F2933] rounded-tl-md shadow-sm'
+                                    ? 'bg-[var(--primary)] text-white rounded-tr-md'
+                                    : 'bg-white border border-[var(--border)] text-[var(--foreground)] rounded-tl-md shadow-sm'
                             }`}>
                                 {renderContent(msg.content)}
                             </div>
@@ -132,11 +132,11 @@ export default function AskAIPanel({ reportId, reportName, onClose }: AskAIPanel
                     {/* Typing indicator */}
                     {loading && (
                         <div className="flex gap-2.5">
-                            <div className="w-7 h-7 rounded-xl bg-white border border-[#E2E8F0] flex items-center justify-center text-xs flex-shrink-0">🤖</div>
-                            <div className="bg-white border border-[#E2E8F0] rounded-2xl rounded-tl-md px-4 py-3 shadow-sm">
+                            <div className="w-7 h-7 rounded-xl bg-white border border-[var(--border)] flex items-center justify-center text-xs flex-shrink-0">🤖</div>
+                            <div className="bg-white border border-[var(--border)] rounded-2xl rounded-tl-md px-4 py-3 shadow-sm">
                                 <div className="flex gap-1.5 items-center h-4">
                                     {[0, 1, 2].map(i => (
-                                        <div key={i} className="w-1.5 h-1.5 bg-[#4F6F6F] rounded-full animate-bounce"
+                                        <div key={i} className="w-1.5 h-1.5 bg-[var(--primary)] rounded-full animate-bounce"
                                             style={{ animationDelay: `${i * 0.15}s` }} />
                                     ))}
                                 </div>
@@ -153,7 +153,7 @@ export default function AskAIPanel({ reportId, reportName, onClose }: AskAIPanel
                         <div className="flex gap-2 flex-wrap">
                             {QUICK_QUESTIONS.map((q, i) => (
                                 <button key={i} onClick={() => sendMessage(q)}
-                                    className="text-[11px] font-bold text-[#4F6F6F] bg-white border border-[#E2E8F0] px-3 py-1.5 rounded-full hover:bg-[#4F6F6F] hover:text-white hover:border-[#4F6F6F] transition-all">
+                                    className="text-[11px] font-bold text-[var(--primary)] bg-white border border-[var(--border)] px-3 py-1.5 rounded-full hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)] transition-all">
                                     {q}
                                 </button>
                             ))}
@@ -163,7 +163,7 @@ export default function AskAIPanel({ reportId, reportName, onClose }: AskAIPanel
 
                 {/* Input */}
                 <div className="p-4 border-t border-[#F1F5F9] bg-white">
-                    <div className="flex items-end gap-2 bg-[#F8FAFC] rounded-2xl border border-[#E2E8F0] px-4 py-3 focus-within:border-[#4F6F6F] transition-colors">
+                    <div className="flex items-end gap-2 bg-[#F8FAFC] rounded-2xl border border-[var(--border)] px-4 py-3 focus-within:border-[var(--primary)] transition-colors">
                         <textarea
                             ref={inputRef}
                             rows={1}
@@ -171,7 +171,7 @@ export default function AskAIPanel({ reportId, reportName, onClose }: AskAIPanel
                             onChange={e => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
                             placeholder="Ask anything about your report..."
-                            className="flex-1 bg-transparent text-sm text-[#1F2933] placeholder-[#94A3B8] outline-none resize-none font-medium max-h-28"
+                            className="flex-1 bg-transparent text-sm text-[var(--foreground)] placeholder-[#94A3B8] outline-none resize-none font-medium max-h-28"
                             style={{ lineHeight: '1.5' }}
                             disabled={loading}
                         />
@@ -179,7 +179,7 @@ export default function AskAIPanel({ reportId, reportName, onClose }: AskAIPanel
                             onClick={() => sendMessage()}
                             disabled={!input.trim() || loading}
                             id="ask-ai-send-btn"
-                            className="w-9 h-9 bg-[#4F6F6F] text-white rounded-xl flex items-center justify-center hover:bg-[#1F2933] transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
+                            className="w-9 h-9 bg-[var(--primary)] text-white rounded-xl flex items-center justify-center hover:bg-[var(--foreground)] transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

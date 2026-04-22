@@ -24,7 +24,7 @@ const TEST_TYPES = [
 ];
 
 // ─── Spinner SVG ─────────────────────────────────────────────────────────────
-function Spinner({ size = 14, color = '#3B82F6' }: { size?: number; color?: string }) {
+function Spinner({ size = 14, color = 'var(--primary)' }: { size?: number; color?: string }) {
     return (
         <svg
             width={size}
@@ -55,7 +55,7 @@ function StageIndicator({
             {state === 'active' && (
                 <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
             )}
-            {state === 'spinning' && <Spinner size={13} color="#6B7280" />}
+            {state === 'spinning' && <Spinner size={13} color="var(--muted-foreground)" />}
             {state === 'idle' && (
                 <span className="w-2 h-2 rounded-full bg-gray-300 shrink-0" />
             )}
@@ -66,7 +66,7 @@ function StageIndicator({
                         state === 'active'
                             ? '#16A34A'
                             : state === 'spinning'
-                            ? '#6B7280'
+                            ? 'var(--muted-foreground)'
                             : '#9CA3AF',
                 }}
             >
@@ -261,7 +261,7 @@ function UploadForm() {
                             className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
                             style={{ background: '#EBF3FF' }}
                         >
-                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="#2563EB" strokeWidth="2">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="var(--primary)" strokeWidth="2">
                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                                 <circle cx="9" cy="7" r="4" />
                                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -395,7 +395,7 @@ function UploadForm() {
                                 className="flex items-center justify-center gap-2 py-2.5 rounded-full text-[13px] font-semibold transition-all"
                                 style={{
                                     background: urgency === 'Routine' ? '#DBEAFE' : '#EEF2F7',
-                                    color: urgency === 'Routine' ? '#1D4ED8' : '#6B7280',
+                                    color: urgency === 'Routine' ? '#1D4ED8' : 'var(--muted-foreground)',
                                     border: urgency === 'Routine' ? '1px solid #BFDBFE' : '1px solid transparent',
                                 }}
                             >
@@ -417,7 +417,7 @@ function UploadForm() {
                                 className="flex items-center justify-center gap-2 py-2.5 rounded-full text-[13px] font-semibold transition-all"
                                 style={{
                                     background: urgency === 'Priority' ? '#DBEAFE' : '#EEF2F7',
-                                    color: urgency === 'Priority' ? '#1D4ED8' : '#6B7280',
+                                    color: urgency === 'Priority' ? '#1D4ED8' : 'var(--muted-foreground)',
                                     border: urgency === 'Priority' ? '1px solid #BFDBFE' : '1px solid transparent',
                                 }}
                             >
@@ -434,8 +434,8 @@ function UploadForm() {
                                 onClick={() => setUrgency('STAT/Urgent')}
                                 className="flex items-center justify-center gap-2 py-2.5 rounded-full text-[13px] font-semibold transition-all"
                                 style={{
-                                    background: urgency === 'STAT/Urgent' ? '#C8A84B' : '#EEF2F7',
-                                    color: urgency === 'STAT/Urgent' ? '#fff' : '#6B7280',
+                                    background: urgency === 'STAT/Urgent' ? 'var(--primary)' : '#EEF2F7',
+                                    color: urgency === 'STAT/Urgent' ? '#fff' : 'var(--muted-foreground)',
                                     border: 'none',
                                     boxShadow:
                                         urgency === 'STAT/Urgent'
@@ -459,7 +459,7 @@ function UploadForm() {
                     onDrop={handleDrop}
                     className="rounded-2xl text-center transition-all"
                     style={{
-                        border: `2px dashed ${dragActive ? '#C8A84B' : '#D5D9E2'}`,
+                        border: `2px dashed ${dragActive ? 'var(--primary)' : '#D5D9E2'}`,
                         background: dragActive ? '#FEFCE8' : '#FAFAF6',
                         padding: '48px 40px',
                     }}
@@ -470,7 +470,7 @@ function UploadForm() {
                             {/* Amber circle icon */}
                             <div
                                 className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3"
-                                style={{ background: '#C8A84B' }}
+                                style={{ background: 'var(--primary)' }}
                             >
                                 <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2">
                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14 2z" />
@@ -495,7 +495,7 @@ function UploadForm() {
                             {/* Amber upload circle */}
                             <div
                                 className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5"
-                                style={{ background: '#C8A84B' }}
+                                style={{ background: 'var(--primary)' }}
                             >
                                 <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth="2.5">
                                     <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
@@ -535,13 +535,13 @@ function UploadForm() {
                                     fontSize: '13.5px',
                                     padding: '10px 28px',
                                     borderRadius: '999px',
-                                    border: '1.5px solid #C8A84B',
+                                    border: '1.5px solid var(--primary)',
                                     background: 'transparent',
                                     color: '#8B6914',
                                     letterSpacing: '0.01em',
                                 }}
                                 onMouseEnter={(e) => {
-                                    (e.currentTarget as HTMLButtonElement).style.background = '#C8A84B';
+                                    (e.currentTarget as HTMLButtonElement).style.background = 'var(--primary)';
                                     (e.currentTarget as HTMLButtonElement).style.color = '#fff';
                                 }}
                                 onMouseLeave={(e) => {
@@ -562,7 +562,7 @@ function UploadForm() {
                         style={{
                             background: '#FAFAF3',
                             border: '1px solid #E8E4CC',
-                            borderLeft: '4px solid #C8A84B',
+                            borderLeft: '4px solid var(--primary)',
                             boxShadow: '0 1px 6px rgba(0,0,0,0.05)',
                         }}
                     >
@@ -590,7 +590,7 @@ function UploadForm() {
                                 className="h-full rounded-full transition-all duration-300"
                                 style={{
                                     width: `${progress}%`,
-                                    background: 'linear-gradient(90deg, #5C4A1E 0%, #9A7A35 100%)',
+                                    background: 'linear-gradient(90deg, #5C4A1E 0%, var(--primary) 100%)',
                                 }}
                             />
                         </div>
@@ -643,7 +643,7 @@ function UploadForm() {
                         background:
                             !file || !selectedPatient
                                 ? '#E5E7EB'
-                                : '#C8A84B',
+                                : 'var(--primary)',
                         color: !file || !selectedPatient ? '#9CA3AF' : '#fff',
                         cursor: !file || !selectedPatient ? 'not-allowed' : 'pointer',
                         boxShadow:
@@ -685,7 +685,7 @@ export default function UploadReportPage() {
                 <div className="flex items-center justify-center min-h-[400px]">
                     <div
                         className="w-10 h-10 border-4 rounded-full animate-spin"
-                        style={{ borderColor: '#E8EDF2', borderTopColor: '#C8A84B' }}
+                        style={{ borderColor: '#E8EDF2', borderTopColor: 'var(--primary)' }}
                     />
                 </div>
             }

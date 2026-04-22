@@ -12,8 +12,8 @@ const FILTER_TABS = ['All Reports', 'Hematology', 'Biochemistry', 'Radiology', '
 // ─── Per-report icon (square, rounded) ───────────────────────────────────────
 const ICON_CONFIGS = [
     {
-        bg: 'bg-amber-50',
-        color: 'text-amber-500',
+        bg: 'bg-[var(--accent-soft)]',
+        color: 'text-[var(--primary)]',
         icon: (
             <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M12 2C6 2 2 12 2 12s4 10 10 10 10-10 10-10S18 2 12 2z" /><circle cx="12" cy="12" r="3" />
@@ -52,10 +52,10 @@ function getStabilityStatus(report: any): { label: string; isHigh: boolean } {
 // ─── Category tag pill colour ─────────────────────────────────────────────────
 function getCategoryStyle(testType: string) {
     const t = (testType || '').toLowerCase();
-    if (t.includes('hemat') || t.includes('blood') || t.includes('cbc')) return 'text-amber-700 bg-amber-50 border border-amber-200';
+    if (t.includes('hemat') || t.includes('blood') || t.includes('cbc')) return 'text-[var(--primary)] bg-[var(--accent-soft)] border border-[var(--border)]';
     if (t.includes('bio') || t.includes('glucose') || t.includes('lipid')) return 'text-pink-700 bg-pink-50 border border-pink-200';
     if (t.includes('radio') || t.includes('x-ray') || t.includes('xray') || t.includes('chest')) return 'text-violet-700 bg-violet-50 border border-violet-200';
-    if (t.includes('cardio') || t.includes('heart')) return 'text-blue-700 bg-blue-50 border border-blue-200';
+    if (t.includes('cardio') || t.includes('heart')) return 'text-blue-700 bg-[var(--accent-soft)] border border-blue-200';
     return 'text-gray-600 bg-gray-50 border border-gray-200';
 }
 
@@ -142,7 +142,7 @@ function SharePopover({ report }: { report: any }) {
             <button
                 ref={btnRef}
                 onClick={handleOpen}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-blue-500 hover:bg-blue-50 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-[var(--primary)] hover:bg-[var(--accent-soft)] transition-colors"
                 title="Share Report"
             >
                 <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -193,11 +193,11 @@ function SharePopover({ report }: { report: any }) {
                             className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 transition-colors text-left"
                         >
                             <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] shrink-0 ${
-                                copied ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-500'
+                                copied ? 'bg-[var(--accent)] text-[var(--primary)]' : 'bg-gray-100 text-gray-500'
                             }`}>
                                 {copied ? '✓' : '🔗'}
                             </span>
-                            <span className={`text-[12.5px] font-semibold ${copied ? 'text-amber-600' : 'text-gray-700'}`}>
+                            <span className={`text-[12.5px] font-semibold ${copied ? 'text-[var(--primary)]' : 'text-gray-700'}`}>
                                 {copied ? 'Copied!' : 'Copy Link'}
                             </span>
                         </button>
@@ -301,7 +301,7 @@ export default function DoctorSharedReportsPage() {
                         key={tab}
                         onClick={() => { setActiveFilter(tab); setCurrentPage(1); }}
                         className={`text-[12.5px] font-semibold px-4 py-1.5 rounded-full transition-all border ${activeFilter === tab
-                            ? 'bg-[#FCEEA5] text-[#5C4209] border-[#F0D96A] shadow-sm'
+                            ? 'bg-[var(--accent)] text-[var(--primary)] border-[#F0D96A] shadow-sm'
                             : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:text-gray-700'
                             }`}
                     >
@@ -414,7 +414,7 @@ export default function DoctorSharedReportsPage() {
                                             const pid = typeof report.patientId === 'object' ? report.patientId?._id : report.patientId;
                                             return pid ? (
                                                 <Link href={`/dashboard/doctor/patient/${pid}/dashboard`}
-                                                    className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-amber-500 hover:bg-amber-50 transition-colors"
+                                                    className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-[var(--primary)] hover:bg-[var(--accent-soft)] transition-colors"
                                                     title="View Patient Insights">
                                                     <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
                                                 </Link>
@@ -434,7 +434,7 @@ export default function DoctorSharedReportsPage() {
                                         {/* View */}
                                         <button
                                             onClick={() => setExpanded(isExpanded ? null : report._id)}
-                                            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-[12px] font-bold px-3.5 py-1.5 rounded-full transition-colors"
+                                            className="flex items-center gap-1.5 bg-[var(--primary)] hover:bg-blue-700 text-white text-[12px] font-bold px-3.5 py-1.5 rounded-full transition-colors"
                                         >
                                             <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                             {isExpanded ? 'Close' : 'View'}
@@ -450,8 +450,8 @@ export default function DoctorSharedReportsPage() {
                                             {/* AI Insight */}
                                             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                                                 <div className="flex items-center gap-2 px-5 py-3 bg-gray-900">
-                                                    <svg width="12" height="12" fill="none" stroke="#FCEEA5" strokeWidth="2.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                                                    <span className="text-[10px] font-bold text-[#FCEEA5] uppercase tracking-widest">AI Clinical Insight</span>
+                                                    <svg width="12" height="12" fill="none" stroke="var(--accent)" strokeWidth="2.5" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                                    <span className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-widest">AI Clinical Insight</span>
                                                 </div>
                                                 <div className="px-5 py-4">
                                                     {report.aiSummary ? (
@@ -497,8 +497,8 @@ export default function DoctorSharedReportsPage() {
                                                 {/* Clinical Note */}
                                                 <div className="px-5 py-4 border-t border-gray-100">
                                                     {report.doctorComment && (
-                                                        <div className="mb-3 px-3 py-2 bg-amber-50 rounded-xl border border-amber-100">
-                                                            <p className="text-[9px] font-bold text-amber-700 uppercase tracking-widest mb-0.5">Clinical Note</p>
+                                                        <div className="mb-3 px-3 py-2 bg-[var(--accent-soft)] rounded-xl border border-[var(--border)]">
+                                                            <p className="text-[9px] font-bold text-[var(--primary)] uppercase tracking-widest mb-0.5">Clinical Note</p>
                                                             <p className="text-[12px] text-gray-700 italic">"{report.doctorComment}"</p>
                                                         </div>
                                                     )}

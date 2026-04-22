@@ -8,9 +8,9 @@ interface HealthAlertBannerProps {
 }
 
 export default function HealthAlertBanner({ message, type = 'info' }: HealthAlertBannerProps) {
-    const bgColor = type === 'critical' ? 'bg-rose-50 border-rose-200' : 'bg-amber-50 border-amber-200';
+    const bgColor = type === 'critical' ? 'bg-rose-50 border-rose-200' : 'bg-[var(--accent-soft)] border-[var(--border)]';
     const textColor = type === 'critical' ? 'text-rose-800' : 'text-amber-800';
-    const iconColor = type === 'critical' ? '#E11D48' : '#D97706';
+    const iconColor = type === 'critical' ? '#E11D48' : 'var(--primary)';
 
     return (
         <div className={`flex items-start p-4 rounded-2xl border ${bgColor} ${textColor} mb-8 animate-in slide-in-from-top duration-500`}>

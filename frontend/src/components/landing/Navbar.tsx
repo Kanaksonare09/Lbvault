@@ -28,7 +28,7 @@ export default function Navbar() {
               width: 26,
               height: 26,
               borderRadius: 7,
-              background: 'linear-gradient(135deg, #FACC15 0%, #F59E0B 100%)',
+              background: 'linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%)',
               boxShadow: '0 2px 8px rgba(245,158,11,0.35)',
               flexShrink: 0,
             }}
@@ -41,7 +41,7 @@ export default function Navbar() {
             style={{
               fontWeight: 700,
               fontSize: 15,
-              color: '#111827',
+              color: 'var(--foreground)',
               letterSpacing: '-0.3px',
             }}
           >
@@ -58,13 +58,13 @@ export default function Navbar() {
               style={{
                 fontSize: 13.5,
                 fontWeight: 500,
-                color: '#6B7280',
+                color: 'var(--muted-foreground)',
                 textDecoration: 'none',
                 transition: 'color 0.15s',
                 letterSpacing: '-0.1px',
               }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#111827')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#6B7280')}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--foreground)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted-foreground)')}
             >
               {item}
             </a>
@@ -79,7 +79,7 @@ export default function Navbar() {
             style={{
               fontSize: 13.5,
               fontWeight: 500,
-              color: '#6B7280',
+              color: 'var(--muted-foreground)',
               textDecoration: 'none',
               transition: 'color 0.15s',
             }}
@@ -92,7 +92,7 @@ export default function Navbar() {
               fontSize: 13,
               fontWeight: 600,
               color: '#ffffff',
-              background: '#111827',
+              background: 'var(--foreground)',
               padding: '7px 16px',
               borderRadius: 8,
               textDecoration: 'none',
@@ -105,7 +105,7 @@ export default function Navbar() {
               (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 12px rgba(0,0,0,0.18)';
             }}
             onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.background = '#111827';
+              (e.currentTarget as HTMLElement).style.background = 'var(--foreground)';
               (e.currentTarget as HTMLElement).style.boxShadow = 'none';
             }}
           >

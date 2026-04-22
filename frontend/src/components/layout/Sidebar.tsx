@@ -62,40 +62,20 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
     const isPathologyDashboard = isPathology && pathname === '/dashboard/pathology';
 
     return (
-        <aside className="w-[210px] bg-white flex flex-col h-full z-20 shrink-0 border-r border-gray-100">
+        <aside className="w-[240px] flex flex-col h-full z-20 shrink-0" style={{ background: 'var(--sidebar)', color: 'var(--sidebar-foreground)' }}>
 
             {/* ── Brand ─────────────────────────────────────── */}
-            <div className="px-5 pt-6 pb-5">
-                <Link href={isPathology ? '/dashboard/pathology' : `/dashboard/${user?.role}`} className="block">
-                    <div className="flex items-center gap-2.5">
-                        {/* Logo mark — amber gradient health cross */}
-                        <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg,#F6D365 0%,#C8A84B 100%)', boxShadow: '0 2px 8px rgba(200,168,75,0.35)' }}>
-                            <svg width="13" height="13" fill="none" stroke="white" strokeWidth="2.8" strokeLinecap="round" viewBox="0 0 24 24">
-                                <path d="M12 2v20M2 12h20" />
-                            </svg>
-                        </div>
-                        <div className="min-w-0">
-                            {isPathology ? (
-                                <>
-                                    <h2
-                                        className="font-black text-gray-900 tracking-tight leading-tight"
-                                        style={{ fontSize: labName && labName.length > 14 ? '12px' : '14px', lineHeight: 1.2 }}
-                                    >
-                                        {labName || 'Lab Portal'}
-                                    </h2>
-                                </>
-                            ) : (
-                                <>
-                                    <h2 className="text-[15px] font-black text-gray-900 tracking-tight leading-none">HealthScan</h2>
-                                </>
-                            )}
-                        </div>
+            <div className="px-6 pt-8 pb-8">
+                <Link href={isPathology ? '/dashboard/pathology' : `/dashboard/${user?.role}`} className="block group">
+                    <div className="flex flex-col gap-1">
+                        <h2 className="text-[22px] font-black tracking-tight leading-none text-white">HealthScan</h2>
+                        <p className="text-[10px] text-gray-400 font-medium tracking-wide">From Lab Reports to Life Insights</p>
                     </div>
                 </Link>
             </div>
 
             {/* ── Nav ───────────────────────────────────────── */}
-            <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
+            <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
                 {currentRoleItems.map((item) => {
                     const isExact = pathname === item.path;
                     const isActive = isExact || (
@@ -107,12 +87,12 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
                         <Link
                             key={item.name}
                             href={item.path}
-                            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[13px] font-semibold transition-colors ${isActive
-                                ? 'bg-[#FCEEA5] text-[#5C4A1E]'
-                                : 'text-gray-400 hover:text-gray-700 hover:bg-gray-50'
+                            className={`flex items-center gap-4 px-4 py-3 rounded-xl text-[14px] font-medium transition-all ${isActive
+                                ? 'bg-white/10 text-white shadow-sm'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}
                         >
-                            <span className={isActive ? 'text-[#9A7A35]' : 'text-gray-400'}>{item.icon}</span>
+                            <span className={isActive ? 'text-white' : 'text-gray-400'}>{item.icon}</span>
                             <span>{item.name}</span>
                         </Link>
                     );
@@ -120,38 +100,21 @@ export default function Sidebar({ isOpen, setIsOpen }: SidebarProps) {
             </nav>
 
             {/* Bottom section ────────────────────────────── */}
-            <div className="px-3 pb-5 mt-auto space-y-1">
-
-
+            <div className="px-3 pb-8 mt-auto space-y-1">
                 {/* Doctor: Profile link */}
                 {isDoctor && (
-                    <a href="/dashboard/doctor/profile" className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[13px] font-semibold text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors">
-                        <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <a href="/dashboard/doctor/profile" className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-[14px] font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         My Profile
                     </a>
-                )}
-
-                {/* Pathology: User profile card only (Task 2: Support removed) */}
-                {isPathology && (
-                    <div className="flex items-center gap-2.5 px-3 py-3 rounded-xl mb-1">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-200 to-amber-400 flex items-center justify-center shrink-0 ring-2 ring-amber-100">
-                            <span className="text-[13px] font-black text-amber-900">
-                                {user?.name?.charAt(0) ?? 'L'}
-                            </span>
-                        </div>
-                        <div className="min-w-0">
-                            <p className="text-[12px] font-bold text-gray-800 leading-tight truncate">{user?.name}</p>
-                            <p className="text-[9px] text-gray-400 font-semibold uppercase tracking-widest mt-0.5">Pathologist</p>
-                        </div>
-                    </div>
                 )}
 
                 {/* Logout */}
                 <button
                     onClick={logout}
-                    className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-full text-[13px] font-semibold text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-[14px] font-medium text-gray-400 hover:text-white hover:bg-white/5 transition-all"
                 >
-                    <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
                     Logout
                 </button>
             </div>

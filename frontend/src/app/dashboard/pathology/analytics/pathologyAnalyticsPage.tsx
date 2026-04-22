@@ -10,9 +10,9 @@ import {
 } from 'recharts';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
-const AMBER  = '#C8A84B';
+const AMBER  = 'var(--primary)';
 const DARK   = '#1A1F2E';
-const COLORS = [AMBER, '#2563EB', '#8B5CF6', '#F59E0B', '#EC4899'];
+const COLORS = [AMBER, 'var(--primary)', '#8B5CF6', 'var(--primary)', '#EC4899'];
 const DAYS   = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const TIME_FILTERS = ['7 Days', '30 Days', '3 Months', '1 Year'];
 
@@ -27,7 +27,7 @@ const tooltipStyle = {
         fontWeight: 600,
         padding: '8px 14px',
     },
-    itemStyle: { color: '#FCEEA5' },
+    itemStyle: { color: 'var(--accent)' },
     labelStyle: { color: '#9CA3AF', marginBottom: '2px' },
     cursor: { fill: 'rgba(200,168,75,0.06)' },
 };
@@ -54,8 +54,8 @@ function KpiCard({
                 <span
                     className="text-[10px] font-bold px-2 py-0.5 rounded-full"
                     style={{
-                        background: changeUp ? '#FEF3C7' : '#FEE2E2',
-                        color:      changeUp ? '#92400E' : '#991B1B',
+                        background: changeUp ? 'var(--accent)' : '#FEE2E2',
+                        color:      changeUp ? 'var(--primary)' : '#991B1B',
                     }}
                 >
                     {change}
@@ -189,7 +189,7 @@ export default function PathologyAnalyticsPage() {
 
     const riskData = [
         { name: 'Normal',     value: Math.round((data?.totalReports ?? 500) * 0.65), color: AMBER },
-        { name: 'Borderline', value: Math.round((data?.totalReports ?? 500) * 0.22), color: '#2563EB' },
+        { name: 'Borderline', value: Math.round((data?.totalReports ?? 500) * 0.22), color: 'var(--primary)' },
         { name: 'Critical',   value: Math.round((data?.totalReports ?? 500) * 0.13), color: '#EF4444' },
     ];
 
@@ -235,7 +235,7 @@ export default function PathologyAnalyticsPage() {
                             className="px-3.5 py-1.5 rounded-lg text-[11.5px] font-semibold transition-all"
                             style={timeFilter === f
                                 ? { background: AMBER, color: '#fff', boxShadow: '0 2px 6px rgba(200,168,75,0.3)' }
-                                : { color: '#6B7280' }
+                                : { color: 'var(--muted-foreground)' }
                             }
                         >
                             {f}
@@ -325,8 +325,8 @@ export default function PathologyAnalyticsPage() {
                                     <stop offset="95%" stopColor={AMBER} stopOpacity={0} />
                                 </linearGradient>
                                 <linearGradient id="repGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%"  stopColor="#2563EB" stopOpacity={0.2} />
-                                    <stop offset="95%" stopColor="#2563EB" stopOpacity={0} />
+                                    <stop offset="5%"  stopColor="var(--primary)" stopOpacity={0.2} />
+                                    <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="0" vertical={false} stroke="#F1F4F7" />
@@ -336,7 +336,7 @@ export default function PathologyAnalyticsPage() {
                                 tick={{ fontSize: 10, fill: '#9CA3AF', fontWeight: 600 }} />
                             <Tooltip {...tooltipStyle} />
                             <Area type="monotone" dataKey="patients" stroke={AMBER}      strokeWidth={2} fill="url(#patGrad)" name="Patients" />
-                            <Area type="monotone" dataKey="reports"  stroke="#2563EB"    strokeWidth={2} fill="url(#repGrad)" name="Reports" />
+                            <Area type="monotone" dataKey="reports"  stroke="var(--primary)"    strokeWidth={2} fill="url(#repGrad)" name="Reports" />
                             <Legend
                                 iconType="circle"
                                 wrapperStyle={{ fontSize: '10px', fontWeight: 600, paddingTop: '8px' }}
@@ -431,7 +431,7 @@ export default function PathologyAnalyticsPage() {
                         {recentUploads.map((r: any, i: number) => (
                             <div key={r.reportId || i} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#FEF3C7' }}>
+                                    <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--accent)' }}>
                                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke={AMBER} strokeWidth="2">
                                             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
                                             <polyline points="14 2 14 8 20 8" />
