@@ -277,7 +277,7 @@ export default function PatientDashboard() {
               <div className="flex items-start gap-6 overflow-x-auto pb-2 pt-1 px-2">
                 {sessions.length === 0 ? (
                   <p className="text-sm text-gray-400 py-4">No sessions recorded yet.</p>
-                ) : sessions.map((s) => (
+                ) : sessions.map((s: any) => (
                   <button
                     key={s._id}
                     onClick={() => setSelectedReportId(s._id)}
