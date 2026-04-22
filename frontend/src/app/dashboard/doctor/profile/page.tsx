@@ -163,7 +163,7 @@ export default function DoctorProfilePage() {
                         <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-[#1E3A5F]/8 rounded-full text-[10px] font-black text-[#1E3A5F] tracking-wide uppercase">
                             Doctor
                         </span>
-                        {user?.isVerified && (
+                        {(user as any)?.isVerified && (
                             <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-[#D1FAE5] rounded-full text-[10px] font-black text-[#065F46] tracking-wide uppercase border border-[#A7F3D0]">
                                 ✓ Verified
                             </span>
