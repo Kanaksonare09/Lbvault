@@ -328,7 +328,7 @@ export default function DoctorSharedReportsPage() {
                 <div className="space-y-4">
                     {paginated.map((report, idx) => {
                         const patientName = typeof report.patientId === 'object' ? report.patientId?.name : 'Unknown Patient';
-                        const date = new Date(report.uploadDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        const date = fmt(report.uploadDate || report.createdAt);
                         const refNum = `#${getCategoryLabel(report.testType || '').substring(0, 3).toUpperCase()}-${String(report._id).slice(-4).toUpperCase()}`;
                         const { label: stabilityLabel, isHigh } = getStabilityStatus(report);
                         const catLabel = getCategoryLabel(report.testType || report.category || '');

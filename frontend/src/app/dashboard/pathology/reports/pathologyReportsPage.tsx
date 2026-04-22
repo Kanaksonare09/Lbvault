@@ -41,7 +41,7 @@ export default function ReportsPage() {
             `"${r.reportName}"`,
             `"${typeof r.patientId === 'object' ? r.patientId?.name : 'Unknown'}"`,
             `"${r.testType}"`,
-            `"${new Date(r.uploadDate).toLocaleDateString()}"`,
+            `"${new Date(r.uploadDate || r.createdAt || '').toLocaleDateString()}"`,
         ]);
         const csv = [headers, ...rows].map((e) => e.join(',')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });

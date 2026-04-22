@@ -264,7 +264,7 @@ export default function DoctorPatientsPage() {
                               {/* Date */}
                               <div className="shrink-0 text-right">
                                 <p className="text-[11px] font-semibold text-[#7A9999] uppercase tracking-wide whitespace-nowrap">
-                                  {new Date(report.uploadDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                  {new Date(report.uploadDate || report.createdAt || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                 </p>
                               </div>
                             </div>
