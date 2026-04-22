@@ -1,7 +1,7 @@
 const googleTTS = require('google-tts-api');
 const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
+const { cloudinary } = require('../utils/cloudinary');
+const streamifier = require('streamifier');
 
 /**
  * CROSS-PLATFORM TTS SERVICE
@@ -91,17 +91,25 @@ exports.generateAndStoreAudio = async (text, language = 'en') => {
         }
     }
 
-    // Save audio file to /uploads/audio/
-    const uploadsDir = path.join(__dirname, '..', 'uploads', 'audio');
-    if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    // google-tts-api returns MP3 data
-    const fileName = `voice_summary_${Date.now()}_${langCode}.mp3`;
-    const filePath = path.join(uploadsDir, fileName);
-    fs.writeFileSync(filePath, audioBuffer);
-
-    console.log(`[TTS Service] Audio saved: ${fileName}`);
-    return `/uploads/audio/${fileName}`;
+    // Upload audio buffer to Cloudinary
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                folder: 'healthscan_audio',
+                resource_type: 'video', // Cloudinary handles MP3s as video type
+                public_id: `voice_summary_${Date.now()}_${langCode}`,
+                format: 'mp3'
+            },
+            (error, result) => {
+                if (error) {
+                    console.error('[TTS Service] Cloudinary upload failed:', error);
+                    reject(error);
+                } else {
+                    console.log(`[TTS Service] Audio uploaded to Cloudinary: ${result.secure_url}`);
+                    resolve(result.secure_url);
+                }
+            }
+        );
+        streamifier.createReadStream(audioBuffer).pipe(uploadStream);
+    });
 };

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const reportController = require('../controllers/reportController');
 const authMiddleware = require('../middleware/authMiddleware');
-const upload = require('../config/multer');
+const { upload } = require('../utils/cloudinary');
 
 router.post('/upload', authMiddleware(['pathology', 'patient']), upload.single('report'), reportController.uploadReport);
 router.get('/', authMiddleware(), reportController.getReports);

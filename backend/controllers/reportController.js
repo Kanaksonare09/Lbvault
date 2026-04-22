@@ -6,6 +6,7 @@ const ReportAiAnalysis = require('../models/ReportAiAnalysis');
 const ReportAccess = require('../models/ReportAccess');
 const aiService = require('../services/aiService');
 const ttsService = require('../services/ttsService');
+const ocrService = require('../services/ocrService');
 const { createNotification } = require('./notificationController');
 
 exports.uploadReport = async (req, res) => {
@@ -31,7 +32,7 @@ exports.uploadReport = async (req, res) => {
 
         if (!patient) return res.status(404).json({ message: 'Patient not found' });
 
-        const fileUrl = `/uploads/reports/${req.file.filename}`;
+        const fileUrl = req.file.path; // Cloudinary URL
 
         // 1. Create Core Report
         const report = new Report({
@@ -59,19 +60,20 @@ exports.uploadReport = async (req, res) => {
         // 3. Run Full AI Pipeline in background (fire-and-forget)
         setImmediate(async () => {
             try {
-                const path = require('path');
-                const fs = require('fs');
-                const absoluteFilePath = path.join(__dirname, '..', report.fileUrl.replace(/^\//, ''));
-                console.log(`[BG PIPELINE] Pushing document to AI Engine: ${absoluteFilePath}`);
+                console.log(`[BG PIPELINE] Pushing document to Cloud OCR: ${report.fileUrl}`);
 
-                let geminiResult;
-                if (fs.existsSync(absoluteFilePath)) {
-                    geminiResult = await aiService.extractBiomarkersFromDocument(absoluteFilePath);
+                // 1. Extract text using Google Cloud Vision
+                const extractedText = await ocrService.extractText(report.fileUrl);
+
+                if (!extractedText) {
+                    throw new Error("No text could be extracted from image.");
                 }
 
-                if (!geminiResult) throw new Error("Document analysis failed.");
+                // 2. Pass text to AI for biomarker extraction and summarization
+                const geminiResult = await aiService.analyzeReportUniversal(extractedText, 'en');
 
-                const extractedText = geminiResult.rawOcrText || "Raw extracted text for " + reportName;
+                if (!geminiResult) throw new Error("AI analysis failed.");
+
                 const aiBiomarkers = geminiResult.biomarkers || [];
                 const clinicalSummary = geminiResult.summary || "No summary generated.";
 
