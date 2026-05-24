@@ -1,0 +1,219 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-sidebar: var(--sidebar);
+}
+
+
+:root {
+  --background: #F8F9FA;
+  --primary: #4F6F6F;
+  --primary-foreground: #FFFFFF;
+  --secondary: #8FB9A8;
+  --secondary-foreground: #1D2939;
+  --foreground: #1D2939;
+  --card: #FFFFFF;
+  --card-foreground: #1D2939;
+  --muted: #F3F4F6;
+  --muted-foreground: #667085;
+  --accent: #E6EEEB;
+  --accent-foreground: #2C3939;
+  --border: #ECF0F1;
+  --radius: 2rem;
+  
+  /* HealthScan Specifics — Professional Dark Sidebar */
+  --sidebar: #2C3939;
+  --sidebar-foreground: #FFFFFF;
+  --accent-soft: #F9FAFB;
+  --success: #6D8B74;
+  --warning: #B99B6B;
+  --danger: #A64B2A;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+/* Auth Layout Utilities */
+.auth-split-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+}
+
+@media (min-width: 1024px) {
+  .auth-split-grid {
+    grid-template-columns: 1fr 1.2fr;
+  }
+}
+
+/* Floating Label Styles */
+.floating-label-group {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.floating-label-group input,
+.floating-label-group select {
+  width: 100%;
+  padding: 1.5rem 1rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  font-size: 1rem;
+  color: var(--foreground);
+  transition: all 0.2s ease;
+  appearance: none;
+}
+
+.floating-label-group label {
+  position: absolute;
+  top: 1.1rem;
+  left: 1rem;
+  color: var(--muted-foreground);
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  pointer-events: none;
+}
+
+.floating-label-group input:focus~label,
+.floating-label-group input:not(:placeholder-shown)~label,
+.floating-label-group select:focus~label,
+.floating-label-group select:not(:placeholder-shown)~label,
+.floating-label-group select:valid~label {
+  top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.floating-label-group input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(79, 111, 111, 0.1);
+  outline: none;
+}
+
+/* Button & Card Styles */
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding: 1rem 2rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 111, 111, 0.2);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+  scale: 0.98;
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--primary);
+  padding: 1rem 2rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  border: 1px solid var(--primary);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: rgba(79, 111, 111, 0.05);
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: var(--accent-foreground);
+  padding: 1rem 2rem;
+  border-radius: var(--radius);
+  font-weight: 800;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-accent:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(255, 234, 176, 0.4);
+}
+
+.card-premium {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: all 0.3s ease;
+}
+
+.card-premium:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(143, 185, 168, 0.2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(143, 185, 168, 0.4);
+}
